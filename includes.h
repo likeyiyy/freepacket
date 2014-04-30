@@ -9,6 +9,11 @@
 
 #include <stdio.h>       
 #include <stdlib.h>
+#include <assert.h>
+#include <string.h>
+#include <ctype.h>
+
+#include <pthread.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/ioctl.h>
@@ -20,7 +25,10 @@
 #include <linux/tcp.h>
 #include <arpa/inet.h>
 #include <strings.h>
-#include <string.h>
-#include <ctype.h>
 
+#define bool _Bool
+#define true 1
+#define false 0
+
+#include "pool_manager.h"
 #endif
