@@ -54,8 +54,21 @@ pool_t * init_pool(pool_type_t type,int size,int item_size)
     pool->push_pos = size - 1;
     pthread_mutex_init(&pool->mutex,NULL);
     pthread_cond_init(&pool->empty,NULL);
+    switch(type)
+    {
+        case PACKET_POOL:
+        packet_pool = pool;
+        break;
 
-    return NULL;
+        case SESSION_POOL:
+        session_pool = pool;
+        break;
+
+        case BUFFER_POOL:
+        buffer_pool = pool;
+        break;
+    }
+    return pool;
 }
 pool_t * get_pool(pool_type_t type)
 {
