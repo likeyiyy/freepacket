@@ -7,7 +7,22 @@
 
 #include "includes.h"
 
+void   init_generator(int numbers)
+{
+
+}
 void * packet_generator(void * arg)
 {
+    /*
+    * 1. get buffer from pool
+    * */
+
+    /*
+    * 2. 根据配置文件比如UDP，TCP来产生包结构。
+    * */
+
+    /*
+    * 3. 数据放到下一步的队列里。
+    * */
     
 }

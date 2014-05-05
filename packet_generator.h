@@ -7,7 +7,12 @@
 
 #ifndef PACKET_GENERATOR_H
 #define PACKET_GENERATOR_H
+typedef struct generator
+{
+    pool_t    * pool;
+    manager_t * manager;
+}generator_t;
 
-
+void   init_generator(int numbers);
 void * packet_generator(void * arg);
 #endif

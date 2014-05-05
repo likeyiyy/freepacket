@@ -33,5 +33,6 @@
 #define false 0
 
 #include "pool_manager.h"
-#include "manager_buffer.h"
+#include "node_buffer.h"
+#include "checksum.h"
 #endif
