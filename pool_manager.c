@@ -6,8 +6,8 @@
  ************************************************************************/
 
 #include "includes.h"
-static pool_t * packet_pool, * session_pool, * buffer_pool;
-static pool_t * manager_node_pool;
+pool_t * packet_pool, * session_pool, * buffer_pool;
+pool_t * manager_node_pool;
 static inline void exit_if_ptr_is_null(void * ptr,const char * message) 
 {
     if(ptr == NULL)
@@ -24,21 +24,21 @@ static inline void exit_if_ptr_is_null(void * ptr,const char * message)
 * Input:
 * Output:
 * */
-pool_t * init_pool(pool_type_t type,int size,int item_size)
+pool_t * init_pool(pool_type_t type,int numbers,int item_size)
 {
-    assert(size > 0);
+    assert(numbers > 0);
     pool_t * pool = malloc(sizeof(pool_t));
     exit_if_ptr_is_null(pool,"alloc pool error");
     
-    pool->node = malloc(size * sizeof(void *));
+    pool->node = malloc(numbers * sizeof(void *));
     exit_if_ptr_is_null(pool->node,"alloc pool node error");
 
-    pool->buffer = malloc(size * item_size);
+    pool->buffer = malloc(numbers * item_size);
     exit_if_ptr_is_null(pool->buffer,"alloc pool buffer error");
 
     int i = 0;
 
-    for(i = 0; i < size; ++i)
+    for(i = 0; i < numbers; ++i)
     {
         /*
         * 这个复杂的复制时为了，让node_t[]数组里面的指针指向真实的buffer.
@@ -46,13 +46,13 @@ pool_t * init_pool(pool_type_t type,int size,int item_size)
         pool->node[i] = pool->buffer + i * item_size;
     }
     pool->item_size = item_size;
-    pool->total = size;
-    pool->free_num = size;
+    pool->total = numbers;
+    pool->free_num = numbers;
     pool->pop_pos = 0;
     /*
     * 初始化时为满的。
     * */
-    pool->push_pos = size - 1;
+    pool->push_pos = numbers - 1;
     pthread_mutex_init(&pool->mutex,NULL);
     pthread_cond_init(&pool->empty,NULL);
     switch(type)
