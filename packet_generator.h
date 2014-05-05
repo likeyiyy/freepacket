@@ -7,11 +7,7 @@
 
 #ifndef PACKET_GENERATOR_H
 #define PACKET_GENERATOR_H
-typedef struct _packet_pool
-{
 
-}packet_pool_t;
 
-packet_pool_t * init_packet_pool(unsigned int size);
-packet_pool_t * get_packet_pool();
+void * packet_generator(void * arg);
 #endif

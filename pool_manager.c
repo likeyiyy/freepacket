@@ -7,6 +7,7 @@
 
 #include "includes.h"
 static pool_t * packet_pool, * session_pool, * buffer_pool;
+static pool_t * manager_node_pool;
 static inline void exit_if_ptr_is_null(void * ptr,const char * message) 
 {
     if(ptr == NULL)
@@ -67,6 +68,10 @@ pool_t * init_pool(pool_type_t type,int size,int item_size)
         case BUFFER_POOL:
         buffer_pool = pool;
         break;
+
+        case MANAGER_NODE_POOL:
+        manager_node_pool = pool;
+        break;
     }
     return pool;
 }
@@ -85,9 +90,13 @@ pool_t * get_pool(pool_type_t type)
         case BUFFER_POOL:
         return buffer_pool;
         break;
+
+        case MANAGER_NODE_POOL:
+        return manager_node_pool;
+        break;
     }
 }
-bool push_pool(pool_t * pool,void * data)
+bool free_buf(pool_t * pool,void * data)
 {
     pthread_mutex_lock(&pool->mutex);
     /*
@@ -108,12 +117,13 @@ bool push_pool(pool_t * pool,void * data)
 /*
 *  本函数不用is_empty_pool，因为防止锁中锁
 * */
-bool pop_pool(pool_t * pool,void ** data)
+bool get_buf(pool_t * pool,void ** data)
 {
     pthread_mutex_lock(&pool->mutex);
 
     while(pool->push_pos == pool->pop_pos)
     {
+        printf("Error:pool is empty\n");
         pthread_cond_wait(&pool->empty,&pool->mutex);
     }
     *data = pool->node[pool->pop_pos];

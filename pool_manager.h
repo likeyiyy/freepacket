@@ -11,12 +11,15 @@ typedef enum _pool_type
 {
     PACKET_POOL,
     SESSION_POOL,
-    BUFFER_POOL
+    BUFFER_POOL,
+    MANAGER_NODE_POOL
 }pool_type_t;
+#if 0
 typedef struct _node
 {
     void * data;
 }node_t;
+#endif
 typedef struct _pool
 {
     int push_pos;
@@ -31,8 +34,8 @@ typedef struct _pool
 }pool_t;
 pool_t * init_pool(pool_type_t type,int size,int item_size);
 pool_t * get_pool(pool_type_t type);
-bool push_pool(pool_t * pool,void * data);
-bool pop_pool(pool_t * pool,void ** data);
+bool free_buf(pool_t * pool,void * data);
+bool get_buf(pool_t * pool,void ** data);
 bool is_empty_pool(pool_t * pool);
 bool is_full_pool(pool_t * pool);
 #endif

@@ -12,6 +12,7 @@
 #include <assert.h>
 #include <string.h>
 #include <ctype.h>
+#include <signal.h>
 
 #include <pthread.h>
 #include <sys/types.h>
@@ -25,10 +26,12 @@
 #include <linux/tcp.h>
 #include <arpa/inet.h>
 #include <strings.h>
+#include <unistd.h>
 
 #define bool _Bool
 #define true 1
 #define false 0
 
 #include "pool_manager.h"
+#include "manager_buffer.h"
 #endif
