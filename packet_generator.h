@@ -7,32 +7,11 @@
 
 #ifndef PACKET_GENERATOR_H
 #define PACKET_GENERATOR_H
-typedef struct config
-{
-    int TCP;
-    int UDP;
-    uint32_t saddr;
-    uint32_t daddr;
-
-    uint32_t saddr_counter;
-    uint32_t daddr_counter;
-
-    uint16_t sport;
-    uint16_t dport;
-
-    uint16_t sport_counter;
-    uint16_t dport_counter;
-
-    uint32_t speed;
-
-    int numbers;   /* PACKET pool 的大小*/
-    int packet_size;
-}config_t;
+#include "includes.h"
 typedef struct generator
 {
     config_t  * config;
     pool_t    * pool;
-    manager_t * manager;
 }generator_t;
 typedef struct generator_info
 {

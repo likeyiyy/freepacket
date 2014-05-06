@@ -33,8 +33,8 @@ typedef struct _pool
     pthread_cond_t empty;
 }pool_t;
 
-extern static pool_t * packet_pool, * session_pool, * buffer_pool;
-extern static pool_t * manager_node_pool;
+extern pool_t * packet_pool, * session_pool, * buffer_pool;
+extern pool_t * manager_node_pool;
 pool_t * init_pool(pool_type_t type,int size,int item_size);
 pool_t * get_pool(pool_type_t type);
 bool free_buf(pool_t * pool,void * data);

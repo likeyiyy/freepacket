@@ -1,12 +1,16 @@
 CC=gcc
 CLFLAGS= -g -lpthread
-OBJS=pool_manager.o node_buffer.o checksum.o
+OBJS=pool_manager.o node_buffer.o checksum.o config.o
 
 .PHONY:clean all
 
-EXECS=pool_test manager_buffer_test checksum_test
+EXECS=pool_test manager_buffer_test checksum_test config_test
 
 all:$(EXECS)
+
+config_test:config_test.c $(OBJS)
+	$(CC) $(CLFLAGS) -o $@ $^
+
 
 checksum_test:checksum_test.c $(OBJS)
 	$(CC) $(CLFLAGS) -o $@ $^

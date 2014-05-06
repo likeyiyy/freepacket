@@ -35,6 +35,6 @@
 #include "pool_manager.h"
 #include "node_buffer.h"
 #include "checksum.h"
-
+#include "config.h"
 #include "packet_generator.h"
 #endif
