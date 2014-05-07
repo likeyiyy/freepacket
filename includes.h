@@ -38,4 +38,5 @@
 #include "checksum.h"
 #include "config.h"
 #include "packet_generator.h"
+#include "packet_parse.h"
 #endif

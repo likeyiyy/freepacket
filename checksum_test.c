@@ -37,6 +37,7 @@ uint8_t ip_header[20] =
     0x9e
 };
 unsigned char buffer[2048];
+#if 0
 void print_packet(unsigned char * packet,int size) 
 {        
     int i = 0;  
@@ -54,6 +55,7 @@ void print_packet(unsigned char * packet,int size)
         }   
     printf("\n");                                   
 } 
+#endif
 int main()
 {
 
@@ -72,17 +74,38 @@ int main()
     
     int len = sizeof(struct sockaddr_ll);
     int total;
-    total = recvfrom(sockfd,buffer,2048,0,(struct sockaddr*)&sa,&len);
+    while(1)
+    {
     
-    print_packet(buffer,total);
+    
+        total = recvfrom(sockfd,buffer,2048,0,(struct sockaddr*)&sa,&len);
 
-    printf("checksum:%x\n",((struct iphdr *)buffer)->check);
+        struct iphdr * ip = (struct iphdr *)buffer;       
+        printf("ip->tot_len:%d\n",ip->tot_len);
+        if((ip->protocol == IPPROTO_TCP) )
+        {
+            print_packet(buffer,total); 
+            struct tcphdr * tcp_hdr = (struct tcphdr *)((unsigned char *)ip + 20);
+            parse_iphdr(ip);
+            parse_tcphdr(tcp_hdr);
+            printf("checksum:%x\n",((struct iphdr *)buffer)->check);
+            checksum_ip((struct iphdr *)buffer);
+            print_packet(buffer,total);
+            tcp_hdr->check = 0;
 
-    checksum_ip((struct iphdr *)buffer);
+            uint16_t sum = IPPROTO_TCP + ntohs(ip->tot_len) - 20;
+            uint16_t l4_check = ~ip_xsum((uint16_t *)&ip->saddr,(total - 12)/2,htons(sum));
 
-    printf("checksum:%x\n",((struct iphdr *)buffer)->check);
+            tcp_hdr->check = l4_check;
 
-    print_packet(buffer,total);
+            printf("l4 check:%x\n",l4_check);
 
+            printf("checksum:%x\n",((struct iphdr *)buffer)->check);
+
+
+            print_packet(buffer,total);
+            break;
+        }
+    }
     return 0;
 }

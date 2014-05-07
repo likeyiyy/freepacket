@@ -13,29 +13,37 @@ DEBUG	node_buffer.h	14;"	d
 DEBUG	node_buffer.h	17;"	d
 EXECS	Makefile	/^EXECS=pool_test manager_buffer_test checksum_test config_test$/;"	m
 INCLUDES_H	includes.h	8;"	d
+IP_CE	packet_parse.c	12;"	d	file:
+IP_DF	packet_parse.c	13;"	d	file:
+IP_MF	packet_parse.c	14;"	d	file:
+IP_OFFSET	packet_parse.c	15;"	d	file:
 LIKEYI_DEBUG	node_buffer.h	11;"	d
 MANAGER_NODE_POOL	pool_manager.h	/^    MANAGER_NODE_POOL$/;"	e	enum:_pool_type
 MTHREAD_QUEUE_H	node_buffer.h	9;"	d
 NODE_POOL_SIZE	node_buffer.h	33;"	d
-OBJS	Makefile	/^OBJS=pool_manager.o node_buffer.o checksum.o config.o$/;"	m
+OBJS	Makefile	/^OBJS=pool_manager.o node_buffer.o checksum.o config.o packet_parse.o$/;"	m
 PACKET_GENERATOR_H	packet_generator.h	9;"	d
 PACKET_POOL	pool_manager.h	/^    PACKET_POOL,$/;"	e	enum:_pool_type
 PACKET_POOL_SIZE	config.h	30;"	d
 PAGE_SHIFT	config.h	28;"	d
+PARSE_PACKET_H	packet_parse.h	9;"	d
 POOL_MANAGER_H	pool_manager.h	9;"	d
 PROCBLOCK_SIZE	config.h	27;"	d
 SESSION_POOL	pool_manager.h	/^    SESSION_POOL,$/;"	e	enum:_pool_type
+TCP	config.h	31;"	d
+UDP	config.h	32;"	d
 _node	node_buffer.h	/^typedef struct _node$/;"	s
 _pool	pool_manager.h	/^typedef struct _pool$/;"	s
 _pool_type	pool_manager.h	/^typedef enum _pool_type$/;"	g
 _queue	node_buffer.h	/^typedef struct _queue $/;"	s
 a	manager_buffer_test.c	/^    int a;$/;"	m	struct:__anon1	file:
-bool	includes.h	31;"	d
+bool	includes.h	32;"	d
 buffer	checksum_test.c	/^unsigned char buffer[2048];$/;"	v
 buffer	pool_manager.h	/^    void * buffer;$/;"	m	struct:_pool
 buffer_pool	pool_manager.c	/^pool_t * packet_pool, * session_pool, * buffer_pool;$/;"	v
 c	manager_buffer_test.c	/^    char c[20];$/;"	m	struct:__anon1	file:
 checksum_ip	checksum.c	/^void checksum_ip(struct iphdr * iph)$/;"	f
+checksum_tcp	checksum.c	/^void checksum_tcp(struct tcphdr * tcph,int length)$/;"	f
 config	config.h	/^typedef struct config$/;"	s
 config	config_test.c	/^config_t config;$/;"	v
 config	packet_generator.c	/^static config_t * config;$/;"	v	file:
@@ -43,9 +51,11 @@ config	packet_generator.h	/^    config_t  * config;$/;"	m	struct:generator
 config_file	packet_generator.c	/^static uint8_t  * config_file;$/;"	v	file:
 config_t	config.h	/^}config_t;$/;"	t	typeref:struct:config
 count	malloc_test.c	/^unsigned long count = 0;$/;"	v
+daddr_cur	config.h	/^    uint32_t daddr_cur;$/;"	m	struct:config
 daddr_max	config.h	/^    uint32_t daddr_max;$/;"	m	struct:config
 daddr_min	config.h	/^    uint32_t daddr_min;$/;"	m	struct:config
 data	node_buffer.h	/^    void * data;$/;"	m	struct:_node
+dport_cur	config.h	/^    uint16_t dport_cur;$/;"	m	struct:config
 dport_max	config.h	/^    uint16_t dport_max;$/;"	m	struct:config
 dport_min	config.h	/^    uint16_t dport_min;$/;"	m	struct:config
 dstmac	config.h	/^    unsigned char dstmac[6];$/;"	m	struct:config
@@ -53,7 +63,7 @@ empty	pool_manager.h	/^    pthread_cond_t empty;$/;"	m	struct:_pool
 ether_atoe	config.c	/^int ether_atoe(const char *a, unsigned char *e)$/;"	f
 ether_etoa	config.c	/^char * ether_etoa(const unsigned char *e, char *a)$/;"	f
 exit_if_ptr_is_null	pool_manager.c	/^static inline void exit_if_ptr_is_null(void * ptr,const char * message) $/;"	f	file:
-false	includes.h	33;"	d
+false	includes.h	34;"	d
 free_buf	pool_manager.c	/^bool free_buf(pool_t * pool,void * data)$/;"	f
 free_num	pool_manager.h	/^    unsigned int free_num;$/;"	m	struct:_pool
 generator	packet_generator.h	/^    generator_t * generator;$/;"	m	struct:generator_info
@@ -63,6 +73,10 @@ generator_info	packet_generator.h	/^typedef struct generator_info$/;"	s
 generator_info_t	packet_generator.h	/^}generator_info_t;$/;"	t	typeref:struct:generator_info
 generator_t	packet_generator.h	/^}generator_t;$/;"	t	typeref:struct:generator
 get_buf	pool_manager.c	/^bool get_buf(pool_t * pool,void ** data)$/;"	f
+get_next_dstip	packet_generator.c	/^static inline uint32_t get_next_dstip(config_t * config)$/;"	f	file:
+get_next_dstport	packet_generator.c	/^static inline uint16_t get_next_dstport(config_t * config)$/;"	f	file:
+get_next_srcip	packet_generator.c	/^static inline uint32_t get_next_srcip(config_t * config)$/;"	f	file:
+get_next_srcport	packet_generator.c	/^static inline uint16_t get_next_srcport(config_t * config)$/;"	f	file:
 get_pool	pool_manager.c	/^pool_t * get_pool(pool_type_t type)$/;"	f
 head	node_buffer.h	/^    node_t * head;$/;"	m	struct:_queue
 id	packet_generator.h	/^    pthread_t   id;$/;"	m	struct:generator
@@ -70,6 +84,7 @@ init_generator	packet_generator.c	/^void init_generator(int numbers)$/;"	f
 init_pool	pool_manager.c	/^pool_t * init_pool(pool_type_t type,int numbers,int item_size)$/;"	f
 init_queue	node_buffer.c	/^queue_t * init_queue(unsigned int node_pool_size)$/;"	f
 ip_header	checksum_test.c	/^uint8_t ip_header[20] = $/;"	v
+ip_xsum	checksum.c	/^uint16_t ip_xsum (uint16_t *buff, int len, uint32_t xsum)$/;"	f
 is_empty	node_buffer.c	/^int is_empty(queue_t * q)$/;"	f
 is_empty_pool	pool_manager.c	/^bool is_empty_pool(pool_t * pool)$/;"	f
 is_full_pool	pool_manager.c	/^bool is_full_pool(pool_t * pool)$/;"	f
@@ -94,21 +109,37 @@ numbers	packet_generator.h	/^    uint32_t numbers;$/;"	m	struct:generator_info
 packet_generator_loop	packet_generator.c	/^void * packet_generator_loop(void * arg)$/;"	f
 packet_pool	pool_manager.c	/^pool_t * packet_pool, * session_pool, * buffer_pool;$/;"	v
 packet_t	pool_test.c	/^typedef char packet_t[1500];$/;"	t	file:
+parse_frag_off	packet_parse.c	/^static inline void parse_frag_off(__be16 frag_off)$/;"	f	file:
+parse_full_packet	packet_parse.c	/^void parse_full_packet(void * buffer)$/;"	f
+parse_ip_protocol	packet_parse.c	/^static inline void parse_ip_protocol(__u8 protocol)$/;"	f	file:
+parse_iphdr	packet_parse.c	/^void parse_iphdr(struct iphdr * iph)$/;"	f
+parse_mac_type	packet_parse.c	/^static void parse_mac_type(__be16 h_proto)$/;"	f	file:
+parse_tcphdr	packet_parse.c	/^void parse_tcphdr(struct tcphdr * tcph)$/;"	f
+parse_tos	packet_parse.c	/^static inline void parse_tos(unsigned char tos)$/;"	f	file:
 pkt_data	config.h	/^    unsigned char * pkt_data;$/;"	m	struct:config
 pktlen	config.h	/^    int pktlen;$/;"	m	struct:config
 pool	packet_generator.h	/^    pool_t    * pool;$/;"	m	struct:generator
 pool_t	pool_manager.h	/^}pool_t;$/;"	t	typeref:struct:_pool
 pool_type_t	pool_manager.h	/^}pool_type_t;$/;"	t	typeref:enum:_pool_type
+pop_datalink	packet_generator.c	/^static inline void pop_datalink(void * packet,config_t * config)$/;"	f	file:
 pop_from_queue	node_buffer.c	/^int pop_from_queue(queue_t * q,void ** data)$/;"	f
+pop_iplayer_tcp	packet_generator.c	/^static void pop_iplayer_tcp(void * iph,config_t * config)$/;"	f	file:
+pop_iplayer_udp	packet_generator.c	/^static void pop_iplayer_udp(void * iph,config_t * config)$/;"	f	file:
+pop_payload	packet_generator.c	/^int pop_payload(void * payload,unsigned char * data,config_t * config)$/;"	f
 pop_pos	pool_manager.h	/^    int pop_pos;$/;"	m	struct:_pool
+pop_transmission_tcp	packet_generator.c	/^static int pop_transmission_tcp(void * tcph,config_t * config)$/;"	f	file:
+pop_transmission_udp	packet_generator.c	/^static int pop_transmission_udp(void * udph,config_t * config)$/;"	f	file:
 prev	node_buffer.h	/^    struct _node * prev;$/;"	m	struct:_node	typeref:struct:_node::_node
 print_config_file	config.c	/^void print_config_file(config_t * config)$/;"	f
-print_packet	checksum_test.c	/^void print_packet(unsigned char * packet,int size) $/;"	f
+print_lock	packet_parse.c	/^pthread_mutex_t print_lock = PTHREAD_MUTEX_INITIALIZER;$/;"	v
+print_packet	packet_parse.c	/^void print_packet(unsigned char * packet,int size)    $/;"	f
+printf_mac_info	packet_parse.c	/^static void printf_mac_info(struct ethhdr * ether_header)$/;"	f	file:
 protocol	config.h	/^    int protocol;$/;"	m	struct:config
 push_pos	pool_manager.h	/^    int push_pos;$/;"	m	struct:_pool
 push_to_queue	node_buffer.c	/^int push_to_queue(queue_t * q, void * data)$/;"	f
 queue_t	node_buffer.h	/^}queue_t;$/;"	t	typeref:struct:_queue
 read_config_file	config.c	/^int read_config_file(const char * file_name,config_t * config)$/;"	f
+saddr_cur	config.h	/^    uint32_t saddr_cur;$/;"	m	struct:config
 saddr_max	config.h	/^    uint32_t saddr_max;$/;"	m	struct:config
 saddr_min	config.h	/^    uint32_t saddr_min;$/;"	m	struct:config
 session_pool	pool_manager.c	/^pool_t * packet_pool, * session_pool, * buffer_pool;$/;"	v
@@ -116,10 +147,11 @@ sigfun	malloc_test.c	/^void sigfun(int a)$/;"	f
 skip_opeartor	config.c	/^static inline char * skip_opeartor(const char * p)$/;"	f	file:
 skip_var_name	config.c	/^static inline char * skip_var_name(const char * p)$/;"	f	file:
 speed	config.h	/^    uint32_t speed;$/;"	m	struct:config
+sport_cur	config.h	/^    uint16_t sport_cur;$/;"	m	struct:config
 sport_max	config.h	/^    uint16_t sport_max;$/;"	m	struct:config
 sport_min	config.h	/^    uint16_t sport_min;$/;"	m	struct:config
 srcmac	config.h	/^    unsigned char srcmac[6];$/;"	m	struct:config
 strupr	config.c	/^static inline char * strupr(char * p)$/;"	f	file:
 tail	node_buffer.h	/^    node_t * tail;$/;"	m	struct:_queue
 total	pool_manager.h	/^    unsigned int total;$/;"	m	struct:_pool
-true	includes.h	32;"	d
+true	includes.h	33;"	d

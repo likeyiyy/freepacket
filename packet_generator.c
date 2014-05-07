@@ -104,12 +104,13 @@ static void pop_iplayer_tcp(void * iph,config_t * config)
     ip->protocol = IPPROTO_TCP;
     ip->saddr   = get_next_srcip(config);
     ip->daddr   = get_next_dstip(config);
-    ip->check   = ~ip_xsum((uint16_t *)ip,sizeof(struct iphdr),0);
+    ip->check   = ~ip_xsum((uint16_t *)ip,sizeof(struct iphdr)/2,0);
     /*
     * Do TCP header Check Sum
     * */
-    struct tcphdr * tcp = (struct tcphdr *)(ip+20);
-    tcp->check = htons(~ip_xsum((uint16_t *)ip+12,config->pktlen-26,0));
+    struct tcphdr * tcp = (struct tcphdr *)((unsigned char *)ip+20);
+    uint16_t sum = 0x6 + config->pktlen - 34;
+    tcp->check = (~ip_xsum((uint16_t *)&ip->saddr,(config->pktlen-26)/2,htons(sum)));
 }
 static void pop_iplayer_udp(void * iph,config_t * config)
 {
@@ -121,12 +122,14 @@ static void pop_iplayer_udp(void * iph,config_t * config)
     ip->protocol = IPPROTO_TCP;
     ip->saddr   = get_next_srcip(config);
     ip->daddr   = get_next_dstip(config);
-    ip->check   = ~ip_xsum((uint16_t *)ip,sizeof(struct iphdr),0);
+    ip->check   = ~ip_xsum((uint16_t *)ip,sizeof(struct iphdr)/2,0);
     /*
     * Do UDP header Check Sum
     * */
-    struct udphdr * udp = (struct udphdr *)(ip+20);
-    udp->check = htons(~ip_xsum((uint16_t *)ip+12,config->pktlen-26,0));
+    struct udphdr * udp = (struct udphdr *)((unsigned char *)ip+20);
+
+    uint16_t sum = 0x17 + config->pktlen - 34;
+    udp->check = (~ip_xsum((uint16_t *)((unsigned char *)ip+12),(config->pktlen-26)/2,htons(sum)));
 }
 static inline void pop_datalink(void * packet,config_t * config)
 {

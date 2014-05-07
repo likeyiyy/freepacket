@@ -1,6 +1,6 @@
 CC=gcc
 CLFLAGS= -g -lpthread
-OBJS=pool_manager.o node_buffer.o checksum.o config.o
+OBJS=pool_manager.o node_buffer.o checksum.o config.o packet_parse.o
 
 .PHONY:clean all
 
