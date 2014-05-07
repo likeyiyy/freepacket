@@ -25,3 +25,22 @@ void checksum_ip(struct iphdr * iph)
     iph->check = ~sum;
 }
 
+// Internet Checksum calculation
+// Internet Checksum calculation
+uint16_t ip_xsum (uint16_t *buff, int len, uint32_t xsum)
+{
+  // calculate IP checksum for a buffer of bytes
+  // len is number of 16-bit values
+  while (len--)
+    xsum += * buff++;               // accumulate 16-bit sum
+
+  while (xsum >> 16)                // propagate carries for 1's complement
+    xsum = (xsum & 0xFFFF) + (xsum >> 16);
+
+  return (uint16_t) xsum;
+}
+
+void checksum_tcp(struct tcphdr * tcph,int length)
+{
+
+}

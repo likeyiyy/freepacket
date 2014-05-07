@@ -72,7 +72,14 @@ void print_config_file(config_t * config)
 {
     char macaddr[18];
     struct in_addr min,max;
-    printf("protocol:%d\n",config->protocol);
+    if(config->protocol == TCP)
+    {
+        printf("protocol:tcp\n");
+    }
+    else if(config->protocol == UDP)
+    {
+        printf("protocol:udp\n");
+    }
     printf("srcmac:%s\n",ether_etoa(config->srcmac,macaddr));
     printf("dstmac:%s\n",ether_etoa(config->dstmac,macaddr));
 
@@ -142,9 +149,16 @@ int read_config_file(const char * file_name,config_t * config)
         uint16_t port;
         struct in_addr in;
         //switch 判断var_name属于哪一类.
-        if(strcmp(pname,"PROT") == 0)
+        if(strcmp(pname,"PROTO") == 0)
         {
-            config->protocol = atoi(p);
+            if(strstr(p,"tcp") != NULL)
+            {
+                config->protocol = TCP;
+            }
+            else if(strstr(p,"udp") != NULL)
+            {
+                config->protocol = UDP;
+            }
         }
         else if(strcmp(pname,"SRCMAC") == 0)
         {
@@ -168,6 +182,7 @@ int read_config_file(const char * file_name,config_t * config)
                 return 0;
             }
             config->saddr_min = ipaddr[0] << 24 | ipaddr[1] << 16 | ipaddr[2] << 8 | ipaddr[3];
+            config->saddr_cur = config->saddr_min;
             config->saddr_max = (config->saddr_min)+ counter;
 
         }
@@ -185,6 +200,7 @@ int read_config_file(const char * file_name,config_t * config)
                 return 0;
             }
             config->daddr_min = ipaddr[0] << 24 | ipaddr[1] << 16 | ipaddr[2] << 8 | ipaddr[3];
+            config->daddr_cur = config->daddr_min;
             config->daddr_max = ((config->daddr_min)+ counter);
         }
         else if(strcmp(pname,"SRCPORT") == 0)
@@ -200,6 +216,7 @@ int read_config_file(const char * file_name,config_t * config)
                 return 0;
             }
             config->sport_min = port;
+            config->sport_cur = config->sport_min;
             config->sport_max = port+ counter;
         }
         else if(strcmp(pname,"DSTPORT") == 0)
@@ -215,6 +232,7 @@ int read_config_file(const char * file_name,config_t * config)
                 return 0;
             }
             config->dport_min = port;
+            config->dport_cur = config->dport_min;
             config->dport_max = port+ counter;
         }
         else if(strcmp(pname,"PKTLEN") == 0)
@@ -228,8 +246,7 @@ int read_config_file(const char * file_name,config_t * config)
         }
         else if(strcmp(pname,"PKTDATA") == 0)
         {
-            printf("----------%s\n",p);
-            if(strcmp(p,"none") == 0)
+            if(strcmp(p,"none\n") == 0)
             {
                 config->pkt_data = NULL;
             }

@@ -26,6 +26,10 @@
 #include <string.h>
 #define PROCBLOCK_SIZE 32
 #define PAGE_SHIFT     12
+
+#define PACKET_POOL_SIZE 10000
+#define TCP 1
+#define UDP 2
 typedef struct config
 {
     int protocol;
@@ -34,11 +38,17 @@ typedef struct config
     uint32_t saddr_min;
     uint32_t daddr_min;
 
+    uint32_t saddr_cur;
+    uint32_t daddr_cur;
+
     uint32_t saddr_max;
     uint32_t daddr_max;
 
     uint16_t sport_min;
     uint16_t dport_min;
+
+    uint16_t sport_cur;
+    uint16_t dport_cur;
 
     uint16_t sport_max;
     uint16_t dport_max;
