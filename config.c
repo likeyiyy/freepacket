@@ -72,11 +72,11 @@ void print_config_file(config_t * config)
 {
     char macaddr[18];
     struct in_addr min,max;
-    if(config->protocol == TCP)
+    if(config->protocol == IPPROTO_TCP)
     {
         printf("protocol:tcp\n");
     }
-    else if(config->protocol == UDP)
+    else if(config->protocol == IPPROTO_UDP)
     {
         printf("protocol:udp\n");
     }
@@ -153,11 +153,11 @@ int read_config_file(const char * file_name,config_t * config)
         {
             if(strstr(p,"tcp") != NULL)
             {
-                config->protocol = TCP;
+                config->protocol = IPPROTO_TCP;
             }
             else if(strstr(p,"udp") != NULL)
             {
-                config->protocol = UDP;
+                config->protocol = IPPROTO_UDP;
             }
         }
         else if(strcmp(pname,"SRCMAC") == 0)
