@@ -31,6 +31,21 @@ queue_t * init_queue(unsigned int node_pool_size)
     q->node_pool = init_pool(MANAGER_NODE_POOL,node_pool_size,sizeof(node_t));
     return q;
 }
+void destroy_queue(queue_t * queue)
+{
+    pthread_mutex_destroy(&queue->lock);
+    /*
+    * 好像作为一个队列中的node不要释放。
+    * node的数据部分，也不需要释放。
+    * 释放node，其实是释放pool
+    * */
+    destroy_pool(queue->node_pool);
+    queue->head = NULL;
+    queue->tail = NULL;
+    queue->node_pool = NULL;
+    free(queue);
+    queue = NULL;
+}
 int is_empty(queue_t * q)
 {
     pthread_mutex_lock(&q->lock);

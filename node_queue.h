@@ -34,6 +34,7 @@ typedef struct _queue
 * 不设长度限制.
 * */
 queue_t * init_queue(unsigned int node_pool_size);
+void destroy_queue(queue_t * queue);
 int is_empty(queue_t * q);
 int push_to_queue(queue_t * q, void * data);
 int pop_from_queue(queue_t * q,void ** data);

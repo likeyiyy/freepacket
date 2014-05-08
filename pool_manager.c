@@ -67,6 +67,23 @@ pool_t * init_pool(pool_type_t type,int numbers,int item_size)
     }
     return pool;
 }
+/*
+* 销毁一个缓冲区池子
+* 时间：2014年5月8日17:49:21
+* 作者: likeyi
+* */
+void destroy_pool(pool_t * pool)
+{
+    pthread_mutex_destroy(&pool->mutex); 
+    pthread_cond_destroy(&pool->empty);
+    free(pool->node);
+    pool->node = NULL;
+    free(pool->buffer);
+    pool->buffer = NULL;
+
+    free(pool);
+    pool = NULL;
+}
 pool_t * get_pool(pool_type_t type)
 {
     switch(type)

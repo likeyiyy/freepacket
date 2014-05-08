@@ -27,6 +27,10 @@ typedef struct parser_m
 extern parser_set_t * parser_set;
 
 void init_packet_parse(int numbers);
+/*
+ * 销毁线程和销毁数据分两步走
+ * */
 void finish_packet_parse(parser_set_t * parser_set);
+void destroy_packet_parse(parser_set_t * parser_set);
 void * print_parser(void * arg);
 #endif

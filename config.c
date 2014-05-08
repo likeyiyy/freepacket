@@ -112,6 +112,7 @@ void print_config_file(config_t * config)
 }
 int read_config_file(const char * file_name,config_t * config)
 {
+    assert(config != NULL);
     FILE * fp = NULL;
     char buf[BUFSIZ] = {0};
     char * p, *q;

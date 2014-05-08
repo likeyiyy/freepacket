@@ -46,6 +46,18 @@ void finish_packet_parse(parser_set_t * parser_set)
         pthread_cancel(parser_set->parser[i].id);
     }
 }
+void destroy_packet_parse(parser_set_t * parser_set)
+{
+    int i = 0;
+    for(i = 0; i < parser_set->numbers;++i)
+    {
+        destroy_queue(parser_set->parser[i].queue);
+    }
+    free(parser_set->parser);
+    parser_set->parser = NULL;
+    free(parser_set);
+    parser_set = NULL;
+}
 static pthread_mutex_t print_lock = PTHREAD_MUTEX_INITIALIZER;
 void * print_parser(void * arg)
 {
@@ -68,6 +80,7 @@ void * print_parser(void * arg)
             * */
             ++parser->total;
             free_buf(packet_pool,packet);
+            pthread_testcancel();
 #if 0
             pthread_mutex_lock(&print_lock);
             parse_full_packet(packet->data); 

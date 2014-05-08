@@ -25,19 +25,26 @@
 #include <pthread.h>
 #include <string.h>
 #define PROCBLOCK_SIZE 32
+
 #define PAGE_SHIFT     12
 
 #define CONFIG_FILE "generator.conf"
+
 #define PACKET_GENERATOR_NUMS  10
+
 #define PACKET_POOL_SIZE 1000000
 
 #define NODE_POOL_SIZE 100000
+
 #define PACKET_PARSER_NUMS 1
+
 typedef struct config
 {
     int protocol;
     unsigned char srcmac[6];
+
     unsigned char dstmac[6];
+
     uint32_t saddr_min;
     uint32_t daddr_min;
 
