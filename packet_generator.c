@@ -6,24 +6,33 @@
  ************************************************************************/
 
 #include "includes.h"
-static uint8_t  * config_file;
+static uint8_t  * config_file = CONFIG_FILE;
 static config_t * config;
 static generator_info_t generator_info;
 extern pool_t * packet_pool;
+extern parser_set_t * parser_set;
     
 void init_generator(int numbers)
 {
     int i = 0;
 
+    config = malloc(sizeof(config_t));
+    exit_if_ptr_is_null(config,"config error");
     read_config_file(config_file,config);
     config->numbers = PACKET_POOL_SIZE;  
-    packet_pool = init_pool(PACKET_POOL,config->numbers,config->pktlen);
+    /*
+     * 初始化一个缓冲区池。
+     * 这个缓冲区的头部是个结构体指针，下面是packet_length的长度的缓冲区。
+     * */
+    packet_pool = init_pool(PACKET_POOL,config->numbers,config->pktlen + sizeof(packet_t));
     generator_info.generator = malloc(sizeof(generator_t) * numbers);
+    exit_if_ptr_is_null(generator_info.generator,"generator_info.generator error");
     generator_info.numbers   = numbers;
     for(i = 0; i < numbers; ++i)
     {
         generator_info.generator[i].pool = packet_pool;
         generator_info.generator[i].config = config;
+        generator_info.generator[i].parser_set = parser_set;
         pthread_create(&generator_info.generator[i].id,
                       NULL,
                       packet_generator_loop,
@@ -102,8 +111,8 @@ static void pop_iplayer_tcp(void * iph,config_t * config)
     ip->tot_len = htons(config->pktlen-14);
     ip->ttl     = IPDEFTTL;
     ip->protocol = IPPROTO_TCP;
-    ip->saddr   = get_next_srcip(config);
-    ip->daddr   = get_next_dstip(config);
+    ip->saddr   = htonl(get_next_srcip(config));
+    ip->daddr   = htonl(get_next_dstip(config));
     ip->check   = ~ip_xsum((uint16_t *)ip,sizeof(struct iphdr)/2,0);
     /*
     * Do TCP header Check Sum
@@ -143,10 +152,11 @@ void * packet_generator_loop(void * arg)
     int i,j,m,n;
     generator_t * generator = (generator_t *)arg;
     config_t * config = generator->config;
-    unsigned char * packet;
+    packet_t * packet;
     int payload_length;
     int tcp_length,udp_length;
-    if(config->protocol == TCP)
+    int data_len = config->pktlen + sizeof(packet_t);
+    if(config->protocol == IPPROTO_TCP)
     {
         /*
         * 因为发包程序不会一会发TCP一会发UDP，是固定的，
@@ -159,44 +169,53 @@ void * packet_generator_loop(void * arg)
         * 1. get buffer from pool
         * */
             get_buf(generator->pool,(void **)&packet);
-            bzero(packet,generator->config->pktlen);
+            bzero(packet,data_len);
+            packet->length = config->pktlen;
+            packet->data   = (unsigned char *)packet + sizeof(packet_t);
         /*
         * 2. 根据配置文件比如UDP，TCP来产生包结构。
         * */
-            payload_length = pop_payload(packet+54,config->pkt_data,config);
+            payload_length = pop_payload(packet->data+54,config->pkt_data,config);
 
-            tcp_length = pop_transmission_tcp(packet+34,config);
+            tcp_length = pop_transmission_tcp(packet->data+34,config);
 
-            pop_iplayer_tcp(packet+14,config);
+            pop_iplayer_tcp(packet->data+14,config);
 
-            pop_datalink(packet,config);
+            pop_datalink(packet->data,config);
         /*
         * 3. 数据放到下一步的队列里。
         * */
+            parser_t * parser = get_next_parser(generator->parser_set);
+            push_to_queue(parser->queue,packet);
         }
     }
-    else if(config->protocol == UDP)
+    else if(config->protocol == IPPROTO_UDP)
     {
         while(1)
         {
         /*
         * 1. get buffer from pool
         * */
-        get_buf(generator->pool,(void **)&packet);
+            get_buf(generator->pool,(void **)&packet);
+            bzero(packet,data_len);
+            packet->length = config->pktlen;
+            packet->data   = (unsigned char *)packet + sizeof(packet_t);
         /*
         * 2. 根据配置文件比如UDP，TCP来产生包结构。
         * */
-        payload_length = pop_payload(packet+42,config->pkt_data,config);
+            payload_length = pop_payload(packet->data+42,config->pkt_data,config);
 
-        udp_length = pop_transmission_udp(packet+34,config);
+            udp_length = pop_transmission_udp(packet->data+34,config);
 
-        pop_iplayer_udp(packet+14,config);
+            pop_iplayer_udp(packet->data+14,config);
             
-        pop_datalink(packet,config);
+            pop_datalink(packet->data,config);
 
         /*
         * 3. 数据放到下一步的队列里。
         * */
+            parser_t * parser = get_next_parser(generator->parser_set);
+            push_to_queue(parser->queue,(void*)packet);
         }
 
     }

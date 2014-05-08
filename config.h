@@ -27,9 +27,12 @@
 #define PROCBLOCK_SIZE 32
 #define PAGE_SHIFT     12
 
+#define CONFIG_FILE "generator.conf"
+#define PACKET_GENERATOR_NUMS 20
 #define PACKET_POOL_SIZE 10000
-#define TCP 1
-#define UDP 2
+
+#define NODE_POOL_SIZE 10000
+#define PACKET_PARSER_NUMS 20
 typedef struct config
 {
     int protocol;

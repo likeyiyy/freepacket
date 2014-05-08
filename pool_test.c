@@ -7,7 +7,7 @@
 
 #include <stdio.h>
 #include "includes.h"
-typedef char packet_t[1500];
+
 int main(int argc,char ** argv)
 {
     pool_type_t type = PACKET_POOL;
@@ -35,5 +35,5 @@ int main(int argc,char ** argv)
         item_t * hello = (item_t *)*(pool2->node + i);        
         printf("a;%d,b:%d,c:%s\n",hello->a,hello->b,hello->c);
     }
-#endif
+    #endif
 }

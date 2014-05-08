@@ -8,14 +8,6 @@
 #include "includes.h"
 pool_t * packet_pool, * session_pool, * buffer_pool;
 pool_t * manager_node_pool;
-static inline void exit_if_ptr_is_null(void * ptr,const char * message) 
-{
-    if(ptr == NULL)
-    {   
-        printf("%s\n",message);
-        exit(-1);
-    }   
-}
 
 /*
 * Date:     2014年4月30日15:53:00

@@ -7,14 +7,13 @@
 
 #ifndef PACKET_GENERATOR_H
 #define PACKET_GENERATOR_H
-#include "includes.h"
-
 
 typedef struct generator
 {
     pthread_t   id;
     config_t  * config;
     pool_t    * pool;
+    parser_set_t * parser_set;
 }generator_t;
 typedef struct generator_info
 {

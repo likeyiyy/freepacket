@@ -1,11 +1,19 @@
 #include "includes.h"
+void exit_if_ptr_is_null(void * ptr,const char * message) 
+{
+    if(ptr == NULL)
+    {   
+        printf("%s\n",message);
+        exit(-1);
+    }   
+}
 static inline char * skip_var_name(const char * p)
 {
     while(!isspace(p[0]) && p[0] != '=' && p[0] != '\0')
     {
         p++;
     }
-    return p;
+    return (char *)p;
 }
 static inline char * skip_opeartor(const char * p)
 {
@@ -13,7 +21,7 @@ static inline char * skip_opeartor(const char * p)
     {
         p++;
     } 
-    return p;
+    return (char *)p;
 }
 static inline char * strupr(char * p)
 {
@@ -139,6 +147,7 @@ int read_config_file(const char * file_name,config_t * config)
         //printf("count=%d\t%s",count,p);
         q = skip_var_name(p);
         pname = malloc(q-p+1);
+        exit_if_ptr_is_null(pname,"pname alloca error");
         strncpy(pname, p, q-p );
         p = q;
         p = skip_opeartor(p);
@@ -251,6 +260,7 @@ int read_config_file(const char * file_name,config_t * config)
                 config->pkt_data = NULL;
             }
             config->pkt_data = malloc(strlen(p)+1);
+            exit_if_ptr_is_null(config->pkt_data,"config->pkt_data malloc error");
             strcpy(config->pkt_data,p);
         }
         else if(strcmp(pname,"SPEED") == 0)
