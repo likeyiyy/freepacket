@@ -8,6 +8,7 @@
 #include "includes.h"
 
 parser_set_t * parser_set;
+extern pool_t * packet_pool;
 static inline void init_single_parser(parser_t * parser)
 {
     parser->queue = init_queue(NODE_POOL_SIZE);
@@ -19,8 +20,10 @@ void init_packet_parse(int numbers)
      * */
     parser_set = malloc(sizeof(parser_set_t));
     exit_if_ptr_is_null(parser_set,"parser_set alloc error");
+
     parser_set->parser  = malloc(numbers * sizeof(parser_t));
     exit_if_ptr_is_null(parser_set->parser,"parser_set->parser alloc error");
+
     parser_set->numbers = numbers;
     
     int i = 0;
@@ -34,21 +37,22 @@ void init_packet_parse(int numbers)
     }
 
 }
-parser_t * get_next_parser(parser_set_t * parser_set)
+
+void finish_packet_parse(parser_set_t * parser_set)
 {
-    if(parser_set->cur_num == parser_set->numbers)
+    int i = 0;
+    for(i = 0; i < parser_set->numbers;++i)
     {
-        return &parser_set->parser[parser_set->cur_num++];
-    }
-    else
-    {
-        parser_set->cur_num = 0;
-        return &parser_set->parser[parser_set->cur_num];
+        pthread_cancel(parser_set->parser[i].id);
     }
 }
 static pthread_mutex_t print_lock = PTHREAD_MUTEX_INITIALIZER;
 void * print_parser(void * arg)
 {
+    pthread_detach(pthread_self());
+    pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, 0);
+    pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, 0);
+
     parser_t * parser = (parser_t *)arg;
     packet_t * packet;
     while(1)
@@ -63,6 +67,7 @@ void * print_parser(void * arg)
             * 打印这个数据包。
             * */
             ++parser->total;
+            free_buf(packet_pool,packet);
 #if 0
             pthread_mutex_lock(&print_lock);
             parse_full_packet(packet->data); 

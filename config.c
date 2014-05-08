@@ -3,7 +3,7 @@ void exit_if_ptr_is_null(void * ptr,const char * message)
 {
     if(ptr == NULL)
     {   
-        printf("%s\n",message);
+        DEBUG("%s\n",message);
         exit(-1);
     }   
 }

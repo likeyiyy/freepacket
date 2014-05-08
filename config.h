@@ -28,11 +28,11 @@
 #define PAGE_SHIFT     12
 
 #define CONFIG_FILE "generator.conf"
-#define PACKET_GENERATOR_NUMS 20
-#define PACKET_POOL_SIZE 10000
+#define PACKET_GENERATOR_NUMS  10
+#define PACKET_POOL_SIZE 1000000
 
-#define NODE_POOL_SIZE 10000
-#define PACKET_PARSER_NUMS 20
+#define NODE_POOL_SIZE 100000
+#define PACKET_PARSER_NUMS 1
 typedef struct config
 {
     int protocol;
@@ -71,4 +71,6 @@ char * ether_etoa(const unsigned char *e, char *a);
 int read_config_file(const char * file_name,config_t * config);
 
 void print_config_file(config_t * config);
+
+void exit_if_ptr_is_null(void * p,const char * c);
 #endif

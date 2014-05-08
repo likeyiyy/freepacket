@@ -32,6 +32,12 @@
 #define bool _Bool
 #define true 1
 #define false 0
+#define LIKEYI_DEBUG
+#ifdef LIKEYI_DEBUG
+#define DEBUG(format,...) printf("FILE: "__FILE__", LINE: %d: "format"\n", __LINE__, ##__VA_ARGS__)
+#else
+#define DEBUG(format,...)  
+#endif
 /*
 * 一个数据包却要有数据部分和长度部分，真的必要吗？
 * 是的，对于generator来说确实不必要，但是对于parser却是需要的。

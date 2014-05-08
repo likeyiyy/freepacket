@@ -115,7 +115,7 @@ bool get_buf(pool_t * pool,void ** data)
 
     while(pool->push_pos == pool->pop_pos)
     {
-        printf("Error:pool is empty\n");
+        DEBUG("Error:pool is empty\n");
         pthread_cond_wait(&pool->empty,&pool->mutex);
     }
     *data = pool->node[pool->pop_pos];

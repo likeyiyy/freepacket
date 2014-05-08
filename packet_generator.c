@@ -7,8 +7,8 @@
 
 #include "includes.h"
 static uint8_t  * config_file = CONFIG_FILE;
-static config_t * config;
-static generator_info_t generator_info;
+config_t * config;
+generator_info_t generator_info;
 extern pool_t * packet_pool;
 extern parser_set_t * parser_set;
     
@@ -27,12 +27,17 @@ void init_generator(int numbers)
     packet_pool = init_pool(PACKET_POOL,config->numbers,config->pktlen + sizeof(packet_t));
     generator_info.generator = malloc(sizeof(generator_t) * numbers);
     exit_if_ptr_is_null(generator_info.generator,"generator_info.generator error");
+
     generator_info.numbers   = numbers;
+
     for(i = 0; i < numbers; ++i)
     {
         generator_info.generator[i].pool = packet_pool;
         generator_info.generator[i].config = config;
         generator_info.generator[i].parser_set = parser_set;
+        generator_info.generator[i].index = i;
+        generator_info.generator[i].next_thread_id = 0;
+        generator_info.generator[i].total_send_byte = 0;
         pthread_create(&generator_info.generator[i].id,
                       NULL,
                       packet_generator_loop,
@@ -149,7 +154,9 @@ static inline void pop_datalink(void * packet,config_t * config)
 }
 void * packet_generator_loop(void * arg)
 {
-    int i,j,m,n;
+    pthread_detach(pthread_self());
+    pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, 0);
+    pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, 0);
     generator_t * generator = (generator_t *)arg;
     config_t * config = generator->config;
     packet_t * packet;
@@ -175,7 +182,7 @@ void * packet_generator_loop(void * arg)
         /*
         * 2. 根据配置文件比如UDP，TCP来产生包结构。
         * */
-            payload_length = pop_payload(packet->data+54,config->pkt_data,config);
+            //payload_length = pop_payload(packet->data+54,config->pkt_data,config);
 
             tcp_length = pop_transmission_tcp(packet->data+34,config);
 
@@ -185,8 +192,14 @@ void * packet_generator_loop(void * arg)
         /*
         * 3. 数据放到下一步的队列里。
         * */
-            parser_t * parser = get_next_parser(generator->parser_set);
+            /* 数据包均匀 分部到 下一个工作的线程里。*/
+            //printf("---------------%d----------\n",generator->next_thread_id);
+            parser_t * parser = &generator->parser_set->parser[generator->next_thread_id++];
+            generator->next_thread_id = (generator->next_thread_id == generator->parser_set->numbers)? 0 : generator->next_thread_id;
             push_to_queue(parser->queue,packet);
+            generator->total_send_byte += config->pktlen;
+
+            pthread_testcancel();
         }
     }
     else if(config->protocol == IPPROTO_UDP)
@@ -214,8 +227,11 @@ void * packet_generator_loop(void * arg)
         /*
         * 3. 数据放到下一步的队列里。
         * */
-            parser_t * parser = get_next_parser(generator->parser_set);
+            //printf("---------------%d----------\n",generator->next_thread_id);
+            parser_t * parser = &generator->parser_set->parser[generator->next_thread_id++];
+            generator->next_thread_id = (generator->next_thread_id == generator->parser_set->numbers)? 0 : generator->next_thread_id;
             push_to_queue(parser->queue,(void*)packet);
+            pthread_testcancel();
         }
 
     }

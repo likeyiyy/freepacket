@@ -22,12 +22,11 @@ typedef struct parser_m
 {
     parser_t * parser;
     int numbers;
-    int cur_num;
 }parser_set_t;
 
 extern parser_set_t * parser_set;
 
 void init_packet_parse(int numbers);
-parser_t * get_next_parser(parser_set_t * parser_set);
+void finish_packet_parse(parser_set_t * parser_set);
 void * print_parser(void * arg);
 #endif

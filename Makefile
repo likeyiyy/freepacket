@@ -1,5 +1,5 @@
 CC=gcc
-CLFLAGS= -g -lpthread
+CLFLAGS= -g -lpthread -Wall
 OBJS=pool_manager.o node_queue.o checksum.o config.o parse.o packet_generator.o packet_parser.o
 
 .PHONY:clean all
