@@ -9,6 +9,8 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include "includes.h"
+struct timeval G_old;
+struct timeval G_new;
 queue_t * init_queue(unsigned int node_pool_size)
 {
     queue_t * q = malloc(sizeof(queue_t));
@@ -23,6 +25,12 @@ queue_t * init_queue(unsigned int node_pool_size)
     if(status != 0)
     {
         DEBUG("init mutex error");
+        return NULL;
+    }
+    status = pthread_cond_init(&q->empty,NULL);
+    if(status != 0)
+    {
+        DEBUG("init cond error");
         return NULL;
     }
     /*
@@ -64,6 +72,7 @@ int push_to_queue(queue_t * q, void * data)
     get_buf(q->node_pool,(void **)&node);
     if(node == NULL)
     {
+        DEBUG("get node error from node pool");
         pthread_mutex_unlock(&q->lock);
         return -1;
     }
@@ -80,6 +89,7 @@ int push_to_queue(queue_t * q, void * data)
         q->tail = node;
     }
     ++q->length;
+    pthread_cond_signal(&q->empty);
     pthread_mutex_unlock(&q->lock);
     return 0;
 
@@ -88,7 +98,11 @@ int pop_from_queue(queue_t * q,void ** data)
 {
     pthread_mutex_lock(&q->lock);
     int err = -1;
-    if(q->length != 0)
+    while(q->length == 0)
+    {
+        //DEBUG("Error:queue is empty\n");
+        pthread_cond_wait(&q->empty,&q->lock); 
+    }
     {
             
         node_t * node = q->head;

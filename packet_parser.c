@@ -12,6 +12,7 @@ extern pool_t * packet_pool;
 static inline void init_single_parser(parser_t * parser)
 {
     parser->queue = init_queue(NODE_POOL_SIZE);
+    parser->packet = malloc(sizeof(packet_t));
     parser->total = 0;
 }
 void init_packet_parse(int numbers)
@@ -66,27 +67,26 @@ void * print_parser(void * arg)
     pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, 0);
 
     parser_t * parser = (parser_t *)arg;
-    packet_t * packet;
     while(1)
     {
+        gettimeofday(&parser->old,NULL);
         /*
         * 从队列中取出一个数据包
         * */
-        int err = pop_from_queue(parser->queue,(void **)&packet);
-        if(err == 0)
-        {
+        int err = pop_from_queue(parser->queue,(void **)&parser->packet);
             /*
             * 打印这个数据包。
             * */
-            ++parser->total;
-            free_buf(packet_pool,packet);
-            pthread_testcancel();
+        parser->total += parser->packet->length;
+        free_buf(packet_pool,parser->packet);
+        gettimeofday(&parser->now,NULL);
+        //printf("-----------parser------period time:%llu\n",(parser->now.tv_usec + 1000000 - parser->old.tv_usec)%1000000) ;
+        pthread_testcancel();
 #if 0
             pthread_mutex_lock(&print_lock);
             parse_full_packet(packet->data); 
             print_packet(packet->data,packet->length);
             pthread_mutex_unlock(&print_lock);
 #endif
-        }
     }
 }

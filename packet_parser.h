@@ -15,7 +15,9 @@ typedef struct _parser
      * */
     uint64_t total;
     queue_t * queue;
-
+    packet_t * packet;
+    struct timeval old;
+    struct timeval now;
 }parser_t;
 
 typedef struct parser_m

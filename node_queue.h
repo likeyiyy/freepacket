@@ -29,10 +29,13 @@ typedef struct _queue
     unsigned long  length;
     pool_t * node_pool;
     pthread_mutex_t lock;
+    pthread_cond_t empty;
 }queue_t;
 /*
 * 不设长度限制.
 * */
+extern struct timeval G_old;
+extern struct timeval G_new;
 queue_t * init_queue(unsigned int node_pool_size);
 void destroy_queue(queue_t * queue);
 int is_empty(queue_t * q);

@@ -9,7 +9,5 @@
 //config_t config;
 int main()
 {
-    read_config_file("generator.conf",&config);
-    print_config_file(&config);
     
 }

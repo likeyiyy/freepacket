@@ -11,6 +11,8 @@ config_t * config;
 generator_info_t * generator_info;
 extern pool_t * packet_pool;
 extern parser_set_t * parser_set;
+extern struct timeval G_old;
+extern struct timeval G_new;
     
 void init_generator(int numbers)
 {
@@ -202,6 +204,7 @@ void * packet_generator_loop(void * arg)
     int payload_length;
     int tcp_length,udp_length;
     int data_len = config->pktlen + sizeof(packet_t);
+    srand((unsigned int)time(NULL));
     if(config->protocol == IPPROTO_TCP)
     {
         /*
@@ -209,11 +212,13 @@ void * packet_generator_loop(void * arg)
         * 这样会减少判断。
         * 或许，一亿次循环能减少一秒把。(@_@)
         * */
+        struct timeval old, new;
         while(1)
         {
         /*
         * 1. get buffer from pool
         * */
+            gettimeofday(&generator->old,NULL);
             get_buf(generator->pool,(void **)&packet);
             bzero(packet,data_len);
             packet->length = config->pktlen;
@@ -233,9 +238,15 @@ void * packet_generator_loop(void * arg)
         * */
             /* 数据包均匀 分部到 下一个工作的线程里。*/
             //printf("---------------%d----------\n",generator->next_thread_id);
-            parser_t * parser = &generator->parser_set->parser[generator->next_thread_id++];
-            generator->next_thread_id = (generator->next_thread_id == generator->parser_set->numbers)? 0 : generator->next_thread_id;
+            
+            //parser_t * parser = &generator->parser_set->parser[generator->next_thread_id++];
+            parser_t * parser = &generator->parser_set->parser[rand()%generator->parser_set->numbers];
+            //generator->next_thread_id = (generator->next_thread_id == generator->parser_set->numbers)? 0 : generator->next_thread_id;
             push_to_queue(parser->queue,packet);
+
+            gettimeofday(&generator->now,NULL);
+            //printf("----------------------period time:%llu\n",(generator->now.tv_usec + 1000000 - generator->old.tv_usec)%1000000) ;
+
             generator->total_send_byte += config->pktlen;
 
             pthread_testcancel();

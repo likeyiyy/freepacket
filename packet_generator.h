@@ -17,6 +17,7 @@ typedef struct generator
     config_t  * config;
     pool_t    * pool;
     parser_set_t * parser_set;
+    struct timeval old,now;
 }generator_t;
 typedef struct generator_info
 {

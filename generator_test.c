@@ -9,8 +9,8 @@
 extern generator_info_t * generator_info;
 extern parser_set_t * parser_set;
 extern config_t * config;
-uint64_t send_count[101][101] = {0};
-uint64_t recv_count[101][101] = {0};
+uint64_t send_count = 0;
+uint64_t recv_count = 0;
 void sig_statistics(int arg)
 {
     uint64_t sum = 0;
@@ -52,52 +52,57 @@ void count_now(int i,int j)
     * */
     for(k = 0; k < j; k++)
     {
-        send_count[i][j] += generator_info->generator[i].total_send_byte;
+        send_count += generator_info->generator[k].total_send_byte;
     }
     /*
     * 消费者统计
     * */
     for(k = 0; k < i; k++)
     {
-        recv_count[i][j] += parser_set->parser[i].total;
+		printf("%d thread: queue length:%d\n",k,parser_set->parser[k].queue->length);
+        recv_count += parser_set->parser[k].total;
     }
 }
-int main()
+int main(int argc,char ** argv)
 {
     int i,j;
-    for(i = 1; i <= 100; ++i)
+    assert(argc == 3);
+    int parser_nums = atoi(argv[1]);
+    int gener_nums  = atoi(argv[2]);
+    //for(i = 1; i < 2; ++i)
     {
-        for(j = 1; j <= 100; ++j)
+        //for(j = 4; j < 5; ++j)
         {
             /*
             * 初始化线程
             * */
 
-            init_packet_parse(i);
+            init_packet_parse(parser_nums);
 
-            init_generator(j);
+            init_generator(gener_nums);
             /*
             * 运行5秒
             * */
-            sleep(1);
+            sleep(5);
 
             /*
             * 取消掉所有线程。
             * */
             finish_generator(generator_info);
+            //printf("queue length:%d\n",parser_set->parser[i].queue->length);
             finish_packet_parse(parser_set);
             /*
             * 统计结果
             * */
-            count_now(i,j);
-            printf("send[%d][%d]:%llu\t",i,j,send_count[i][j]);
-            printf("recv[%d][%d]:%llu\n",i,j,recv_count[i][j]);
+            count_now(parser_nums,gener_nums);
+            printf("send:%d count:%llu\t",gener_nums,send_count / (5 * 1024 * 1024));
+            printf("recv:%d count:%llu\n",parser_nums,recv_count / (5 * 1024 * 1024));
 
             /*
             * 删除线程的数据结构
             * */
-            destroy_generator(generator_info);
-            destroy_packet_parse(parser_set);
+            //destroy_generator(generator_info);
+            //destroy_packet_parse(parser_set);
 
         }
 
@@ -108,14 +113,7 @@ int main()
     /*
     * 初始化产生数据包的线程。
     * */
-    for(i = 1; i <= 100; ++i)
-    {
-        for(j = 1; j <= 100; ++j)
-        {
-            printf("send[%d][%d]:%llu\t",send_count[i][j]);
-            printf("recv[%d][%d]:%llu\t",recv_count[i][j]);
-        }
-    }
+    exit(0);
     pthread_exit(NULL);
 }
 
