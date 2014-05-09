@@ -78,7 +78,7 @@ void * print_parser(void * arg)
             * 打印这个数据包。
             * */
         parser->total += parser->packet->length;
-        free_buf(packet_pool,parser->packet);
+        free_buf(parser->packet->pool,parser->packet);
         gettimeofday(&parser->now,NULL);
         //printf("-----------parser------period time:%llu\n",(parser->now.tv_usec + 1000000 - parser->old.tv_usec)%1000000) ;
         pthread_testcancel();

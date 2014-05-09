@@ -28,7 +28,6 @@ void init_generator(int numbers)
      * 初始化一个缓冲区池。
      * 这个缓冲区的头部是个结构体指针，下面是packet_length的长度的缓冲区。
      * */
-    packet_pool = init_pool(PACKET_POOL,config->numbers,config->pktlen + sizeof(packet_t));
     generator_info->generator = malloc(sizeof(generator_t) * numbers);
     exit_if_ptr_is_null(generator_info->generator,"generator_info.generator error");
 
@@ -38,7 +37,7 @@ void init_generator(int numbers)
 
     for(i = 0; i < numbers; ++i)
     {
-        generator_info->generator[i].pool = packet_pool;
+        generator_info->generator[i].pool = init_pool(PACKET_POOL,config->numbers,config->pktlen + sizeof(packet_t));
         generator_info->generator[i].config = config;
         generator_info->generator[i].parser_set = parser_set;
         generator_info->generator[i].index = i;
@@ -221,6 +220,7 @@ void * packet_generator_loop(void * arg)
             gettimeofday(&generator->old,NULL);
             get_buf(generator->pool,(void **)&packet);
             bzero(packet,data_len);
+            packet->pool   = generator->pool;
             packet->length = config->pktlen;
             packet->data   = (unsigned char *)packet + sizeof(packet_t);
         /*
