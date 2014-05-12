@@ -7,13 +7,11 @@
 #include <use_net.h>
 #include <pthread.h>
 pthread_mutex_t print_lock = PTHREAD_MUTEX_INITIALIZER;
-
 /* IP flags. */
 #define IP_CE       0x8000      /* Flag: "Congestion"       */
 #define IP_DF       0x4000      /* Flag: "Don't Fragment"   */
 #define IP_MF       0x2000      /* Flag: "More Fragments"   */
 #define IP_OFFSET   0x1FFF      /* "Fragment Offset" part   */
-
 /* byte no mean bigedian or litiledian */
 static inline void parse_tos(unsigned char tos)
 {
@@ -50,7 +48,6 @@ static inline void parse_frag_off(__be16 frag_off)
         return;
     }
     printf("not yet fragment\n");
-
 }
 static inline void parse_ip_protocol(__u8 protocol)
 {
@@ -97,7 +94,6 @@ void parse_iphdr(struct iphdr * iph)
     printf("daddr:%s\n",inet_ntoa(in));
     pthread_mutex_unlock(&print_lock);
 }
-
 void parse_tcphdr(struct tcphdr * tcph)
 {
     printf("Source port:%u    ",ntohs(tcph->source));        
@@ -184,7 +180,6 @@ static void parse_mac_type(__be16 h_proto)
 		case ETH_P_FIP   :      printf(" FCoE Initialization Protocol \n");break;
 		case ETH_P_EDSA  :      printf(" Ethertype DSA [ NOT AN OFFICIALLY REGISTERED ID ] \n");break;
 		case ETH_P_AF_IUCV   :      printf(" IBM af_iucv [ NOT AN OFFICIALLY REGISTERED ID ] \n");break;
-
 		case ETH_P_802_3 :      printf(" Dummy type for 802.3 frames  \n");break;
 		case ETH_P_AX25  :      printf(" Dummy protocol id for AX.25  \n");break;
 		case ETH_P_ALL   :      printf(" Every packet (be careful!!!) \n");break;
@@ -229,17 +224,13 @@ static void printf_mac_info(struct ethhdr * ether_header)
                 ether_header->h_source[5]
                 );
         parse_mac_type(ntohs(ether_header->h_proto));
-
 }
-
-
 void parse_full_packet(void * buffer)
 {
     struct ethhdr * ether_header;
     struct iphdr  * ip_header;
     struct tcphdr * tcp_header;
     struct udphdr * udp_header;
-        
     ether_header = (struct ethhdr *)buffer;
     printf_mac_info(ether_header);
     if(ether_header->h_proto == htons(ETH_P_IP))
@@ -254,7 +245,6 @@ void parse_full_packet(void * buffer)
                 break;
             default:break;
         }
-
     }
 }
 void print_packet(unsigned char * packet,int size)    
@@ -271,7 +261,6 @@ void print_packet(unsigned char * packet,int size)
                 {       
                             printf("\n%02x ",packet[i]);        
                         }       
-            
     }
     printf("\n");                               
     pthread_mutex_unlock(&print_lock);

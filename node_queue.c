@@ -4,7 +4,6 @@
 	> Mail: likeyiyy@sina.com 
     > Created Time: 2014年5月5日10:57:18
  ************************************************************************/
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
@@ -92,7 +91,6 @@ int push_to_queue(queue_t * q, void * data)
     pthread_cond_signal(&q->empty);
     pthread_mutex_unlock(&q->lock);
     return 0;
-
 }
 int pop_from_queue(queue_t * q,void ** data)
 {
@@ -104,7 +102,6 @@ int pop_from_queue(queue_t * q,void ** data)
         pthread_cond_wait(&q->empty,&q->lock); 
     }
     {
-            
         node_t * node = q->head;
         q->head = node->next;
         if(q->head == NULL)

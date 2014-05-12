@@ -43,19 +43,14 @@ int ether_atoe(const char *a, unsigned char *e)
 {
       char *c = (char *) a;
         int i = 0;
-
           memset(e, 0, ETH_ALEN);
           for (;;) {
                   e[i++] = (unsigned char) strtoul(c, &c, 16);
                       if (!*c++ || i == ETH_ALEN)
                                 break;
-                        
           }
             return (i == ETH_ALEN);
-
 }
-
-
 /*
  *  * Convert Ethernet address binary data to string representation
  *   * @param    e    binary data
@@ -66,15 +61,12 @@ char * ether_etoa(const unsigned char *e, char *a)
 {
       char *c = a;
         int i;
-
         for (i = 0; i < ETH_ALEN; i++) {
                 if (i)
                           *c++ = ':';
                     c += sprintf(c, "%02X", e[i] & 0xff);
-                      
         }
           return a;
-
 }
 void print_config_file(config_t * config)
 {
@@ -90,25 +82,19 @@ void print_config_file(config_t * config)
     }
     printf("srcmac:%s\n",ether_etoa(config->srcmac,macaddr));
     printf("dstmac:%s\n",ether_etoa(config->dstmac,macaddr));
-
     min.s_addr = ntohl(config->saddr_min);
     max.s_addr = ntohl(config->saddr_max);
     printf("srcipaddr.min:%s\t",inet_ntoa(min));
     printf("srcipaddr.max:%s\n",inet_ntoa(max));
-
     min.s_addr = ntohl(config->daddr_min);
     max.s_addr = ntohl(config->daddr_max);
     printf("dstipaddr.min:%s\t",inet_ntoa(min));
     printf("dstipaddr.max:%s\n",inet_ntoa(max));
-
     printf("sport_min:%d,sport_max:%d\n",config->sport_min,config->sport_max);
     printf("dport_min:%d,dport_max:%d\n",config->dport_min,config->dport_max);
-
     printf("pktlen:%d\n",config->pktlen);
     printf("speed:%d\n",config->speed);
     printf("pkt_data:%s\n",config->pkt_data);
-
-
 }
 int read_config_file(const char * file_name,config_t * config)
 {
@@ -194,7 +180,6 @@ int read_config_file(const char * file_name,config_t * config)
             config->saddr_min = ipaddr[0] << 24 | ipaddr[1] << 16 | ipaddr[2] << 8 | ipaddr[3];
             config->saddr_cur = config->saddr_min;
             config->saddr_max = (config->saddr_min)+ counter;
-
         }
         else if(strcmp(pname,"DSTIP") == 0)
         {
@@ -268,7 +253,6 @@ int read_config_file(const char * file_name,config_t * config)
         {
             config->speed = atoi(p);
         }
-        
         free(pname);        
     }
     return 0;

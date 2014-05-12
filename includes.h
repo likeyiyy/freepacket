@@ -6,14 +6,12 @@
  ************************************************************************/
 #ifndef INCLUDES_H
 #define INCLUDES_H
-
 #include <stdio.h>       
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
 #include <ctype.h>
 #include <signal.h>
-
 #include <pthread.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -28,7 +26,6 @@
 #include <arpa/inet.h>
 #include <strings.h>
 #include <unistd.h>
-
 #define bool _Bool
 #define true 1
 #define false 0
@@ -38,7 +35,6 @@
 #else
 #define DEBUG(format,...)  
 #endif
-
 #include "pool_manager.h"
 /*
 * 一个数据包却要有数据部分和长度部分，真的必要吗？
@@ -51,6 +47,18 @@ typedef struct packet
     unsigned int    length; /* 一个包的长度*/
     pool_t * pool;          /* 这个包来自哪个池子*/
 }packet_t;
+typedef struct flow_item
+{
+    packet_t * packet;
+    uint32_t saddr;
+    uint32_t daddr;
+    uint32_t source;
+    uint32_t dest;
+    uint8_t  protocol;
+    unsigned char * payload;
+    unsigned int    payload_len;
+    pool_t * pool;          /* 这个包来自哪个池子*/
+}flow_item_t;
 
 #include "config.h"
 #include "node_queue.h"
@@ -58,4 +66,6 @@ typedef struct packet
 #include "packet_parser.h"
 #include "parse.h"
 #include "packet_generator.h"
+#include "session_queue.h"
+#include "session.h"
 #endif

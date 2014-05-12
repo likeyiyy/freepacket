@@ -4,7 +4,6 @@
 	> Mail: likeyiyy@sina.com 
 	> Created Time: Wed 30 Apr 2014 03:02:16 PM CST
  ************************************************************************/
-
 #include "includes.h"
 static uint8_t  * config_file = CONFIG_FILE;
 config_t * config;
@@ -13,28 +12,23 @@ extern pool_t * packet_pool;
 extern parser_set_t * parser_set;
 extern struct timeval G_old;
 extern struct timeval G_new;
-    
 void init_generator(int numbers)
 {
     int i = 0;
-
     generator_info = malloc(sizeof(generator_info_t));
     config = malloc(sizeof(config_t));
     exit_if_ptr_is_null(config,"config error");
     read_config_file(config_file,config);
     config->numbers = PACKET_POOL_SIZE;  
-
     /*
      * 初始化一个缓冲区池。
      * 这个缓冲区的头部是个结构体指针，下面是packet_length的长度的缓冲区。
      * */
     generator_info->generator = malloc(sizeof(generator_t) * numbers);
     exit_if_ptr_is_null(generator_info->generator,"generator_info.generator error");
-
     generator_info->numbers   = numbers;
     generator_info->pool      = packet_pool;
     generator_info->config    = config;
-
     for(i = 0; i < numbers; ++i)
     {
         generator_info->generator[i].pool = init_pool(PACKET_POOL,config->numbers,config->pktlen + sizeof(packet_t));
@@ -62,7 +56,6 @@ void   destroy_generator(generator_info_t * generator_info)
     generator_info->generator = NULL;
     /* 销毁缓冲区池子 */
     destroy_pool(generator_info->pool);
-    
     /*
      * 销毁配置文件分配的内存。
      * */
@@ -70,12 +63,9 @@ void   destroy_generator(generator_info_t * generator_info)
     generator_info->config->pkt_data = NULL;
     free(generator_info->config);
     generator_info->config = NULL;
-
     free(generator_info);
     generator_info = NULL;
-
 }
-
 void   finish_generator(generator_info_t * generator_info)
 {
     int i = 0;
@@ -100,7 +90,6 @@ int pop_payload(void * payload,unsigned char * data,config_t * config)
         j -= i;
     }
     memcpy(payload + start,data,j);
-
     /*
     * 返回payload的长度。
     * */
@@ -181,7 +170,6 @@ static void pop_iplayer_udp(void * iph,config_t * config)
     * Do UDP header Check Sum
     * */
     struct udphdr * udp = (struct udphdr *)((unsigned char *)ip+20);
-
     uint16_t sum = 0x17 + config->pktlen - 34;
     udp->check = (~ip_xsum((uint16_t *)((unsigned char *)ip+12),(config->pktlen-26)/2,htons(sum)));
 }
@@ -227,28 +215,21 @@ void * packet_generator_loop(void * arg)
         * 2. 根据配置文件比如UDP，TCP来产生包结构。
         * */
             //payload_length = pop_payload(packet->data+54,config->pkt_data,config);
-
             tcp_length = pop_transmission_tcp(packet->data+34,config);
-
             pop_iplayer_tcp(packet->data+14,config);
-
             pop_datalink(packet->data,config);
         /*
         * 3. 数据放到下一步的队列里。
         * */
             /* 数据包均匀 分部到 下一个工作的线程里。*/
             //printf("---------------%d----------\n",generator->next_thread_id);
-            
             //parser_t * parser = &generator->parser_set->parser[generator->next_thread_id++];
             parser_t * parser = &generator->parser_set->parser[rand()%generator->parser_set->numbers];
             //generator->next_thread_id = (generator->next_thread_id == generator->parser_set->numbers)? 0 : generator->next_thread_id;
             push_to_queue(parser->queue,packet);
-
             gettimeofday(&generator->now,NULL);
             //printf("----------------------period time:%llu\n",(generator->now.tv_usec + 1000000 - generator->old.tv_usec)%1000000) ;
-
             generator->total_send_byte += config->pktlen;
-
             pthread_testcancel();
         }
     }
@@ -267,13 +248,9 @@ void * packet_generator_loop(void * arg)
         * 2. 根据配置文件比如UDP，TCP来产生包结构。
         * */
             payload_length = pop_payload(packet->data+42,config->pkt_data,config);
-
             udp_length = pop_transmission_udp(packet->data+34,config);
-
             pop_iplayer_udp(packet->data+14,config);
-            
             pop_datalink(packet->data,config);
-
         /*
         * 3. 数据放到下一步的队列里。
         * */
@@ -283,6 +260,5 @@ void * packet_generator_loop(void * arg)
             push_to_queue(parser->queue,(void*)packet);
             pthread_testcancel();
         }
-
     }
 }
