@@ -18,7 +18,9 @@ typedef struct _session_queue
     pthread_cond_t empty;
     pthread_cond_t full;
 }session_queue_t;
-
+/*
+* This is just a queue not a pool
+* */
 session_queue_t * init_session_queue(int length,int item_size);
 
 void destroy_session_queue(session_queue_t * session_queue);

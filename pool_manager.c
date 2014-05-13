@@ -110,6 +110,16 @@ bool free_buf(pool_t * pool,void * data)
     pthread_cond_signal(&pool->empty);
     pthread_mutex_unlock(&pool->mutex);
 }
+static inline void print_pool_type(pool_t * pool)
+{
+    switch(pool->pool_type)
+    {
+        case 0:printf("Packet Generator Pool\n");break;
+        case 1:printf("Parser To Seeion Pool\n");break;
+        case 2:printf("Session Pool\n");break;
+        case 3:printf("Generator To Parser Queue\n");break;
+    }
+}
 /*
 *  本函数不用is_empty_pool，因为防止锁中锁
 * */
@@ -118,7 +128,7 @@ bool get_buf(pool_t * pool,void ** data)
     pthread_mutex_lock(&pool->mutex);
     while(pool->push_pos == pool->pop_pos)
     {
-        DEBUG("Error:pool is empty\n");
+        print_pool_type(pool);
         pthread_cond_wait(&pool->empty,&pool->mutex);
     }
     *data = pool->node[pool->pop_pos];

@@ -32,6 +32,7 @@ void init_generator_set(int numbers)
     for(i = 0; i < numbers; ++i)
     {
         generator_set->generator[i].pool = init_pool(PACKET_POOL,config->numbers,config->pktlen + sizeof(packet_t));
+        generator_set->generator[i].pool->pool_type = 0;
         generator_set->generator[i].config = config;
         generator_set->generator[i].parser_set = parser_set;
         generator_set->generator[i].index = i;

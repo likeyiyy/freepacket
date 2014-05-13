@@ -25,6 +25,7 @@ session_set_t * init_session_set(uint32_t length)
         set->bucket[i].session_pool = init_pool(SESSION_POOL,
                                                 SESSION_POOL_LENGTH,
                                                 sizeof(session_t));
+        set->bucket[i].session_pool->pool_type = 2;
         set->bucket[i].index = i;
     }
     for(i = 0; i < length; i++)

@@ -13,6 +13,7 @@ static inline void init_single_parser(parser_t * parser)
     parser->pool   = init_pool(MANAGER_NODE_POOL,
                               SESSION_QUEUE_LENGTH,
                               sizeof(flow_item_t));
+    parser->pool->pool_type = 1;
     parser->total = 0;
     parser->hash  = session_set;
 }

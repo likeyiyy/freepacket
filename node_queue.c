@@ -36,6 +36,7 @@ queue_t * init_queue(unsigned int node_pool_size)
      * if init pool is error,should be exit.
      * */
     q->node_pool = init_pool(MANAGER_NODE_POOL,node_pool_size,sizeof(node_t));
+    q->node_pool->pool_type = 3;
     return q;
 }
 void destroy_queue(queue_t * queue)

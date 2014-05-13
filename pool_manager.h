@@ -22,15 +22,18 @@ typedef struct _node
 #endif
 typedef struct _pool
 {
-    int push_pos;
-    int pop_pos;
-    void ** node;
-    void * buffer;
-    int item_size;
-    unsigned int total;
-    unsigned int free_num;
+    int             push_pos;
+    int             pop_pos;
+    void         ** node;
+    void          * buffer;
+    int             item_size;
+    unsigned int    total;
+    unsigned int    free_num;
     pthread_mutex_t mutex;
-    pthread_cond_t empty;
+    pthread_cond_t  empty;
+
+
+    int pool_type;
 }pool_t;
 
 extern pool_t * packet_pool, * session_pool, * buffer_pool;
