@@ -15,7 +15,7 @@ typedef struct _parser
     uint64_t total;
     queue_t * queue;
     pool_t  * pool;
-    session_set_t * hash;
+    session_set_t * session_set;
     struct timeval old;
     struct timeval now;
 }parser_t;

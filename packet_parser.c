@@ -15,7 +15,7 @@ static inline void init_single_parser(parser_t * parser)
                               sizeof(flow_item_t));
     parser->pool->pool_type = 1;
     parser->total = 0;
-    parser->hash  = session_set;
+    parser->session_set  = session_set;
 }
 void init_parser_set(int numbers)
 {
@@ -130,9 +130,9 @@ void * print_parser(void * arg)
                 /*
                 * 送给下个流水线的队列。
                 * */
-                push_session_buf(parser->hash->bucket[next_thread_id].queue,flow);
+                push_session_buf(parser->session_set->bucket[next_thread_id].queue,flow);
                 next_thread_id++;
-                if(next_thread_id == parser->hash->length)
+                if(next_thread_id == parser->session_set->length)
                 {
                     next_thread_id = 0;
                 }
@@ -162,15 +162,15 @@ void * print_parser(void * arg)
                 /*
                 * 送给下个流水线的队列。
                 * */
-                push_session_buf(parser->hash->bucket[next_thread_id].queue,flow);
+                push_session_buf(parser->session_set->bucket[next_thread_id].queue,flow);
                 next_thread_id++;
-                if(next_thread_id == parser->hash->length)
+                if(next_thread_id == parser->session_set->length)
                 {
                     next_thread_id = 0;
                 }
             }
         }
-        else
+       else
         {
             free_packet(packet);
         }

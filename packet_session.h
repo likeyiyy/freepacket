@@ -8,9 +8,9 @@
 #define H_SESSION_H
 #define SESSION_BUFFER_SIZE 65536 
 #define SESSION_QUEUE_LENGTH 50000
-#define SESSION_POOL_LENGTH  1000
+#define SESSION_POOL_LENGTH  10000
 #define MAX_FACTOR           0.75
-#define DESTORY_TIME         3
+#define DESTORY_TIME         1
 typedef struct _session_item
 {
     uint8_t buffer[SESSION_BUFFER_SIZE];

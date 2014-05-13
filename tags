@@ -5,7 +5,6 @@
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
 !_TAG_PROGRAM_VERSION	5.8	//
 BUFFER_POOL	pool_manager.h	/^    BUFFER_POOL,$/;"	e	enum:_pool_type
-BUFFER_session_queue	session_queue.h	/^    BUFFER_session_queue,$/;"	e	enum:_session_queue_type
 CC	Makefile	/^CC=gcc$/;"	m
 CHECK_SUM_H	checksum.h	9;"	d
 CLFLAGS	Makefile	/^CLFLAGS= -g -lpthread $/;"	m
@@ -15,10 +14,11 @@ DEBUG	includes.h	34;"	d
 DEBUG	includes.h	36;"	d
 DEBUG	node_queue.h	14;"	d
 DEBUG	node_queue.h	17;"	d
-EXECS	Makefile	/^EXECS=session_queue_test pool_test manager_buffer_test checksum_test config_test generator_test$/;"	m
+DESTORY_TIME	packet_session.h	13;"	d
+EXECS	Makefile	/^EXECS=simulation checksum_test  config_test  generator_test  \\$/;"	m
 G_new	node_queue.c	/^struct timeval G_new;$/;"	v	typeref:struct:timeval
 G_old	node_queue.c	/^struct timeval G_old;$/;"	v	typeref:struct:timeval
-H_SESSION_H	session.h	8;"	d
+H_SESSION_H	packet_session.h	8;"	d
 INCLUDES_H	includes.h	8;"	d
 IP_CE	parse.c	11;"	d	file:
 IP_DF	parse.c	12;"	d	file:
@@ -27,71 +27,66 @@ IP_OFFSET	parse.c	14;"	d	file:
 LIKEYI_DEBUG	includes.h	32;"	d
 LIKEYI_DEBUG	node_queue.h	11;"	d
 MANAGER_NODE_POOL	pool_manager.h	/^    MANAGER_NODE_POOL$/;"	e	enum:_pool_type
-MANAGER_NODE_session_queue	session_queue.h	/^    MANAGER_NODE_session_queue$/;"	e	enum:_session_queue_type
+MAX_FACTOR	packet_session.h	12;"	d
 MTHREAD_QUEUE_H	node_queue.h	9;"	d
 NODE_POOL_SIZE	config.h	31;"	d
-OBJS	Makefile	/^OBJS=pool_manager.o node_queue.o checksum.o config.o parse.o packet_generator.o packet_parser.o session_queue.o$/;"	m
+OBJS	Makefile	/^OBJS=pool_manager.o node_queue.o checksum.o config.o \\$/;"	m
 PACKET_GENERATOR_H	packet_generator.h	8;"	d
 PACKET_GENERATOR_NUMS	config.h	29;"	d
 PACKET_PARSER_NUMS	config.h	32;"	d
-PACKET_PARSE_H	packet_parser.h	9;"	d
 PACKET_POOL	pool_manager.h	/^    PACKET_POOL,$/;"	e	enum:_pool_type
 PACKET_POOL_SIZE	config.h	30;"	d
-PACKET_session_queue	session_queue.h	/^    PACKET_session_queue,$/;"	e	enum:_session_queue_type
 PAGE_SHIFT	config.h	27;"	d
 PARSE_PACKET_H	parse.h	9;"	d
 POOL_MANAGER_H	pool_manager.h	9;"	d
 PROCBLOCK_SIZE	config.h	26;"	d
-SESSION_BUFFER_SIZE	session.h	9;"	d
+SESSION_BUFFER_SIZE	packet_session.h	9;"	d
 SESSION_POOL	pool_manager.h	/^    SESSION_POOL,$/;"	e	enum:_pool_type
-SESSION_QUEUE_LENGTH	session.h	10;"	d
-SESSION_session_queue	session_queue.h	/^    SESSION_session_queue,$/;"	e	enum:_session_queue_type
-_flow_list	session.h	/^typedef struct _flow_list$/;"	s
-_hash	session.h	/^typedef struct _hash$/;"	s
+SESSION_POOL_LENGTH	packet_session.h	11;"	d
+SESSION_QUEUE_LENGTH	packet_session.h	10;"	d
 _node	node_queue.h	/^typedef struct _node$/;"	s
 _parser	packet_parser.h	/^typedef struct _parser$/;"	s
 _pool	pool_manager.h	/^typedef struct _pool$/;"	s
 _pool_type	pool_manager.h	/^typedef enum _pool_type$/;"	g
 _queue	node_queue.h	/^typedef struct _queue $/;"	s
-_session	session.h	/^typedef struct _session$/;"	s
-_session_bucket	session.h	/^typedef struct _session_bucket$/;"	s
+_session	packet_session.h	/^typedef struct _session$/;"	s
+_session_bucket	packet_session.h	/^typedef struct _session_bucket$/;"	s
+_session_item	packet_session.h	/^typedef struct _session_item$/;"	s
 _session_queue	session_queue.h	/^typedef struct _session_queue$/;"	s
-_session_queue_type	session_queue.h	/^typedef enum _session_queue_type$/;"	g
+_set	packet_session.h	/^typedef struct _set$/;"	s
 a	manager_buffer_test.c	/^    int a;$/;"	m	struct:__anon1	file:
 b	session_queue_test.c	/^    double b;$/;"	m	struct:test	file:
 bool	includes.h	29;"	d
-bucket	session.h	/^    bucket_t * bucket;$/;"	m	struct:_hash
-bucket_t	session.h	/^}bucket_t;$/;"	t	typeref:struct:_session_bucket
+bucket	packet_session.h	/^    bucket_t * bucket;$/;"	m	struct:_set
+bucket_t	packet_session.h	/^}bucket_t;$/;"	t	typeref:struct:_session_bucket
 buffer	checksum_test.c	/^unsigned char buffer[2048];$/;"	v
-buffer	pool_manager.h	/^    void * buffer;$/;"	m	struct:_pool
-buffer	session.h	/^    uint8_t buffer[SESSION_BUFFER_SIZE];$/;"	m	struct:_session
-buffer	session_queue.h	/^    void * buffer;$/;"	m	struct:_session_queue
+buffer	packet_session.h	/^    uint8_t buffer[SESSION_BUFFER_SIZE];$/;"	m	struct:_session_item
+buffer	pool_manager.h	/^    void          * buffer;$/;"	m	struct:_pool
 buffer_pool	pool_manager.c	/^pool_t * packet_pool, * session_pool, * buffer_pool;$/;"	v
 c	manager_buffer_test.c	/^    char c[20];$/;"	m	struct:__anon1	file:
 c	session_queue_test.c	/^    char c [100];$/;"	m	struct:test	file:
 checksum_ip	checksum.c	/^void checksum_ip(struct iphdr * iph)$/;"	f
-compare_flow	session.c	/^static inline int compare_flow(flow_list_t * list,flow_item_t * flow)$/;"	f	file:
+compare_flow	packet_session.c	/^static inline int compare_flow(session_t * list , flow_item_t * flow)$/;"	f	file:
 config	config.h	/^typedef struct config$/;"	s
 config	packet_generator.c	/^config_t * config;$/;"	v
 config	packet_generator.h	/^    config_t  * config;$/;"	m	struct:generator
-config	packet_generator.h	/^    config_t  * config;$/;"	m	struct:generator_info
+config	packet_generator.h	/^    config_t  * config;$/;"	m	struct:generator_set
 config_file	packet_generator.c	/^static uint8_t  * config_file = CONFIG_FILE;$/;"	v	file:
 config_t	config.h	/^}config_t;$/;"	t	typeref:struct:config
 count	malloc_test.c	/^unsigned long count = 0;$/;"	v
 count_now	generator_test.c	/^void count_now(int i,int j)$/;"	f
-cur_len	session.h	/^    uint32_t cur_len;$/;"	m	struct:_session
+cur_len	packet_session.h	/^    uint32_t cur_len;$/;"	m	struct:_session_item
 daddr	includes.h	/^    uint32_t daddr;$/;"	m	struct:flow_item
-daddr	session.h	/^    uint32_t daddr;$/;"	m	struct:_session
+daddr	packet_session.h	/^    uint32_t daddr;$/;"	m	struct:_session_item
 daddr_cur	config.h	/^    uint32_t daddr_cur;$/;"	m	struct:config
 daddr_max	config.h	/^    uint32_t daddr_max;$/;"	m	struct:config
 daddr_min	config.h	/^    uint32_t daddr_min;$/;"	m	struct:config
 data	includes.h	/^    unsigned char * data;   \/* 一个包的数据部分*\/$/;"	m	struct:packet
-data	memory.c	/^    unsigned char * data;$/;"	m	struct:packet	file:
 data	node_queue.h	/^    void * data;$/;"	m	struct:_node
 dest	includes.h	/^    uint32_t dest;$/;"	m	struct:flow_item
-dest	session.h	/^    uint32_t dest;$/;"	m	struct:_session
-destroy_generator	packet_generator.c	/^void   destroy_generator(generator_info_t * generator_info)$/;"	f
-destroy_packet_parse	packet_parser.c	/^void destroy_packet_parse(parser_set_t * parser_set)$/;"	f
+dest	packet_session.h	/^    uint32_t dest;$/;"	m	struct:_session_item
+destroy_generator	packet_generator.c	/^void   destroy_generator(generator_set_t * generator_set)$/;"	f
+destroy_parser_set	packet_parser.c	/^void destroy_parser_set(parser_set_t * parser_set)$/;"	f
 destroy_pool	pool_manager.c	/^void destroy_pool(pool_t * pool)$/;"	f
 destroy_queue	node_queue.c	/^void destroy_queue(queue_t * queue)$/;"	f
 destroy_session_queue	session_queue.c	/^void destroy_session_queue(session_queue_t * session_queue)$/;"	f
@@ -100,26 +95,27 @@ dport_max	config.h	/^    uint16_t dport_max;$/;"	m	struct:config
 dport_min	config.h	/^    uint16_t dport_min;$/;"	m	struct:config
 dstmac	config.h	/^    unsigned char dstmac[6];$/;"	m	struct:config
 empty	node_queue.h	/^    pthread_cond_t empty;$/;"	m	struct:_queue
-empty	pool_manager.h	/^    pthread_cond_t empty;$/;"	m	struct:_pool
+empty	pool_manager.h	/^    pthread_cond_t  empty;$/;"	m	struct:_pool
 empty	session_queue.h	/^    pthread_cond_t empty;$/;"	m	struct:_session_queue
 ether_atoe	config.c	/^int ether_atoe(const char *a, unsigned char *e)$/;"	f
 ether_etoa	config.c	/^char * ether_etoa(const unsigned char *e, char *a)$/;"	f
 exit_if_ptr_is_null	config.c	/^void exit_if_ptr_is_null(void * ptr,const char * message) $/;"	f
 false	includes.h	31;"	d
-finish_generator	packet_generator.c	/^void   finish_generator(generator_info_t * generator_info)$/;"	f
-finish_packet_parse	packet_parser.c	/^void finish_packet_parse(parser_set_t * parser_set)$/;"	f
+finish_generator	packet_generator.c	/^void   finish_generator(generator_set_t * generator_set)$/;"	f
+finish_parser_set	packet_parser.c	/^void finish_parser_set(parser_set_t * parser_set)$/;"	f
 flow_item	includes.h	/^typedef struct flow_item$/;"	s
 flow_item_t	includes.h	/^}flow_item_t;$/;"	t	typeref:struct:flow_item
-flow_list_t	session.h	/^}flow_list_t;$/;"	t	typeref:struct:_flow_list
 free_buf	pool_manager.c	/^bool free_buf(pool_t * pool,void * data)$/;"	f
-free_num	pool_manager.h	/^    unsigned int free_num;$/;"	m	struct:_pool
+free_flow	packet_session.c	/^static inline void free_flow(flow_item_t * flow)$/;"	f	file:
+free_num	pool_manager.h	/^    unsigned int    free_num;$/;"	m	struct:_pool
 free_num	session_queue.h	/^    unsigned int free_num;$/;"	m	struct:_session_queue
+free_packet	packet_parser.c	/^static inline void free_packet(packet_t * packet)$/;"	f	file:
 full	session_queue.h	/^    pthread_cond_t full;$/;"	m	struct:_session_queue
-generator	packet_generator.h	/^    generator_t * generator;$/;"	m	struct:generator_info
+generator	packet_generator.h	/^    generator_t * generator;$/;"	m	struct:generator_set
 generator	packet_generator.h	/^typedef struct generator$/;"	s
-generator_info	packet_generator.c	/^generator_info_t * generator_info;$/;"	v
-generator_info	packet_generator.h	/^typedef struct generator_info$/;"	s
-generator_info_t	packet_generator.h	/^}generator_info_t;$/;"	t	typeref:struct:generator_info
+generator_set	packet_generator.c	/^generator_set_t * generator_set;$/;"	v
+generator_set	packet_generator.h	/^typedef struct generator_set$/;"	s
+generator_set_t	packet_generator.h	/^}generator_set_t;$/;"	t	typeref:struct:generator_set
 generator_t	packet_generator.h	/^}generator_t;$/;"	t	typeref:struct:generator
 get_buf	pool_manager.c	/^bool get_buf(pool_t * pool,void ** data)$/;"	f
 get_next_dstip	packet_generator.c	/^static inline uint32_t get_next_dstip(config_t * config)$/;"	f	file:
@@ -127,17 +123,19 @@ get_next_dstport	packet_generator.c	/^static inline uint16_t get_next_dstport(co
 get_next_srcip	packet_generator.c	/^static inline uint32_t get_next_srcip(config_t * config)$/;"	f	file:
 get_next_srcport	packet_generator.c	/^static inline uint16_t get_next_srcport(config_t * config)$/;"	f	file:
 get_pool	pool_manager.c	/^pool_t * get_pool(pool_type_t type)$/;"	f
-get_session_queue	session_queue.c	/^session_queue_t * get_session_queue(session_queue_type_t type)$/;"	f
+hash	packet_parser.h	/^    session_set_t * hash;$/;"	m	struct:_parser
 head	node_queue.h	/^    node_t * head;$/;"	m	struct:_queue
 id	packet_generator.h	/^    pthread_t   id;$/;"	m	struct:generator
 id	packet_parser.h	/^    pthread_t id;$/;"	m	struct:_parser
+id	packet_session.h	/^    pthread_t         id;$/;"	m	struct:_session_bucket
 index	packet_generator.h	/^    int         index;$/;"	m	struct:generator
-init_generator	packet_generator.c	/^void init_generator(int numbers)$/;"	f
-init_packet_parse	packet_parser.c	/^void init_packet_parse(int numbers)$/;"	f
+index	packet_session.h	/^    int               index;$/;"	m	struct:_session_bucket
+init_generator_set	packet_generator.c	/^void init_generator_set(int numbers)$/;"	f
+init_parser_set	packet_parser.c	/^void init_parser_set(int numbers)$/;"	f
 init_pool	pool_manager.c	/^pool_t * init_pool(pool_type_t type,int numbers,int item_size)$/;"	f
 init_queue	node_queue.c	/^queue_t * init_queue(unsigned int node_pool_size)$/;"	f
-init_sessino_hash	session.c	/^session_hash_t * init_sessino_hash(uint32_t length)$/;"	f
 init_session_queue	session_queue.c	/^session_queue_t * init_session_queue(int numbers,int item_size)$/;"	f
+init_session_set	packet_session.c	/^session_set_t * init_session_set(uint32_t length)$/;"	f
 init_single_parser	packet_parser.c	/^static inline void init_single_parser(parser_t * parser)$/;"	f	file:
 ip_header	checksum_test.c	/^uint8_t ip_header[20] = $/;"	v
 ip_xsum	checksum.c	/^uint16_t ip_xsum (uint16_t *buff, int len, uint32_t xsum)$/;"	f
@@ -146,51 +144,50 @@ is_empty_pool	pool_manager.c	/^bool is_empty_pool(pool_t * pool)$/;"	f
 is_empty_session_queue	session_queue.c	/^bool is_empty_session_queue(session_queue_t * session_queue)$/;"	f
 is_full_pool	pool_manager.c	/^bool is_full_pool(pool_t * pool)$/;"	f
 is_full_session_queue	session_queue.c	/^bool is_full_session_queue(session_queue_t * session_queue)$/;"	f
-item_size	pool_manager.h	/^    int item_size;$/;"	m	struct:_pool
+item	packet_session.h	/^    session_item_t  item;$/;"	m	struct:_session
+item_size	pool_manager.h	/^    int             item_size;$/;"	m	struct:_pool
 item_size	session_queue.h	/^    int item_size;$/;"	m	struct:_session_queue
 item_t	manager_buffer_test.c	/^}item_t;$/;"	t	typeref:struct:__anon1	file:
-last_time	session.h	/^    struct timeval last_time;$/;"	m	struct:_session	typeref:struct:_session::timeval
+last_time	packet_session.h	/^    struct timeval last_time;$/;"	m	struct:_session_item	typeref:struct:_session_item::timeval
 length	includes.h	/^    unsigned int    length; \/* 一个包的长度*\/$/;"	m	struct:packet
-length	memory.c	/^    unsigned int    length;$/;"	m	struct:packet	file:
 length	node_queue.h	/^    unsigned long  length;$/;"	m	struct:_queue
-length	session.h	/^    uint32_t    length;$/;"	m	struct:_hash
-length	session.h	/^    uint32_t length;$/;"	m	struct:_session
-list	session.h	/^    flow_list_t 　* list;$/;"	m	struct:_session_bucket
+length	packet_session.h	/^    uint32_t    length;$/;"	m	struct:_set
+length	packet_session.h	/^    uint32_t length;$/;"	m	struct:_session_item
+list	packet_session.h	/^    session_t       * list;$/;"	m	struct:_session_bucket
 lock	node_queue.h	/^    pthread_mutex_t lock;$/;"	m	struct:_queue
 main	checksum_test.c	/^int main()$/;"	f
 main	config_test.c	/^int main()$/;"	f
-main	for_test.c	/^int main()$/;"	f
 main	generator_test.c	/^int main(int argc,char ** argv)$/;"	f
 main	malloc_test.c	/^int main()$/;"	f
 main	manager_buffer_test.c	/^int main(int argc,char ** argv)$/;"	f
-main	memory.c	/^int main()$/;"	f
 main	pool_test.c	/^int main(int argc,char ** argv)$/;"	f
 main	session_queue_test.c	/^int main(int argc,char ** argv)$/;"	f
+main	simulation.c	/^int main(int argc, char ** argv)$/;"	f
+make_flow_item_tcp	packet_parser.c	/^static inline void make_flow_item_tcp(flow_item_t * flow,packet_t * packet,struct iphdr *ip_hdr, struct tcphdr * tcp_hdr,int header_len)$/;"	f	file:
+make_flow_item_udp	packet_parser.c	/^static inline void make_flow_item_udp(flow_item_t * flow,packet_t * packet,struct iphdr *ip_hdr,struct udphdr * udp_hdr,int header_len)$/;"	f	file:
+make_new_session	packet_session.c	/^static inline void make_new_session(session_t * new_session,flow_item_t * flow)$/;"	f	file:
 manager_node_pool	pool_manager.c	/^pool_t * manager_node_pool;$/;"	v
 mutex	pool_manager.h	/^    pthread_mutex_t mutex;$/;"	m	struct:_pool
 mutex	session_queue.h	/^    pthread_mutex_t mutex;$/;"	m	struct:_session_queue
 next	node_queue.h	/^    struct _node * next;$/;"	m	struct:_node	typeref:struct:_node::_node
-next	session.h	/^    flow_list_t * next;$/;"	m	struct:_flow_list
+next	packet_session.h	/^    struct _session * next;$/;"	m	struct:_session	typeref:struct:_session::_session
 next_thread_id	packet_generator.h	/^    int         next_thread_id;$/;"	m	struct:generator
-node	pool_manager.h	/^    void ** node;$/;"	m	struct:_pool
+node	pool_manager.h	/^    void         ** node;$/;"	m	struct:_pool
 node	session_queue.h	/^    void ** node;$/;"	m	struct:_session_queue
 node_pool	node_queue.h	/^    pool_t * node_pool;$/;"	m	struct:_queue
 node_t	node_queue.h	/^}node_t;$/;"	t	typeref:struct:_node
 now	packet_generator.h	/^    struct timeval old,now;$/;"	m	struct:generator	typeref:struct:generator::
 now	packet_parser.h	/^    struct timeval now;$/;"	m	struct:_parser	typeref:struct:_parser::timeval
 numbers	config.h	/^    int numbers;   \/* PACKET pool 的大小*\/$/;"	m	struct:config
-numbers	packet_generator.h	/^    uint32_t numbers;$/;"	m	struct:generator_info
+numbers	packet_generator.h	/^    uint32_t numbers;$/;"	m	struct:generator_set
 numbers	packet_parser.h	/^    int numbers;$/;"	m	struct:parser_m
 old	packet_generator.h	/^    struct timeval old,now;$/;"	m	struct:generator	typeref:struct:generator::timeval
 old	packet_parser.h	/^    struct timeval old;$/;"	m	struct:_parser	typeref:struct:_parser::timeval
 packet	includes.h	/^    packet_t * packet;$/;"	m	struct:flow_item
 packet	includes.h	/^typedef struct packet$/;"	s
-packet	memory.c	/^typedef struct packet$/;"	s	file:
-packet	packet_parser.h	/^    packet_t * packet;$/;"	m	struct:_parser
 packet_generator_loop	packet_generator.c	/^void * packet_generator_loop(void * arg)$/;"	f
 packet_pool	pool_manager.c	/^pool_t * packet_pool, * session_pool, * buffer_pool;$/;"	v
 packet_t	includes.h	/^}packet_t;$/;"	t	typeref:struct:packet
-packet_t	memory.c	/^}packet_t;$/;"	t	typeref:struct:packet	file:
 parse_frag_off	parse.c	/^static inline void parse_frag_off(__be16 frag_off)$/;"	f	file:
 parse_full_packet	parse.c	/^void parse_full_packet(void * buffer)$/;"	f
 parse_ip_protocol	parse.c	/^static inline void parse_ip_protocol(__u8 protocol)$/;"	f	file:
@@ -202,6 +199,7 @@ parser	packet_parser.h	/^    parser_t * parser;$/;"	m	struct:parser_m
 parser_m	packet_parser.h	/^typedef struct parser_m$/;"	s
 parser_set	packet_generator.h	/^    parser_set_t * parser_set;$/;"	m	struct:generator
 parser_set	packet_parser.c	/^parser_set_t * parser_set;$/;"	v
+parser_set_H	packet_parser.h	8;"	d
 parser_set_t	packet_parser.h	/^}parser_set_t;$/;"	t	typeref:struct:parser_m
 parser_t	packet_parser.h	/^}parser_t;$/;"	t	typeref:struct:_parser
 payload	includes.h	/^    unsigned char * payload;$/;"	m	struct:flow_item
@@ -211,59 +209,63 @@ pktlen	config.h	/^    int pktlen;$/;"	m	struct:config
 pool	includes.h	/^    pool_t * pool;          \/* 这个包来自哪个池子*\/$/;"	m	struct:flow_item
 pool	includes.h	/^    pool_t * pool;          \/* 这个包来自哪个池子*\/$/;"	m	struct:packet
 pool	packet_generator.h	/^    pool_t    * pool;$/;"	m	struct:generator
-pool	packet_generator.h	/^    pool_t    * pool;$/;"	m	struct:generator_info
+pool	packet_generator.h	/^    pool_t    * pool;$/;"	m	struct:generator_set
+pool	packet_parser.h	/^    pool_t  * pool;$/;"	m	struct:_parser
 pool_t	pool_manager.h	/^}pool_t;$/;"	t	typeref:struct:_pool
+pool_type	pool_manager.h	/^    int pool_type;$/;"	m	struct:_pool
 pool_type_t	pool_manager.h	/^}pool_type_t;$/;"	t	typeref:enum:_pool_type
-pop_buf	session_queue.c	/^bool pop_buf(session_queue_t * session_queue,void ** data)$/;"	f
 pop_datalink	packet_generator.c	/^static inline void pop_datalink(void * packet,config_t * config)$/;"	f	file:
 pop_from_queue	node_queue.c	/^int pop_from_queue(queue_t * q,void ** data)$/;"	f
 pop_iplayer_tcp	packet_generator.c	/^static void pop_iplayer_tcp(void * iph,config_t * config)$/;"	f	file:
 pop_iplayer_udp	packet_generator.c	/^static void pop_iplayer_udp(void * iph,config_t * config)$/;"	f	file:
 pop_payload	packet_generator.c	/^int pop_payload(void * payload,unsigned char * data,config_t * config)$/;"	f
-pop_pos	pool_manager.h	/^    int pop_pos;$/;"	m	struct:_pool
+pop_pos	pool_manager.h	/^    int             pop_pos;$/;"	m	struct:_pool
 pop_pos	session_queue.h	/^    int pop_pos;$/;"	m	struct:_session_queue
+pop_session_buf	session_queue.c	/^bool pop_session_buf(session_queue_t * session_queue,void ** data)$/;"	f
 pop_transmission_tcp	packet_generator.c	/^static int pop_transmission_tcp(void * tcph,config_t * config)$/;"	f	file:
 pop_transmission_udp	packet_generator.c	/^static int pop_transmission_udp(void * udph,config_t * config)$/;"	f	file:
 prev	node_queue.h	/^    struct _node * prev;$/;"	m	struct:_node	typeref:struct:_node::_node
-prev	session.h	/^    flow_list_t * prev;$/;"	m	struct:_flow_list
+prev	packet_session.h	/^    struct _session * prev;$/;"	m	struct:_session	typeref:struct:_session::_session
 print_config_file	config.c	/^void print_config_file(config_t * config)$/;"	f
 print_lock	packet_parser.c	/^static pthread_mutex_t print_lock = PTHREAD_MUTEX_INITIALIZER;$/;"	v	file:
 print_lock	parse.c	/^pthread_mutex_t print_lock = PTHREAD_MUTEX_INITIALIZER;$/;"	v
 print_packet	parse.c	/^void print_packet(unsigned char * packet,int size)    $/;"	f
 print_parser	packet_parser.c	/^void * print_parser(void * arg)$/;"	f
+print_pool_type	pool_manager.c	/^static inline void print_pool_type(pool_t * pool)$/;"	f	file:
 printf_mac_info	parse.c	/^static void printf_mac_info(struct ethhdr * ether_header)$/;"	f	file:
 protocol	config.h	/^    int protocol;$/;"	m	struct:config
 protocol	includes.h	/^    uint8_t  protocol;$/;"	m	struct:flow_item
-protocol	session.h	/^    uint8_t  protocol;$/;"	m	struct:_session
-push_buf	session_queue.c	/^bool push_buf(session_queue_t * session_queue,void * data)$/;"	f
-push_pos	pool_manager.h	/^    int push_pos;$/;"	m	struct:_pool
+protocol	packet_session.h	/^    uint8_t  protocol;$/;"	m	struct:_session_item
+push_pos	pool_manager.h	/^    int             push_pos;$/;"	m	struct:_pool
 push_pos	session_queue.h	/^    int push_pos;$/;"	m	struct:_session_queue
+push_session_buf	session_queue.c	/^bool push_session_buf(session_queue_t * session_queue,void * data)$/;"	f
 push_to_queue	node_queue.c	/^int push_to_queue(queue_t * q, void * data)$/;"	f
 queue	packet_parser.h	/^    queue_t * queue;$/;"	m	struct:_parser
-queue	session.h	/^    session_queue_t * queue;$/;"	m	struct:_session_bucket
+queue	packet_session.h	/^    session_queue_t * queue;$/;"	m	struct:_session_bucket
 queue_t	node_queue.h	/^}queue_t;$/;"	t	typeref:struct:_queue
 read_config_file	config.c	/^int read_config_file(const char * file_name,config_t * config)$/;"	f
 recv_count	generator_test.c	/^uint64_t recv_count = 0;$/;"	v
 saddr	includes.h	/^    uint32_t saddr;$/;"	m	struct:flow_item
-saddr	session.h	/^    uint32_t saddr;$/;"	m	struct:_session
+saddr	packet_session.h	/^    uint32_t saddr;$/;"	m	struct:_session_item
 saddr_cur	config.h	/^    uint32_t saddr_cur;$/;"	m	struct:config
 saddr_max	config.h	/^    uint32_t saddr_max;$/;"	m	struct:config
 saddr_min	config.h	/^    uint32_t saddr_min;$/;"	m	struct:config
 send_count	generator_test.c	/^uint64_t send_count = 0;$/;"	v
-session	session.h	/^    session_t  session;$/;"	m	struct:_flow_list
-session_hash_t	session.h	/^}session_hash_t;$/;"	t	typeref:struct:_hash
+session_item_t	packet_session.h	/^}session_item_t;$/;"	t	typeref:struct:_session_item
+session_pool	packet_session.h	/^    pool_t          * session_pool;$/;"	m	struct:_session_bucket
 session_pool	pool_manager.c	/^pool_t * packet_pool, * session_pool, * buffer_pool;$/;"	v
-session_queue_MANAGER_H	session_queue.h	9;"	d
+session_queue_MANAGER_H	session_queue.h	8;"	d
 session_queue_t	session_queue.h	/^}session_queue_t;$/;"	t	typeref:struct:_session_queue
-session_queue_type_t	session_queue.h	/^}session_queue_type_t;$/;"	t	typeref:enum:_session_queue_type
-session_t	session.h	/^}session_t;$/;"	t	typeref:struct:_session
-session_worker	session.c	/^void * session_worker(void * arg)$/;"	f
+session_set	packet_session.c	/^session_set_t * session_set;$/;"	v
+session_set_t	packet_session.h	/^}session_set_t;$/;"	t	typeref:struct:_set
+session_t	packet_session.h	/^}session_t;$/;"	t	typeref:struct:_session
+session_worker	packet_session.c	/^void * session_worker(void * arg)$/;"	f
 sig_statistics	generator_test.c	/^void sig_statistics(int arg)$/;"	f
 sigfun	malloc_test.c	/^void sigfun(int a)$/;"	f
 skip_opeartor	config.c	/^static inline char * skip_opeartor(const char * p)$/;"	f	file:
 skip_var_name	config.c	/^static inline char * skip_var_name(const char * p)$/;"	f	file:
 source	includes.h	/^    uint32_t source;$/;"	m	struct:flow_item
-source	session.h	/^    uint32_t source;$/;"	m	struct:_session
+source	packet_session.h	/^    uint32_t source;$/;"	m	struct:_session_item
 speed	config.h	/^    uint32_t speed;$/;"	m	struct:config
 sport_cur	config.h	/^    uint16_t sport_cur;$/;"	m	struct:config
 sport_max	config.h	/^    uint16_t sport_max;$/;"	m	struct:config
@@ -274,7 +276,7 @@ tail	node_queue.h	/^    node_t * tail;$/;"	m	struct:_queue
 test	session_queue_test.c	/^typedef struct test$/;"	s	file:
 test_t	session_queue_test.c	/^}test_t;$/;"	t	typeref:struct:test	file:
 total	packet_parser.h	/^    uint64_t total;$/;"	m	struct:_parser
-total	pool_manager.h	/^    unsigned int total;$/;"	m	struct:_pool
+total	pool_manager.h	/^    unsigned int    total;$/;"	m	struct:_pool
 total	session_queue.h	/^    unsigned int total;$/;"	m	struct:_session_queue
 total_send_byte	packet_generator.h	/^    uint64_t    total_send_byte;$/;"	m	struct:generator
 true	includes.h	30;"	d

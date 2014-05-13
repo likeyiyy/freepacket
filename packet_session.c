@@ -76,7 +76,6 @@ static inline void make_new_session(session_t * new_session,flow_item_t * flow)
     item->protocol  = flow->protocol;
     gettimeofday(&item->last_time,NULL);
     memcpy(item->buffer,flow->payload,flow->payload_len);
-    free_flow(flow);
     item->cur_len  += flow->payload_len;
 }
 /*
@@ -124,6 +123,7 @@ void * session_worker(void * arg)
             new_session->next = NULL;
             new_session->prev = prev;
             make_new_session(new_session,flow);
+            free_flow(flow);
             /*
             * 这说明是头结点。头结点，next也是NULL.
             * */
