@@ -63,9 +63,9 @@ typedef struct flow_item
 #include "config.h"
 #include "node_queue.h"
 #include "checksum.h"
+#include "session_queue.h"
+#include "packet_session.h"
 #include "packet_parser.h"
 #include "parse.h"
 #include "packet_generator.h"
-#include "session_queue.h"
-#include "session.h"
 #endif

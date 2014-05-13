@@ -1,12 +1,18 @@
 CC=gcc
 CLFLAGS= -g -lpthread 
-OBJS=pool_manager.o node_queue.o checksum.o config.o parse.o packet_generator.o packet_parser.o session_queue.o
+OBJS=pool_manager.o node_queue.o checksum.o config.o \
+	 parse.o packet_generator.o packet_parser.o session_queue.o   \
+	 packet_session.o
 
 .PHONY:clean all
 
-EXECS=session_queue_test pool_test manager_buffer_test checksum_test config_test generator_test
+EXECS=simulation checksum_test  config_test  generator_test  \
+	  manager_buffer_test pool_test
 
 all:$(EXECS)
+
+simulation:simulation.c $(OBJS)
+	$(CC) $(CLFLAGS) -o $@ $^
 
 session_queue_test:session_queue_test.c $(OBJS)
 	$(CC) $(CLFLAGS) -o $@ $^

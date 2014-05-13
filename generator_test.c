@@ -6,7 +6,7 @@
  ************************************************************************/
 
 #include "includes.h"
-extern generator_info_t * generator_info;
+extern generator_set_t * generator_set;
 extern parser_set_t * parser_set;
 extern config_t * config;
 uint64_t send_count = 0;
@@ -16,10 +16,10 @@ void sig_statistics(int arg)
     uint64_t sum = 0;
     uint64_t total_send = 0;
     int i = 0;
-    for(i = 0; i < generator_info->numbers; ++i)
+    for(i = 0; i < generator_set->numbers; ++i)
     {
-        total_send += generator_info->generator[i].total_send_byte;
-        pthread_cancel(generator_info->generator[i].id);
+        total_send += generator_set->generator[i].total_send_byte;
+        pthread_cancel(generator_set->generator[i].id);
 
     }
     /*
@@ -52,7 +52,7 @@ void count_now(int i,int j)
     * */
     for(k = 0; k < j; k++)
     {
-        send_count += generator_info->generator[k].total_send_byte;
+        send_count += generator_set->generator[k].total_send_byte;
     }
     /*
     * 消费者统计
@@ -77,9 +77,9 @@ int main(int argc,char ** argv)
             * 初始化线程
             * */
 
-            init_packet_parse(parser_nums);
+            init_parser_set(parser_nums);
 
-            init_generator(gener_nums);
+            init_generator_set(gener_nums);
             /*
             * 运行5秒
             * */
@@ -88,9 +88,9 @@ int main(int argc,char ** argv)
             /*
             * 取消掉所有线程。
             * */
-            finish_generator(generator_info);
+            finish_generator(generator_set);
             //printf("queue length:%d\n",parser_set->parser[i].queue->length);
-            finish_packet_parse(parser_set);
+            finish_parser_set(parser_set);
             /*
             * 统计结果
             * */
@@ -101,7 +101,7 @@ int main(int argc,char ** argv)
             /*
             * 删除线程的数据结构
             * */
-            //destroy_generator(generator_info);
+            //destroy_generator(generator_set);
             //destroy_packet_parse(parser_set);
 
         }

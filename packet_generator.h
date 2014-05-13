@@ -17,21 +17,21 @@ typedef struct generator
     parser_set_t * parser_set;
     struct timeval old,now;
 }generator_t;
-typedef struct generator_info
+typedef struct generator_set
 {
     generator_t * generator;
     uint32_t numbers;
     config_t  * config;
     pool_t    * pool;
-}generator_info_t;
-extern generator_info_t * generator_info;
+}generator_set_t;
+extern generator_set_t * generator_set;
 extern config_t * config;
-void   init_generator(int numbers);
+void   init_generator_set(int numbers);
 /*
  * 销毁线程，和销毁线程的数据结构要分两步走。
  * 尤其是当这个线程和其他线程有交互时。
  * */
-void   destroy_generator(generator_info_t * generator_info);
-void   finish_generator(generator_info_t * generator_info);
+void   destroy_generator(generator_set_t * generator_set);
+void   finish_generator(generator_set_t * generator_set);
 void * packet_generator_loop(void * arg);
 #endif

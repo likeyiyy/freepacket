@@ -7,15 +7,15 @@
 #include "includes.h"
 static uint8_t  * config_file = CONFIG_FILE;
 config_t * config;
-generator_info_t * generator_info;
+generator_set_t * generator_set;
 extern pool_t * packet_pool;
 extern parser_set_t * parser_set;
 extern struct timeval G_old;
 extern struct timeval G_new;
-void init_generator(int numbers)
+void init_generator_set(int numbers)
 {
     int i = 0;
-    generator_info = malloc(sizeof(generator_info_t));
+    generator_set = malloc(sizeof(generator_set_t));
     config = malloc(sizeof(config_t));
     exit_if_ptr_is_null(config,"config error");
     read_config_file(config_file,config);
@@ -24,54 +24,54 @@ void init_generator(int numbers)
      * 初始化一个缓冲区池。
      * 这个缓冲区的头部是个结构体指针，下面是packet_length的长度的缓冲区。
      * */
-    generator_info->generator = malloc(sizeof(generator_t) * numbers);
-    exit_if_ptr_is_null(generator_info->generator,"generator_info.generator error");
-    generator_info->numbers   = numbers;
-    generator_info->pool      = packet_pool;
-    generator_info->config    = config;
+    generator_set->generator = malloc(sizeof(generator_t) * numbers);
+    exit_if_ptr_is_null(generator_set->generator,"generator_set.generator error");
+    generator_set->numbers   = numbers;
+    generator_set->pool      = packet_pool;
+    generator_set->config    = config;
     for(i = 0; i < numbers; ++i)
     {
-        generator_info->generator[i].pool = init_pool(PACKET_POOL,config->numbers,config->pktlen + sizeof(packet_t));
-        generator_info->generator[i].config = config;
-        generator_info->generator[i].parser_set = parser_set;
-        generator_info->generator[i].index = i;
-        generator_info->generator[i].next_thread_id = 0;
-        generator_info->generator[i].total_send_byte = 0;
-        pthread_create(&generator_info->generator[i].id,
+        generator_set->generator[i].pool = init_pool(PACKET_POOL,config->numbers,config->pktlen + sizeof(packet_t));
+        generator_set->generator[i].config = config;
+        generator_set->generator[i].parser_set = parser_set;
+        generator_set->generator[i].index = i;
+        generator_set->generator[i].next_thread_id = 0;
+        generator_set->generator[i].total_send_byte = 0;
+        pthread_create(&generator_set->generator[i].id,
                       NULL,
                       packet_generator_loop,
-                      &generator_info->generator[i]); 
+                      &generator_set->generator[i]); 
     }
 }
-void   destroy_generator(generator_info_t * generator_info)
+void   destroy_generator(generator_set_t * generator_set)
 {
     int i = 0;
-    for(i = 0; i < generator_info->numbers; ++i)
+    for(i = 0; i < generator_set->numbers; ++i)
     {
-        generator_info->generator[i].config     = NULL;
-        generator_info->generator[i].pool       = NULL;
-        generator_info->generator[i].parser_set = NULL;
+        generator_set->generator[i].config     = NULL;
+        generator_set->generator[i].pool       = NULL;
+        generator_set->generator[i].parser_set = NULL;
     }
-    free(generator_info->generator);
-    generator_info->generator = NULL;
+    free(generator_set->generator);
+    generator_set->generator = NULL;
     /* 销毁缓冲区池子 */
-    destroy_pool(generator_info->pool);
+    destroy_pool(generator_set->pool);
     /*
      * 销毁配置文件分配的内存。
      * */
-    free(generator_info->config->pkt_data);
-    generator_info->config->pkt_data = NULL;
-    free(generator_info->config);
-    generator_info->config = NULL;
-    free(generator_info);
-    generator_info = NULL;
+    free(generator_set->config->pkt_data);
+    generator_set->config->pkt_data = NULL;
+    free(generator_set->config);
+    generator_set->config = NULL;
+    free(generator_set);
+    generator_set = NULL;
 }
-void   finish_generator(generator_info_t * generator_info)
+void   finish_generator(generator_set_t * generator_set)
 {
     int i = 0;
-    for(i = 0; i < generator_info->numbers; ++i)
+    for(i = 0; i < generator_set->numbers; ++i)
     {
-        pthread_cancel(generator_info->generator[i].id);
+        pthread_cancel(generator_set->generator[i].id);
     }
 }
 int pop_payload(void * payload,unsigned char * data,config_t * config)
