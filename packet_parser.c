@@ -6,8 +6,8 @@
  ************************************************************************/
 #include "includes.h"
 
-#define HASH_INDEX(flow,a) ((flow->upper_ip^flow->lower_ip^flow->upper_port^flow->lower_port^(flow->protocol>>1)&((a)->length - 1)))
-extern session_set_t * session_set;
+#define HASH_INDEX(flow,a) ((flow->upper_ip^flow->lower_ip^flow->upper_port^flow->lower_port^(flow->protocol>>1))&((a)->length - 1))
+extern manager_set_t * manager_set;
 parser_set_t * parser_set;
 static inline void init_single_parser(parser_t * parser)
 {
@@ -17,7 +17,7 @@ static inline void init_single_parser(parser_t * parser)
                               sizeof(flow_item_t));
     parser->pool->pool_type = 1;
     parser->total = 0;
-    parser->session_set  = session_set;
+    parser->manager_set  = manager_set;
 }
 void init_parser_set(int numbers)
 {
@@ -164,8 +164,8 @@ void * print_parser(void * arg)
                 /*
                 * 送给下个流水线的队列。
                 * */
-                int index = HASH_INDEX(flow,parser->session_set);
-                push_session_buf(parser->session_set->bucket[index].queue,flow);
+                unsigned int index = HASH_INDEX(flow,parser->manager_set);
+                push_session_buf(parser->manager_set->manager[index].queue,flow);
             }
         }
         else if(ip_hdr->protocol == IPPROTO_UDP)
@@ -192,8 +192,8 @@ void * print_parser(void * arg)
                 /*
                 * 送给下个流水线的队列。
                 * */
-                int index = HASH_INDEX(flow,parser->session_set);
-                push_session_buf(parser->session_set->bucket[index].queue,flow);
+                int index = HASH_INDEX(flow,parser->manager_set);
+                push_session_buf(parser->manager_set->manager[index].queue,flow);
             }
         }
        else

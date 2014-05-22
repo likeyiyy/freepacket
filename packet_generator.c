@@ -27,7 +27,6 @@ void init_generator_set(int numbers)
     generator_set->generator = malloc(sizeof(generator_t) * numbers);
     exit_if_ptr_is_null(generator_set->generator,"generator_set.generator error");
     generator_set->numbers   = numbers;
-    generator_set->pool      = packet_pool;
     generator_set->config    = config;
     for(i = 0; i < numbers; ++i)
     {
@@ -56,7 +55,6 @@ void   destroy_generator(generator_set_t * generator_set)
     free(generator_set->generator);
     generator_set->generator = NULL;
     /* 销毁缓冲区池子 */
-    destroy_pool(generator_set->pool);
     /*
      * 销毁配置文件分配的内存。
      * */

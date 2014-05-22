@@ -22,7 +22,6 @@ typedef struct generator_set
     generator_t * generator;
     uint32_t numbers;
     config_t  * config;
-    pool_t    * pool;
 }generator_set_t;
 extern generator_set_t * generator_set;
 extern config_t * config;

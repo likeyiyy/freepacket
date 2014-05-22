@@ -2,7 +2,7 @@ CC=gcc
 CLFLAGS= -g -lpthread 
 OBJS=pool_manager.o node_queue.o checksum.o config.o \
 	 parse.o packet_generator.o packet_parser.o session_queue.o   \
-	 packet_session.o
+	 packet_manager.o
 
 .PHONY:clean all
 

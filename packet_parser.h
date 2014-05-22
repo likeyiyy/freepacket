@@ -15,14 +15,14 @@ typedef struct _parser
     uint64_t total;
     queue_t * queue;
     pool_t  * pool;
-    session_set_t * session_set;
+    manager_set_t * manager_set;
     struct timeval old;
     struct timeval now;
 }parser_t;
 typedef struct parser_m
 {
     parser_t * parser;
-    int numbers;
+    uint32_t numbers;
 }parser_set_t;
 extern parser_set_t * parser_set;
 void init_parser_set(int numbers);

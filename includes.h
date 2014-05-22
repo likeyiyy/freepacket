@@ -64,7 +64,7 @@ typedef struct flow_item
 #include "node_queue.h"
 #include "checksum.h"
 #include "session_queue.h"
-#include "packet_session.h"
+#include "packet_manager.h"
 #include "packet_parser.h"
 #include "parse.h"
 #include "packet_generator.h"
