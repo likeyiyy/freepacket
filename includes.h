@@ -50,10 +50,10 @@ typedef struct packet
 typedef struct flow_item
 {
     packet_t * packet;
-    uint32_t saddr;
-    uint32_t daddr;
-    uint32_t source;
-    uint32_t dest;
+    uint32_t upper_ip;
+    uint32_t lower_ip;
+    uint32_t upper_port;
+    uint32_t lower_port;
     uint8_t  protocol;
     unsigned char * payload;
     unsigned int    payload_len;

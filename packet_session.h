@@ -17,10 +17,10 @@ typedef struct _session_item
     struct timeval last_time;
     uint32_t length;
     uint32_t cur_len;
-    uint32_t saddr;
-    uint32_t daddr;
-    uint32_t source;
-    uint32_t dest;
+    uint32_t upper_ip;
+    uint32_t lower_ip;
+    uint32_t upper_port;
+    uint32_t lower_port;
     uint8_t  protocol;
 }session_item_t;
 typedef struct _session

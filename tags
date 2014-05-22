@@ -123,7 +123,6 @@ get_next_dstport	packet_generator.c	/^static inline uint16_t get_next_dstport(co
 get_next_srcip	packet_generator.c	/^static inline uint32_t get_next_srcip(config_t * config)$/;"	f	file:
 get_next_srcport	packet_generator.c	/^static inline uint16_t get_next_srcport(config_t * config)$/;"	f	file:
 get_pool	pool_manager.c	/^pool_t * get_pool(pool_type_t type)$/;"	f
-hash	packet_parser.h	/^    session_set_t * hash;$/;"	m	struct:_parser
 head	node_queue.h	/^    node_t * head;$/;"	m	struct:_queue
 id	packet_generator.h	/^    pthread_t   id;$/;"	m	struct:generator
 id	packet_parser.h	/^    pthread_t id;$/;"	m	struct:_parser
@@ -256,6 +255,7 @@ session_pool	packet_session.h	/^    pool_t          * session_pool;$/;"	m	struct
 session_pool	pool_manager.c	/^pool_t * packet_pool, * session_pool, * buffer_pool;$/;"	v
 session_queue_MANAGER_H	session_queue.h	8;"	d
 session_queue_t	session_queue.h	/^}session_queue_t;$/;"	t	typeref:struct:_session_queue
+session_set	packet_parser.h	/^    session_set_t * session_set;$/;"	m	struct:_parser
 session_set	packet_session.c	/^session_set_t * session_set;$/;"	v
 session_set_t	packet_session.h	/^}session_set_t;$/;"	t	typeref:struct:_set
 session_t	packet_session.h	/^}session_t;$/;"	t	typeref:struct:_session

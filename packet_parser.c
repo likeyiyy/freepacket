@@ -5,6 +5,8 @@
 	> Created Time: Thu 08 May 2014 10:49:55 AM CST
  ************************************************************************/
 #include "includes.h"
+
+#define HASH_INDEX(flow,a) ((flow->upper_ip^flow->lower_ip^flow->upper_port^flow->lower_port^(flow->protocol>>1)&((a)->length - 1)))
 extern session_set_t * session_set;
 parser_set_t * parser_set;
 static inline void init_single_parser(parser_t * parser)
@@ -63,10 +65,26 @@ static inline void free_packet(packet_t * packet)
 static inline void make_flow_item_tcp(flow_item_t * flow,packet_t * packet,struct iphdr *ip_hdr, struct tcphdr * tcp_hdr,int header_len)
 {
     flow->packet   = packet;
-    flow->saddr    = ip_hdr->saddr;
-    flow->daddr    = ip_hdr->daddr;
-    flow->source   = tcp_hdr->source;
-    flow->dest     = tcp_hdr->dest;
+    if(ip_hdr->saddr >= ip_hdr->daddr)
+    {
+        flow->upper_ip = ip_hdr->saddr;
+        flow->lower_ip = ip_hdr->daddr;
+    }
+    else
+    {
+        flow->upper_ip = ip_hdr->daddr;
+        flow->lower_ip = ip_hdr->saddr;
+    }
+    if(tcp_hdr->source >= tcp_hdr->dest)
+    {
+        flow->upper_port = tcp_hdr->source;
+        flow->lower_port = tcp_hdr->dest;
+    }
+    else
+    {
+        flow->upper_port = tcp_hdr->dest;
+        flow->lower_port = tcp_hdr->source;
+    }
     flow->protocol = ip_hdr->protocol;
     flow->payload  = packet->data + header_len;
     flow->payload_len = packet->length - header_len;
@@ -74,10 +92,26 @@ static inline void make_flow_item_tcp(flow_item_t * flow,packet_t * packet,struc
 static inline void make_flow_item_udp(flow_item_t * flow,packet_t * packet,struct iphdr *ip_hdr,struct udphdr * udp_hdr,int header_len)
 {
     flow->packet   = packet;
-    flow->saddr    = ip_hdr->saddr;
-    flow->daddr    = ip_hdr->daddr;
-    flow->source   = udp_hdr->source;
-    flow->dest     = udp_hdr->dest;
+    if(ip_hdr->saddr >= ip_hdr->daddr)
+    {
+        flow->upper_ip = ip_hdr->saddr;
+        flow->lower_ip = ip_hdr->daddr;
+    }
+    else
+    {
+        flow->upper_ip = ip_hdr->daddr;
+        flow->lower_ip = ip_hdr->saddr;
+    }
+    if(udp_hdr->source >= udp_hdr->dest)
+    {
+        flow->upper_port = udp_hdr->source;
+        flow->lower_port = udp_hdr->dest;
+    }
+    else
+    {
+        flow->upper_port = udp_hdr->dest;
+        flow->lower_port = udp_hdr->source;
+    }
     flow->protocol = ip_hdr->protocol;
     flow->payload  = packet->data + header_len;
     flow->payload_len = packet->length - header_len;
@@ -130,12 +164,8 @@ void * print_parser(void * arg)
                 /*
                 * 送给下个流水线的队列。
                 * */
-                push_session_buf(parser->session_set->bucket[next_thread_id].queue,flow);
-                next_thread_id++;
-                if(next_thread_id == parser->session_set->length)
-                {
-                    next_thread_id = 0;
-                }
+                int index = HASH_INDEX(flow,parser->session_set);
+                push_session_buf(parser->session_set->bucket[index].queue,flow);
             }
         }
         else if(ip_hdr->protocol == IPPROTO_UDP)
@@ -162,12 +192,8 @@ void * print_parser(void * arg)
                 /*
                 * 送给下个流水线的队列。
                 * */
-                push_session_buf(parser->session_set->bucket[next_thread_id].queue,flow);
-                next_thread_id++;
-                if(next_thread_id == parser->session_set->length)
-                {
-                    next_thread_id = 0;
-                }
+                int index = HASH_INDEX(flow,parser->session_set);
+                push_session_buf(parser->session_set->bucket[index].queue,flow);
             }
         }
        else

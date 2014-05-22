@@ -40,17 +40,11 @@ session_set_t * init_session_set(uint32_t length)
 static inline int compare_flow(session_t * list , flow_item_t * flow)
 {
     session_item_t * session = &list->item;
-    if(session->protocol == flow->protocol && (
-            (session->saddr == flow->saddr &&
-            session->daddr == flow->daddr &&
-            session->source == flow->source &&
-            session->dest   == flow->dest)||
-            (session->saddr == flow->daddr &&
-             session->source == flow->dest &&
-             session->daddr == flow->saddr &&
-             session->dest  == flow->source)
-            )
-      )
+    if( session->protocol == flow->protocol && 
+        session->upper_ip == flow->upper_ip &&
+        session->lower_ip == flow->lower_ip &&
+        session->upper_port == flow->upper_port &&
+        session->lower_port   == flow->lower_port) 
     {
         return 0;
     }
@@ -67,13 +61,13 @@ static inline void free_flow(flow_item_t * flow)
 static inline void make_new_session(session_t * new_session,flow_item_t * flow)
 {
     session_item_t * item = &new_session->item;
-    item->length    = SESSION_BUFFER_SIZE;
-    item->cur_len   = 0;
-    item->saddr     = flow->saddr;
-    item->daddr     = flow->daddr;
-    item->source    = flow->source;
-    item->dest      = flow->dest;
-    item->protocol  = flow->protocol;
+    item->length     = SESSION_BUFFER_SIZE;
+    item->cur_len    = 0;
+    item->upper_ip   = flow->upper_ip;
+    item->lower_ip   = flow->lower_ip;
+    item->upper_port = flow->upper_port;
+    item->lower_port = flow->lower_port;
+    item->protocol   = flow->protocol;
     gettimeofday(&item->last_time,NULL);
     memcpy(item->buffer,flow->payload,flow->payload_len);
     item->cur_len  += flow->payload_len;
@@ -132,19 +126,36 @@ void * session_worker(void * arg)
                 bucket->list = new_session;
             }
         }
-        next = bucket->list;
         struct timeval current_time;
-        while(next != NULL)
+        session_t * current;
+        current = bucket->list;
+        while(current != NULL)
         {
-            head = next->next;
             gettimeofday(&current_time,NULL);
             if((1.0 * next->item.cur_len > MAX_FACTOR * next->item.length) ||
                 (current_time.tv_sec - next->item.last_time.tv_sec > DESTORY_TIME))
             {
-                free_buf(bucket->session_pool,(void *)next); 
+                if(current->prev == NULL)
+                {
+                    bucket->list = current->next;
+                    if(current->next)
+                    {
+                        current->next->prev = current->prev;
+                    }
+                    free_buf(bucket->session_pool,(void *)current); 
+                }
+                else
+                {
+                    current->prev->next = current->next;
+                    if(current->next)
+                    {
+                        current->next->prev = current->prev;
+                    }
+                    free_buf(bucket->session_pool,(void *)current); 
+                }
             }
             /* Do check here */
-            next = head; 
+            current = current->next;
         }
     }
 }
