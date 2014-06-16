@@ -13,7 +13,7 @@ typedef struct _session_queue
     void ** node;
     int item_size;
     unsigned int total;
-    unsigned int free_num;
+    unsigned int length;
     pthread_mutex_t mutex;
     pthread_cond_t empty;
     pthread_cond_t full;

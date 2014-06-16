@@ -104,7 +104,6 @@ int read_config_file(const char * file_name,config_t * config)
     char * p, *q;
     char * pname = NULL;
     int count = 0;
-    int flag = 0; 
     if((fp = fopen(file_name,"r")) == NULL)
     {
         perror("can't open config file");
@@ -143,7 +142,6 @@ int read_config_file(const char * file_name,config_t * config)
         unsigned char ipaddr[4] = {0};
         unsigned int counter;
         uint16_t port;
-        struct in_addr in;
         //switch 判断var_name属于哪一类.
         if(strcmp(pname,"PROTO") == 0)
         {

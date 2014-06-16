@@ -5,6 +5,8 @@
 	> Created Time: Wed 30 Apr 2014 03:02:16 PM CST
  ************************************************************************/
 #include "includes.h"
+
+//#define memcpy(a,b,c) do { memcpy(a,b,c);printf("packet_generator_loop memcpy here\n"); } while(0)
 static uint8_t  * config_file = CONFIG_FILE;
 config_t * config;
 generator_set_t * generator_set;
@@ -198,9 +200,14 @@ void * packet_generator_loop(void * arg)
         * 这样会减少判断。
         * 或许，一亿次循环能减少一秒把。(@_@)
         * */
-        struct timeval old, new;
+        //struct timeval old, new;
+        int counter = 0;
         while(1)
         {
+            if(1)
+            {
+                counter++;
+            
         /*
         * 1. get buffer from pool
         * */
@@ -230,6 +237,8 @@ void * packet_generator_loop(void * arg)
             //printf("----------------------period time:%llu\n",(generator->now.tv_usec + 1000000 - generator->old.tv_usec)%1000000) ;
             generator->total_send_byte += config->pktlen;
             pthread_testcancel();
+
+            }
         }
     }
     else if(config->protocol == IPPROTO_UDP)

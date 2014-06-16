@@ -8,14 +8,6 @@
 #ifndef MTHREAD_QUEUE_H
 #define MTHREAD_QUEUE_H
 #include <pthread.h>
-#define LIKEYI_DEBUG
-#ifdef LIKEYI_DEBUG
-
-#define DEBUG(format,...) printf("FILE: "__FILE__", LINE: %d: "format"\n", __LINE__, ##__VA_ARGS__)
-
-#else
-#define DEBUG(format,...)  
-#endif
 typedef struct _node
 {
     struct _node * prev;
@@ -38,7 +30,7 @@ extern struct timeval G_old;
 extern struct timeval G_new;
 queue_t * init_queue(unsigned int node_pool_size);
 void destroy_queue(queue_t * queue);
-int is_empty(queue_t * q);
+int is_queue_empty(queue_t * q);
 int push_to_queue(queue_t * q, void * data);
 int pop_from_queue(queue_t * q,void ** data);
 

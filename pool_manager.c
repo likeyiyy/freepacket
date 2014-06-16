@@ -90,9 +90,12 @@ pool_t * get_pool(pool_type_t type)
         case MANAGER_NODE_POOL:
         return manager_node_pool;
         break;
+	default:
+	return packet_pool;
+	break;
     }
 }
-bool free_buf(pool_t * pool,void * data)
+void free_buf(pool_t * pool,void * data)
 {
     pthread_mutex_lock(&pool->mutex);
     /*
@@ -123,12 +126,12 @@ static inline void print_pool_type(pool_t * pool)
 /*
 *  本函数不用is_empty_pool，因为防止锁中锁
 * */
-bool get_buf(pool_t * pool,void ** data)
+void get_buf(pool_t * pool,void ** data)
 {
     pthread_mutex_lock(&pool->mutex);
     while(pool->push_pos == pool->pop_pos)
     {
-        print_pool_type(pool);
+        //print_pool_type(pool);
         pthread_cond_wait(&pool->empty,&pool->mutex);
     }
     *data = pool->node[pool->pop_pos];

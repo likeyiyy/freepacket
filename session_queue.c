@@ -22,7 +22,7 @@ session_queue_t * init_session_queue(int numbers,int item_size)
     bzero(session_queue->node,numbers);
     session_queue->item_size = item_size;
     session_queue->total = numbers;
-    session_queue->free_num = numbers;
+    session_queue->length = 0;
     session_queue->pop_pos = 0;
     /*
     * 初始化时为满的。
@@ -56,7 +56,7 @@ bool push_session_buf(session_queue_t * session_queue,void * data)
     }
     session_queue->node[session_queue->push_pos] = data;
     ++session_queue->push_pos;
-    --session_queue->free_num;
+    ++session_queue->length;
     if(session_queue->push_pos >= session_queue->total)
     {
         session_queue->push_pos = 0;
@@ -77,7 +77,7 @@ bool pop_session_buf(session_queue_t * session_queue,void ** data)
     }
     *data = session_queue->node[session_queue->pop_pos];
     ++session_queue->pop_pos;
-    ++session_queue->free_num;
+    --session_queue->length;
     if(session_queue->pop_pos >= session_queue->total)
     {
         session_queue->pop_pos = 0;

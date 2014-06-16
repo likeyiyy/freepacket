@@ -4,7 +4,7 @@
 	> Mail: likeyiyy@sina.com 
 	> Created Time: Wed 02 Apr 2014 04:07:31 PM CST
  ************************************************************************/
-#include <use_net.h>
+#include "use_net.h"
 #include <pthread.h>
 pthread_mutex_t print_lock = PTHREAD_MUTEX_INITIALIZER;
 /* IP flags. */
@@ -176,10 +176,10 @@ static void parse_mac_type(__be16 h_proto)
 		case ETH_P_TIPC  :      printf(" TIPC             \n");break;
 		case ETH_P_1588  :      printf(" IEEE 1588 Timesync \n");break;
 		case ETH_P_FCOE  :      printf(" Fibre Channel over Ethernet  \n");break;
-		case ETH_P_TDLS  :      printf(" TDLS \n");break;
+		//case ETH_P_TDLS  :      printf(" TDLS \n");break;
 		case ETH_P_FIP   :      printf(" FCoE Initialization Protocol \n");break;
 		case ETH_P_EDSA  :      printf(" Ethertype DSA [ NOT AN OFFICIALLY REGISTERED ID ] \n");break;
-		case ETH_P_AF_IUCV   :      printf(" IBM af_iucv [ NOT AN OFFICIALLY REGISTERED ID ] \n");break;
+		//case ETH_P_AF_IUCV   :      printf(" IBM af_iucv [ NOT AN OFFICIALLY REGISTERED ID ] \n");break;
 		case ETH_P_802_3 :      printf(" Dummy type for 802.3 frames  \n");break;
 		case ETH_P_AX25  :      printf(" Dummy protocol id for AX.25  \n");break;
 		case ETH_P_ALL   :      printf(" Every packet (be careful!!!) \n");break;
@@ -230,7 +230,6 @@ void parse_full_packet(void * buffer)
     struct ethhdr * ether_header;
     struct iphdr  * ip_header;
     struct tcphdr * tcp_header;
-    struct udphdr * udp_header;
     ether_header = (struct ethhdr *)buffer;
     printf_mac_info(ether_header);
     if(ether_header->h_proto == htons(ETH_P_IP))

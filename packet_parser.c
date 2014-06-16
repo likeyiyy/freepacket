@@ -6,9 +6,17 @@
  ************************************************************************/
 #include "includes.h"
 
-#define HASH_INDEX(flow,a) ((flow->upper_ip^flow->lower_ip^flow->upper_port^flow->lower_port^(flow->protocol>>1))&((a)->length - 1))
+#define HASH_INDEX(flow,a) ((flow->upper_ip^flow->lower_ip^flow->upper_port^flow->lower_port^(flow->protocol))%((a)->length))
+
 extern manager_set_t * manager_set;
 parser_set_t * parser_set;
+static inline unsigned int hash_index(flow_item_t * flow,manager_set_t * manager_set)
+{
+    //printf("uip:%u,lip:%u,uport:%u,lport:%u,protocol:%u",flow->upper_ip,flow->lower_ip,flow->upper_port,flow->lower_port,flow->protocol);
+    unsigned int index = flow->upper_ip ^ flow->lower_ip ^ flow->upper_port ^ flow->lower_port ^ (flow->protocol << 5);
+    index %= (manager_set->length);
+    return index;
+}
 static inline void init_single_parser(parser_t * parser)
 {
     parser->queue  = init_queue(NODE_POOL_SIZE);
@@ -125,7 +133,7 @@ void * print_parser(void * arg)
     parser_t * parser = (parser_t *)arg;
     packet_t * packet;
     flow_item_t * flow = NULL;
-    int next_thread_id = 0; 
+    unsigned int index;
     while(1)
     {
         /*
@@ -164,7 +172,8 @@ void * print_parser(void * arg)
                 /*
                 * 送给下个流水线的队列。
                 * */
-                unsigned int index = HASH_INDEX(flow,parser->manager_set);
+                index = hash_index(flow,parser->manager_set);
+//                printf("INDEX: %u\n",index);
                 push_session_buf(parser->manager_set->manager[index].queue,flow);
             }
         }
@@ -192,7 +201,7 @@ void * print_parser(void * arg)
                 /*
                 * 送给下个流水线的队列。
                 * */
-                int index = HASH_INDEX(flow,parser->manager_set);
+                index = hash_index(flow,parser->manager_set);
                 push_session_buf(parser->manager_set->manager[index].queue,flow);
             }
         }

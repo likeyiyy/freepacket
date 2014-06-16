@@ -1,41 +1,49 @@
-CC=gcc
-CLFLAGS= -g -lpthread 
-OBJS=pool_manager.o node_queue.o checksum.o config.o \
+#Default Target.
+
+ifeq ($(filter tile%,$(shell uname -m)),)
+
+
+ifdef CROSS_COMPILING
+
+ifdef TILERA_ROOT
+$(error The 'TILERA_ROOT' enviroment variable is not set.)
+else
+CC = $(TILERA_ROOT)/bin/tile-gcc
+MPIPE_CC = $(TILERA_ROOT)/bin/tile-mpipe-cc
+endif
+
+else
+OBJS = display.o
+CC = gcc
+endif
+else
+CC = gcc
+MPIPE_CC=mpipe-cc
+endif
+
+OPT = -Os
+CFLAGS= -std=gnu99 -Wall -g 
+OBJS += pool_manager.o node_queue.o checksum.o config.o \
 	 parse.o packet_generator.o packet_parser.o session_queue.o   \
-	 packet_manager.o
+	 packet_manager.o 
+LDFLAGS= -lncurses -lpthread 
+
+OBJS += use_file.o cpuinfo.o meminfo.o hash.o \
+		taskinfo.o top_list.o top_config.o ttop.o
 
 .PHONY:clean all
 
-EXECS=simulation checksum_test  config_test  generator_test  \
-	  manager_buffer_test pool_test
-
+EXECS=simulation 
+	 
 all:$(EXECS)
 
 simulation:simulation.c $(OBJS)
-	$(CC) $(CLFLAGS) -o $@ $^
-
-session_queue_test:session_queue_test.c $(OBJS)
-	$(CC) $(CLFLAGS) -o $@ $^
-
-generator_test:generator_test.c $(OBJS)
-	$(CC) $(CLFLAGS) -o $@ $^
-
-config_test:config_test.c $(OBJS)
-	$(CC) $(CLFLAGS) -o $@ $^
-
-
-checksum_test:checksum_test.c $(OBJS)
-	$(CC) $(CLFLAGS) -o $@ $^
-
-manager_buffer_test:manager_buffer_test.c $(OBJS)
-	$(CC) $(CLFLAGS) -o $@ $^
-
-pool_test:$(OBJS) pool_test.c
-	$(CC) $(CLFLAGS) -o $@ $^
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^
 
 %.o:%.c
-	$(CC) $(CLFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) -c $< -o $@
 
 
 clean:
 	rm -f *.o $(EXECS)
+

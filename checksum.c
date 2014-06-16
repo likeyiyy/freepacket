@@ -7,7 +7,7 @@
 #include "includes.h"
 void checksum_ip(struct iphdr * iph)
 {
-    int ihl = iph->ihl;
+    //int ihl = iph->ihl;
     uint16_t * ipheader = (uint16_t *)iph;
     int i = 0;
     uint32_t sum = 0;

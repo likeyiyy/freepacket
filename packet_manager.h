@@ -6,36 +6,23 @@
  ************************************************************************/
 #ifndef H_SESSION_H
 #define H_SESSION_H
-#define SESSION_BUFFER_SIZE 65536 
-#define SESSION_QUEUE_LENGTH 50000
-#define SESSION_POOL_LENGTH  10000
-#define MAX_FACTOR           0.75
-#define DESTORY_TIME         1
-typedef struct _session_item
-{
-    uint8_t buffer[SESSION_BUFFER_SIZE];
-    struct timeval last_time;
-    uint32_t length;
-    uint32_t cur_len;
-    uint32_t upper_ip;
-    uint32_t lower_ip;
-    uint32_t upper_port;
-    uint32_t lower_port;
-    uint8_t  protocol;
-}session_item_t;
+/*
 typedef struct _session
 {
     struct _session * next;
     struct _session * prev;
     session_item_t  item;
 }session_t;
+*/
 typedef struct _session_manager
 {
-    pthread_t         id;
-    int               index;
-    session_t       * list;
-    pool_t          * session_pool;
-    session_queue_t * queue;
+    pthread_t          id;
+    int                index;
+    int                list_length;
+    pthread_mutex_t    list_lock;
+    struct list_head * list;
+    pool_t           * session_pool;
+    session_queue_t  * queue;
 }manager_t;
 typedef struct _set
 {

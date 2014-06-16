@@ -54,7 +54,7 @@ void destroy_queue(queue_t * queue)
     free(queue);
     queue = NULL;
 }
-int is_empty(queue_t * q)
+int is_queue_empty(queue_t * q)
 {
     pthread_mutex_lock(&q->lock);
     if(q->length == 0)
