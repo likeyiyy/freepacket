@@ -129,7 +129,7 @@ void * packet_manager_loop(void * arg)
     manager_t * manager = (manager_t *)arg;
     flow_item_t * flow;
     pthread_t clean_id;
-    //pthread_create(&clean_id,NULL,process_session,arg);
+    pthread_create(&clean_id,NULL,process_session,arg);
     struct blist * blist;
     struct blist * new_blist;
     while(1)
