@@ -44,5 +44,5 @@ simulation:simulation.c $(OBJS)
 
 
 clean:
-	git rm -f *.o $(EXECS)
+	git rm -f $(OBJS) $(EXECS)
 
