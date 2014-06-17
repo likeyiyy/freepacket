@@ -99,6 +99,7 @@ void print_config_file(config_t * config)
 int read_config_file(const char * file_name,config_t * config)
 {
     assert(config != NULL);
+    assert(file_name != NULL);
     FILE * fp = NULL;
     char buf[BUFSIZ] = {0};
     char * p, *q;
@@ -139,9 +140,9 @@ int read_config_file(const char * file_name,config_t * config)
         p = skip_opeartor(p);
         //printf("%s\n",p);
         pname = strupr(pname);
-        unsigned char ipaddr[4] = {0};
+        unsigned int ipaddr[4] = {0};
         unsigned int counter;
-        uint16_t port;
+        uint32_t port;
         //switch 判断var_name属于哪一类.
         if(strcmp(pname,"PROTO") == 0)
         {
@@ -198,7 +199,7 @@ int read_config_file(const char * file_name,config_t * config)
         }
         else if(strcmp(pname,"SRCPORT") == 0)
         {
-            int rev = sscanf(p,"%d+%d",&port,&counter); 
+            int rev = sscanf(p,"%u+%u",&port,&counter); 
             if(rev == 1)
             {
                 counter = 0;
@@ -214,7 +215,7 @@ int read_config_file(const char * file_name,config_t * config)
         }
         else if(strcmp(pname,"DSTPORT") == 0)
         {
-            int rev = sscanf(p,"%d+%d",&port,&counter); 
+            int rev = sscanf(p,"%u+%u",&port,&counter); 
             if(rev == 1)
             {
                 counter = 0;
@@ -243,9 +244,9 @@ int read_config_file(const char * file_name,config_t * config)
             {
                 config->pkt_data = NULL;
             }
-            config->pkt_data = malloc(strlen(p)+1);
+            config->pkt_data = calloc(strlen(p)+1,sizeof(char));
             exit_if_ptr_is_null(config->pkt_data,"config->pkt_data malloc error");
-            strcpy(config->pkt_data,p);
+            strcpy(config->pkt_data, p);
         }
         else if(strcmp(pname,"SPEED") == 0)
         {

@@ -88,12 +88,4 @@ typedef struct _session_item
 #include "parse.h"
 #include "packet_generator.h"
 #include "display.h"
-#include "top_config.h"
-#include "cpuinfo.h"
-#include "meminfo.h"
-#include "hash.h"
-#include "top_list.h"
-#include "use_file.h"
-#include "taskinfo.h"
-#include "ttop.h"
 #endif

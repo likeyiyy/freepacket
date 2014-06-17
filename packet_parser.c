@@ -1,10 +1,51 @@
 /*************************************************************************
-	> File Name: parser_setr.c
-	> Author: likeyi
-	> Mail: likeyiyy@sina.com 
-	> Created Time: Thu 08 May 2014 10:49:55 AM CST
+    > File Name: parser_setr.c
+    > Author: likeyi
+    > Mail: likeyiyy@sina.com 
+    > Created Time: Thu 08 May 2014 10:49:55 AM CST
  ************************************************************************/
 #include "includes.h"
+
+uint32_t ipfrag_hash_rnd;
+/* NOTE: Arguments are modified. */
+#define __jhash_mix(a, b, c) \
+        { \
+          a -= b; a -= c; a ^= (c>>13); \
+          b -= c; b -= a; b ^= (a<<8); \
+          c -= a; c -= b; c ^= (b>>13); \
+          a -= b; a -= c; a ^= (c>>12); \
+          b -= c; b -= a; b ^= (a<<16); \
+          c -= a; c -= b; c ^= (b>>5); \
+          a -= b; a -= c; a ^= (c>>3); \
+          b -= c; b -= a; b ^= (a<<10); \
+          c -= a; c -= b; c ^= (b>>15); \
+        } 
+            
+            /* The golden ration: an arbitrary value */
+#define JHASH_GOLDEN_RATIO 0x9e3779b9
+
+
+            /* A special ultra-optimized versions that knows they are hashing exactly
+            *  * 3, 2 or 1 word(s).
+            *   * 
+            *    * NOTE: In partilar the "c += length; __jhash_mix(a,b,c);" normally
+            *     * done at the end is not done here.
+            *      */ 
+static inline uint32_t jhash_3words(uint32_t a, uint32_t b, uint32_t c, uint32_t initval)
+{ 
+                a += JHASH_GOLDEN_RATIO;
+                b += JHASH_GOLDEN_RATIO;
+                c += initval;
+                      
+                __jhash_mix(a, b, c);
+                      
+                return c;
+}   
+
+static inline unsigned int hashfn(uint16_t id, uint32_t saddr, uint32_t daddr, uint8_t prot, uint32_t length)
+{   
+    return jhash_3words((uint32_t)id << 16 | prot, saddr, daddr,ipfrag_hash_rnd) & (length - 1); 
+} 
 
 #define HASH_INDEX(flow,a) ((flow->upper_ip^flow->lower_ip^flow->upper_port^flow->lower_port^(flow->protocol))%((a)->length))
 
@@ -13,8 +54,7 @@ parser_set_t * parser_set;
 static inline unsigned int hash_index(flow_item_t * flow,manager_set_t * manager_set)
 {
     //printf("uip:%u,lip:%u,uport:%u,lport:%u,protocol:%u",flow->upper_ip,flow->lower_ip,flow->upper_port,flow->lower_port,flow->protocol);
-    unsigned int index = flow->upper_ip ^ flow->lower_ip ^ flow->upper_port ^ flow->lower_port ^ (flow->protocol << 5);
-    index %= (manager_set->length);
+    uint32_t index = hashfn(flow->upper_port,flow->lower_ip,flow->upper_ip,flow->protocol,manager_set->length);
     return index;
 }
 static inline void init_single_parser(parser_t * parser)
@@ -36,13 +76,15 @@ void init_parser_set(int numbers)
     parser_set->parser  = malloc(numbers * sizeof(parser_t));
     exit_if_ptr_is_null(parser_set->parser,"parser_set->parser alloc error");
     parser_set->numbers = numbers;
+    srand((unsigned int)time(NULL));
+    ipfrag_hash_rnd = 0xff00ff00;
     int i = 0;
     for(i = 0; i < numbers; i++)
     {
         init_single_parser(&parser_set->parser[i]); 
         pthread_create(&parser_set->parser[i].id,
                 NULL,
-                print_parser,
+                packet_parser_loop,
                 &parser_set->parser[i]);
     }
 }
@@ -124,8 +166,8 @@ static inline void make_flow_item_udp(flow_item_t * flow,packet_t * packet,struc
     flow->payload  = packet->data + header_len;
     flow->payload_len = packet->length - header_len;
 }
-static pthread_mutex_t print_lock = PTHREAD_MUTEX_INITIALIZER;
-void * print_parser(void * arg)
+//static pthread_mutex_t print_lock = PTHREAD_MUTEX_INITIALIZER;
+void * packet_parser_loop(void * arg)
 {
     pthread_detach(pthread_self());
     pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, 0);

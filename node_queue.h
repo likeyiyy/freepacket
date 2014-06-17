@@ -28,7 +28,7 @@ typedef struct _queue
 * */
 extern struct timeval G_old;
 extern struct timeval G_new;
-queue_t * init_queue(unsigned int node_pool_size);
+queue_t * init_queue(unsigned int node_queue_size);
 void destroy_queue(queue_t * queue);
 int is_queue_empty(queue_t * q);
 int push_to_queue(queue_t * q, void * data);

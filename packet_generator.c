@@ -7,7 +7,7 @@
 #include "includes.h"
 
 //#define memcpy(a,b,c) do { memcpy(a,b,c);printf("packet_generator_loop memcpy here\n"); } while(0)
-static uint8_t  * config_file = CONFIG_FILE;
+static   const char * config_file = CONFIG_FILE;
 config_t * config;
 generator_set_t * generator_set;
 extern pool_t * packet_pool;
@@ -21,6 +21,7 @@ void init_generator_set(int numbers)
     config = malloc(sizeof(config_t));
     exit_if_ptr_is_null(config,"config error");
     read_config_file(config_file,config);
+    //print_config_file(config);
     config->numbers = PACKET_POOL_SIZE;  
     /*
      * 初始化一个缓冲区池。
@@ -34,7 +35,10 @@ void init_generator_set(int numbers)
     {
         generator_set->generator[i].pool = init_pool(PACKET_POOL,config->numbers,config->pktlen + sizeof(packet_t));
         generator_set->generator[i].pool->pool_type = 0;
-        generator_set->generator[i].config = config;
+        
+        generator_set->generator[i].config = malloc(sizeof(config_t)); 
+        exit_if_ptr_is_null(generator_set->generator[i].config,"config error");
+        memcpy(generator_set->generator[i].config,config,sizeof(config_t));
         generator_set->generator[i].parser_set = parser_set;
         generator_set->generator[i].index = i;
         generator_set->generator[i].next_thread_id = 0;
@@ -75,9 +79,9 @@ void   finish_generator(generator_set_t * generator_set)
         pthread_cancel(generator_set->generator[i].id);
     }
 }
-int pop_payload(void * payload,unsigned char * data,config_t * config)
+int pop_payload(void * payload, char * data,config_t * config)
 {
-    int i = strlen(data);
+    int i = strlen((const char *)data);
     int j = config->pktlen - 54;
     if(i > j)
     {
@@ -118,9 +122,9 @@ static inline uint16_t get_next_dstport(config_t * config)
 {
     return config->dport_cur == config->dport_max ?
     config->dport_cur = config->dport_min:
-    ++config->sport_cur;
+    ++config->dport_cur;
 }
-static int pop_transmission_tcp(void * tcph,config_t * config)
+static inline int pop_transmission_tcp(void * tcph,config_t * config)
 {
     struct tcphdr * tcp = (struct tcphdr *)tcph;
     tcp->source = htons(get_next_srcport(config));
@@ -129,7 +133,7 @@ static int pop_transmission_tcp(void * tcph,config_t * config)
     tcp->check = 0;
     return config->pktlen - 34;
 }
-static int pop_transmission_udp(void * udph,config_t * config)
+static inline int pop_transmission_udp(void * udph,config_t * config)
 {
     struct udphdr * udp = (struct udphdr *)udph;
     udp->source = htons(get_next_srcport(config));
@@ -138,7 +142,7 @@ static int pop_transmission_udp(void * udph,config_t * config)
     udp->check  = 0;
     return config->pktlen - 34;
 }
-static void pop_iplayer_tcp(void * iph,config_t * config)
+static inline void pop_iplayer_tcp(void * iph,config_t * config)
 {
     struct iphdr * ip = (struct iphdr *)iph;
     ip->version = IPVERSION;
@@ -156,16 +160,16 @@ static void pop_iplayer_tcp(void * iph,config_t * config)
     uint16_t sum = 0x6 + config->pktlen - 34;
     tcp->check = (~ip_xsum((uint16_t *)&ip->saddr,(config->pktlen-26)/2,htons(sum)));
 }
-static void pop_iplayer_udp(void * iph,config_t * config)
+static inline void pop_iplayer_udp(void * iph,config_t * config)
 {
     struct iphdr * ip = (struct iphdr *)iph;
     ip->version = IPVERSION;
     ip->ihl     = sizeof(struct iphdr) / sizeof(uint32_t);
     ip->tot_len = htons(config->pktlen-14);
     ip->ttl     = IPDEFTTL;
-    ip->protocol = IPPROTO_TCP;
-    ip->saddr   = get_next_srcip(config);
-    ip->daddr   = get_next_dstip(config);
+    ip->protocol = IPPROTO_UDP;
+    ip->saddr   = htonl(get_next_srcip(config));
+    ip->daddr   = htonl(get_next_dstip(config));
     ip->check   = ~ip_xsum((uint16_t *)ip,sizeof(struct iphdr)/2,0);
     /*
     * Do UDP header Check Sum
@@ -204,9 +208,9 @@ void * packet_generator_loop(void * arg)
         int counter = 0;
         while(1)
         {
-            if(1)
+            //if(counter < 100000)
             {
-                counter++;
+                //counter++;
             
         /*
         * 1. get buffer from pool
@@ -221,22 +225,22 @@ void * packet_generator_loop(void * arg)
         * 2. 根据配置文件比如UDP，TCP来产生包结构。
         * */
             //payload_length = pop_payload(packet->data+54,config->pkt_data,config);
-            tcp_length = pop_transmission_tcp(packet->data+34,config);
-            pop_iplayer_tcp(packet->data+14,config);
+            tcp_length = pop_transmission_tcp(packet->data + 34,config);
+            pop_iplayer_tcp(packet->data + 14,config);
             pop_datalink(packet->data,config);
         /*
         * 3. 数据放到下一步的队列里。
         * */
             /* 数据包均匀 分部到 下一个工作的线程里。*/
             //printf("---------------%d----------\n",generator->next_thread_id);
-            //parser_t * parser = &generator->parser_set->parser[generator->next_thread_id++];
-            parser_t * parser = &generator->parser_set->parser[rand()%generator->parser_set->numbers];
-            //generator->next_thread_id = (generator->next_thread_id == generator->parser_set->numbers)? 0 : generator->next_thread_id;
+            parser_t * parser = &generator->parser_set->parser[generator->next_thread_id++];
+            //parser_t * parser = &generator->parser_set->parser[rand()%generator->parser_set->numbers];
+            generator->next_thread_id = (generator->next_thread_id == generator->parser_set->numbers)? 0 : generator->next_thread_id;
             push_to_queue(parser->queue,packet);
-            gettimeofday(&generator->now,NULL);
+            //gettimeofday(&generator->now,NULL);
             //printf("----------------------period time:%llu\n",(generator->now.tv_usec + 1000000 - generator->old.tv_usec)%1000000) ;
             generator->total_send_byte += config->pktlen;
-            pthread_testcancel();
+            //pthread_testcancel();
 
             }
         }
@@ -268,5 +272,10 @@ void * packet_generator_loop(void * arg)
             push_to_queue(parser->queue,(void*)packet);
             pthread_testcancel();
         }
+    }
+    else 
+    {
+        printf("NOT UDP NOT TCP config error\n");
+        exit(-1);
     }
 }

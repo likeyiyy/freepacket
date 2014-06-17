@@ -37,7 +37,7 @@ manager_set_t * init_manager_set(uint32_t length)
     {
         pthread_create(&set->manager[i].id,
                        NULL,
-                     session_worker,
+                     packet_manager_loop,
                       &set->manager[i]);
     }
     return set;
@@ -118,21 +118,18 @@ void * process_session(void * arg)
         pthread_mutex_lock(&manager->list_lock);
         delete_session(manager);
         pthread_mutex_unlock(&manager->list_lock);
-        usleep(50*1000);
+        usleep(500*1000);
     }
 }
 /*
 * 真正的工作者。
 * */
-void * session_worker(void * arg)
+void * packet_manager_loop(void * arg)
 {
     manager_t * manager = (manager_t *)arg;
     flow_item_t * flow;
     pthread_t clean_id;
-    pthread_create(&clean_id,
-                  NULL,
-                 process_session,
-                  arg);
+    //pthread_create(&clean_id,NULL,process_session,arg);
     struct blist * blist;
     struct blist * new_blist;
     while(1)
@@ -148,7 +145,9 @@ void * session_worker(void * arg)
         * */
         if(!blist)
         {
+            pthread_mutex_unlock(&manager->list_lock);
             get_buf(manager->session_pool,(void **)&new_blist);
+            pthread_mutex_lock(&manager->list_lock);
             make_new_session(new_blist,flow);
             free_flow(flow);
             INIT_LIST_HEAD(&new_blist->listhead);

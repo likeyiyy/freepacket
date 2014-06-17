@@ -36,5 +36,5 @@ manager_set_t * init_manager_set(uint32_t length);
 /*
 * 真正的工作者。
 * */
-void * session_worker(void * arg);
+void * packet_manager_loop(void * arg);
 #endif

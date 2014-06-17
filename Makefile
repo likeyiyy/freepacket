@@ -3,13 +3,13 @@
 ifeq ($(filter tile%,$(shell uname -m)),)
 
 
-ifdef CROSS_COMPILING
+ifdef CROSS
 
 ifdef TILERA_ROOT
-$(error The 'TILERA_ROOT' enviroment variable is not set.)
-else
 CC = $(TILERA_ROOT)/bin/tile-gcc
 MPIPE_CC = $(TILERA_ROOT)/bin/tile-mpipe-cc
+else
+$(error The 'TILERA_ROOT' enviroment variable is not set.)
 endif
 
 else
@@ -28,8 +28,6 @@ OBJS += pool_manager.o node_queue.o checksum.o config.o \
 	 packet_manager.o 
 LDFLAGS= -lncurses -lpthread 
 
-OBJS += use_file.o cpuinfo.o meminfo.o hash.o \
-		taskinfo.o top_list.o top_config.o ttop.o
 
 .PHONY:clean all
 

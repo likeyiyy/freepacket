@@ -31,5 +31,5 @@ void init_parser_set(int numbers);
  * */
 void finish_parser_set(parser_set_t * parser_set);
 void destroy_parser_set(parser_set_t * parser_set);
-void * print_parser(void * arg);
+void * packet_parser_loop(void * arg);
 #endif

@@ -63,6 +63,7 @@ bool push_session_buf(session_queue_t * session_queue,void * data)
     }
     pthread_cond_signal(&session_queue->empty);
     pthread_mutex_unlock(&session_queue->mutex);
+    return true;
 }
 /*
 *  本函数不用is_empty_session_queue，因为防止锁中锁
@@ -84,6 +85,7 @@ bool pop_session_buf(session_queue_t * session_queue,void ** data)
     }
     pthread_cond_signal(&session_queue->full);
     pthread_mutex_unlock(&session_queue->mutex);
+    return true;
 }
 /*
 *  
