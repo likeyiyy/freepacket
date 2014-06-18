@@ -77,7 +77,7 @@ static void display_manager(window_t * win,manager_set_t * manager_set)
         wprintw(win->win,"Queue Size:%lu pool free:%u hash_count:%d\n",
                manager_set->manager[i].queue->length,
                manager_set->manager[i].session_pool->free_num,
-               manager_set->manager[i].ht->hash_count);
+               hash_count(manager_set->manager[i].ht));
     }
     wprintw(win->win,"\n\n\n");
     wrefresh(win->win);

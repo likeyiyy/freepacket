@@ -93,7 +93,7 @@ daddr_max	config.h	/^    uint32_t daddr_max;$/;"	m	struct:__config
 daddr_min	config.h	/^    uint32_t daddr_min;$/;"	m	struct:__config
 data	includes.h	/^    unsigned char * data;   \/* 一个包的数据部分*\/$/;"	m	struct:packet
 data	node_queue.h	/^    void * data;$/;"	m	struct:_node
-delete_session	packet_manager.c	/^void delete_session(struct list_head * list)$/;"	f
+delete_session	packet_manager.c	/^void delete_session(hash_table * ht,struct list_head * list)$/;"	f
 destroy_generator	packet_generator.c	/^void   destroy_generator(generator_set_t * generator_set)$/;"	f
 destroy_parser_set	packet_parser.c	/^void destroy_parser_set(parser_set_t * parser_set)$/;"	f
 destroy_pool	pool_manager.c	/^void destroy_pool(pool_t * pool)$/;"	f
@@ -135,15 +135,15 @@ get_next_dstport	packet_generator.c	/^static inline uint16_t get_next_dstport(co
 get_next_srcip	packet_generator.c	/^static inline uint32_t get_next_srcip(config_t * config)$/;"	f	file:
 get_next_srcport	packet_generator.c	/^static inline uint16_t get_next_srcport(config_t * config)$/;"	f	file:
 get_pool	pool_manager.c	/^pool_t * get_pool(pool_type_t type)$/;"	f
-hash_add_item	hash.c	/^void * hash_add_item(hash_table * ht, uint32_t key, void * value )$/;"	f
+hash_add_item	hash.c	/^void  hash_add_item(hash_table * ht, uint32_t key, void * value )$/;"	f
 hash_count	hash.h	/^        uint64_t hash_count;$/;"	m	struct:hash_table
 hash_create	hash.c	/^hash_table * hash_create(int num)$/;"	f
 hash_index	packet_parser.c	/^static inline unsigned int hash_index(flow_item_t * flow,manager_set_t * manager_set)$/;"	f	file:
 hash_item_t	hash.c	/^typedef session_item_t hash_item_t ;$/;"	t	file:
-hash_lookup_item	hash.c	/^void * hash_lookup_item(hash_table * ht,void * value)$/;"	f
+hash_lookup_item	hash.c	/^void * hash_lookup_item(hash_table * ht, uint32_t key, void * value)$/;"	f
 hash_table	hash.h	/^typedef struct hash_table {$/;"	s
 hash_table	hash.h	/^} hash_table;$/;"	t	typeref:struct:hash_table
-hash_travel_delete	hash.c	/^int   hash_travel_delete(hash_table * ht)$/;"	f
+hash_travel_delete	hash.c	/^void  hash_travel_delete(hash_table * ht)$/;"	f
 head	node_queue.h	/^    node_t * head;$/;"	m	struct:_queue
 height	display.c	/^    int height;$/;"	m	struct:__anon1	file:
 ht	packet_manager.h	/^    struct hash_table * ht;$/;"	m	struct:_session_manager	typeref:struct:_session_manager::hash_table
@@ -185,8 +185,6 @@ list_entry	list.h	75;"	d
 list_for_each	list.h	78;"	d
 list_for_each_safe	list.h	82;"	d
 list_head	list.h	/^struct list_head {$/;"	s
-list_length	packet_manager.h	/^    int                list_length;$/;"	m	struct:_session_manager
-list_lock	packet_manager.h	/^    pthread_mutex_t    list_lock;$/;"	m	struct:_session_manager
 list_move_tail	list.h	/^static inline void list_move_tail(struct list_head *list,$/;"	f
 listhead	list.h	/^	struct list_head listhead;$/;"	m	struct:blist	typeref:struct:blist::list_head
 lock	hash.h	/^    pthread_mutex_t  lock;$/;"	m	struct:bucket

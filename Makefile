@@ -39,6 +39,7 @@ all:$(EXECS)
 
 simulation:simulation.c $(OBJS)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^
+	git add .
 
 %.o:%.c
 	$(CC) $(CFLAGS) -c $< -o $@
@@ -46,4 +47,5 @@ simulation:simulation.c $(OBJS)
 
 clean:
 	git rm -f *.o $(EXECS)
+	git add .
 

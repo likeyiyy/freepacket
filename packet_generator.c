@@ -224,9 +224,9 @@ void * packet_generator_loop(void * arg)
         int counter = 0;
         while(1)
         {
-            //if(counter < 100000)
+            if(counter < 1000000)
             {
-                //counter++;
+                counter++;
             
         /*
         * 1. get buffer from pool
