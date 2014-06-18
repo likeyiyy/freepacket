@@ -76,6 +76,7 @@ typedef struct _session_item
     uint32_t upper_port;
     uint32_t lower_port;
     uint8_t  protocol;
+    pool_t * pool;
 }session_item_t;
 
 #include "config.h"
@@ -83,6 +84,7 @@ typedef struct _session_item
 #include "checksum.h"
 #include "session_queue.h"
 #include "list.h"
+#include "hash.h"
 #include "packet_manager.h"
 #include "packet_parser.h"
 #include "parse.h"

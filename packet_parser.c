@@ -42,20 +42,45 @@ static inline uint32_t jhash_3words(uint32_t a, uint32_t b, uint32_t c, uint32_t
                 return c;
 }   
 
-static inline unsigned int hashfn(uint16_t id, uint32_t saddr, uint32_t daddr, uint8_t prot, uint32_t length)
-{   
-    return jhash_3words((uint32_t)id << 16 | prot, saddr, daddr,ipfrag_hash_rnd) & (length - 1); 
-} 
 
-#define HASH_INDEX(flow,a) ((flow->upper_ip^flow->lower_ip^flow->upper_port^flow->lower_port^(flow->protocol))%((a)->length))
+#define MAKE_HASH(v1,v2,h1,f1,f2,f3,f4,SIZE) \
+(\
+            v1 = f1 ^ f2,\
+            v2 = f3 ^ f4,\
+            h1 = v1 << 8,\
+            h1 ^= v1 >> 4,\
+            h1 ^= v1 >> 12,\
+            h1 ^= v1 >> 16,\
+            h1 ^= v2 << 6, \
+            h1 ^= v2 << 10, \
+            h1 ^= v2 << 14, \
+            h1 ^= v2 >> 7,\
+            h1%SIZE\
+) 
+static inline uint32_t make_hash(uint32_t f1,uint32_t f2,uint32_t f3,uint32_t f4,uint32_t SIZE) 
+{ 
+    uint32_t v1 = f1 ^ f2; 
+    uint32_t v2 = f3 ^ f4; 
+    uint32_t h1 = v1 << 8;
+    h1 ^= v1 >> 4; 
+    h1 ^= v1 >> 12; 
+    h1 ^= v1 >> 16; 
+                      
+    h1 ^= v2 << 6; 
+    h1 ^= v2 << 10; 
+    h1 ^= v2 << 14; 
+                      
+    h1 ^= v2 >> 7; 
+                      
+    return h1%SIZE; 
+}   
 
 extern manager_set_t * manager_set;
 parser_set_t * parser_set;
 static inline unsigned int hash_index(flow_item_t * flow,manager_set_t * manager_set)
 {
-    //printf("uip:%u,lip:%u,uport:%u,lport:%u,protocol:%u",flow->upper_ip,flow->lower_ip,flow->upper_port,flow->lower_port,flow->protocol);
-    uint32_t index = hashfn(flow->upper_port,flow->lower_ip,flow->upper_ip,flow->protocol,manager_set->length);
-    return index;
+    uint32_t v1,v2,h1;
+    return MAKE_HASH(v1,v2,h1,flow->lower_ip,flow->upper_ip,flow->lower_port,flow->upper_port,manager_set->length);
 }
 static inline void init_single_parser(parser_t * parser)
 {

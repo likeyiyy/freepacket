@@ -100,24 +100,40 @@ int pop_payload(void * payload, char * data,config_t * config)
     * */
     return config->pktlen - 54;
 }
+#define GET_NEXT_SRCIP(config) \
+        ((config->saddr_cur == config->saddr_max) ? \
+         (config->saddr_cur = config->saddr_min) : \
+         (++config->saddr_cur))
 static inline uint32_t get_next_srcip(config_t * config)
 {
     return config->saddr_cur == config->saddr_max ?
     config->saddr_cur = config->saddr_min:
     ++config->saddr_cur;
 }
+#define GET_NEXT_DSTIP(config) \
+        ((config->daddr_cur == config->daddr_max) ? \
+         (config->daddr_cur = config->daddr_min) : \
+         (++config->daddr_cur))
 static inline uint32_t get_next_dstip(config_t * config)
 {
     return config->daddr_cur == config->daddr_max ?
     config->daddr_cur = config->daddr_min:
     ++config->daddr_cur;
 }
+#define GET_NEXT_SRCPORT(config) \
+        ((config->sport_cur == config->sport_max) ? \
+         (config->sport_cur = config->sport_min) : \
+         (++config->sport_cur))
 static inline uint16_t get_next_srcport(config_t * config)
 {
     return config->sport_cur == config->sport_max ?
     config->sport_cur = config->sport_min:
     ++config->sport_cur;
 }
+#define GET_NEXT_DSTPORT(config) \
+        ((config->dport_cur == config->dport_max) ? \
+         (config->dport_cur = config->dport_min) : \
+         (++config->dport_cur))
 static inline uint16_t get_next_dstport(config_t * config)
 {
     return config->dport_cur == config->dport_max ?
@@ -127,8 +143,8 @@ static inline uint16_t get_next_dstport(config_t * config)
 static inline int pop_transmission_tcp(void * tcph,config_t * config)
 {
     struct tcphdr * tcp = (struct tcphdr *)tcph;
-    tcp->source = htons(get_next_srcport(config));
-    tcp->dest   = htons(get_next_dstport(config));
+    tcp->source = htons(GET_NEXT_SRCPORT(config));
+    tcp->dest   = htons(GET_NEXT_DSTPORT(config));
     tcp->doff  = sizeof(struct tcphdr) / 4;
     tcp->check = 0;
     return config->pktlen - 34;
@@ -136,8 +152,8 @@ static inline int pop_transmission_tcp(void * tcph,config_t * config)
 static inline int pop_transmission_udp(void * udph,config_t * config)
 {
     struct udphdr * udp = (struct udphdr *)udph;
-    udp->source = htons(get_next_srcport(config));
-    udp->dest   = htons(get_next_dstport(config));
+    udp->source = htons(GET_NEXT_SRCPORT(config));
+    udp->dest   = htons(GET_NEXT_DSTPORT(config));
     udp->len    = htons(config->pktlen - 34);
     udp->check  = 0;
     return config->pktlen - 34;
@@ -150,8 +166,8 @@ static inline void pop_iplayer_tcp(void * iph,config_t * config)
     ip->tot_len = htons(config->pktlen-14);
     ip->ttl     = IPDEFTTL;
     ip->protocol = IPPROTO_TCP;
-    ip->saddr   = htonl(get_next_srcip(config));
-    ip->daddr   = htonl(get_next_dstip(config));
+    ip->saddr   = htonl(GET_NEXT_SRCIP(config));
+    ip->daddr   = htonl(GET_NEXT_DSTIP(config));
     ip->check   = ~ip_xsum((uint16_t *)ip,sizeof(struct iphdr)/2,0);
     /*
     * Do TCP header Check Sum
@@ -168,8 +184,8 @@ static inline void pop_iplayer_udp(void * iph,config_t * config)
     ip->tot_len = htons(config->pktlen-14);
     ip->ttl     = IPDEFTTL;
     ip->protocol = IPPROTO_UDP;
-    ip->saddr   = htonl(get_next_srcip(config));
-    ip->daddr   = htonl(get_next_dstip(config));
+    ip->saddr   = htonl(GET_NEXT_SRCIP(config));
+    ip->daddr   = htonl(GET_NEXT_DSTIP(config));
     ip->check   = ~ip_xsum((uint16_t *)ip,sizeof(struct iphdr)/2,0);
     /*
     * Do UDP header Check Sum
