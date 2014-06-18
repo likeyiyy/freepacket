@@ -74,10 +74,10 @@ static void display_manager(window_t * win,manager_set_t * manager_set)
     for(int i = 0; i < manager_set->length; ++i)
     {
         
-        wprintw(win->win,"Queue Size:%lu pool free:%u list_length:%d\n",
+        wprintw(win->win,"Queue Size:%lu pool free:%u hash_count:%d\n",
                manager_set->manager[i].queue->length,
                manager_set->manager[i].session_pool->free_num,
-               manager_set->manager[i].list_length);
+               hash_count(manager_set->manager[i].ht));
     }
     wprintw(win->win,"\n\n\n");
     wrefresh(win->win);

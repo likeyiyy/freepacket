@@ -18,6 +18,7 @@ LDFLAGS= -lncurses -lpthread
 OBJS = display.o
 CC = gcc
 endif
+
 else
 CC = gcc
 MPIPE_CC=mpipe-cc
@@ -27,7 +28,7 @@ OPT = -Os
 CFLAGS= -std=gnu99 -Wall -g 
 OBJS += pool_manager.o node_queue.o checksum.o config.o \
 	 parse.o packet_generator.o packet_parser.o session_queue.o   \
-	 packet_manager.o 
+	 packet_manager.o  hash.o
 
 
 .PHONY:clean all
@@ -38,11 +39,13 @@ all:$(EXECS)
 
 simulation:simulation.c $(OBJS)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^
+	git add .
 
 %.o:%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 
 clean:
-	git rm -f $(OBJS) $(EXECS)
+	git rm -f *.o $(EXECS)
+	git add .
 

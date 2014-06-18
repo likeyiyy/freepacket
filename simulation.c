@@ -16,9 +16,10 @@ char ** top_argv;
 
 int main(int argc, char ** argv)
 {
-    init_manager_set(23);
+    init_manager_set(15);
+
     init_parser_set(10);
-    init_generator_set(10);
+    init_generator_set(15);
     sys_dispaly(generator_set,parser_set,manager_set);
     while(1)
     {
