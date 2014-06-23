@@ -13,6 +13,7 @@ static int next_prime(int x)
      long i, j;
      int f;
      
+     x = (x==0)?1:x;
      i = x;
      while (i++)
      {
@@ -31,6 +32,7 @@ static int next_prime(int x)
              return (int)i;
           }
      }
+    return 0;
 }
 
 /*
@@ -113,7 +115,7 @@ void  hash_add_item(hash_table * ht, uint32_t key, void * value )
         {
             memcpy(session->buffer + session->cur_len, new->buffer,new -> cur_len);
             session->cur_len += new->cur_len;
-            gettimeofday(&session->last_time, NULL);
+            session->last_time = GET_CYCLE_COUNT();
         }
         free_buf(new_blist->item.pool, new_blist); 
     }

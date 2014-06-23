@@ -22,7 +22,7 @@ typedef struct _session_manager
     //pthread_mutex_t    list_lock;
     struct hash_table * ht;
     pool_t            * session_pool;
-    session_queue_t   * queue;
+    manager_queue_t   * queue;
 }manager_t;
 typedef struct _set
 {

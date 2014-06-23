@@ -16,10 +16,26 @@ char ** top_argv;
 
 int main(int argc, char ** argv)
 {
-    init_manager_set(15);
 
-    init_parser_set(10);
-    init_generator_set(15);
+    int manager_num,parser_num,generator_num;
+    int ch;
+    while((ch = getopt(argc,argv,"m:p:g:")) != -1)
+    {
+        switch(ch)
+        {
+            case 'm': manager_num = atoi(optarg);break;
+            case 'p': parser_num  = atoi(optarg);break;
+            case 'g': generator_num = atoi(optarg);break;
+            default:printf("other option :%c\n",ch);break;
+        }
+    }
+    init_manager_set(manager_num);
+
+    init_parser_set(parser_num);
+
+    /* Generator */
+    init_generator_set(generator_num);
+
     sys_dispaly(generator_set,parser_set,manager_set);
     while(1)
     {

@@ -32,7 +32,6 @@ typedef struct _pool
     pthread_mutex_t mutex;
     pthread_cond_t  empty;
 
-
     int pool_type;
 }pool_t;
 
@@ -42,7 +41,7 @@ pool_t * init_pool(pool_type_t type,int size,int item_size);
 void destroy_pool(pool_t * pool);
 pool_t * get_pool(pool_type_t type);
 void free_buf(pool_t * pool,void * data);
-void get_buf(pool_t * pool,void ** data);
+int get_buf(pool_t * pool,void ** data);
 bool is_empty_pool(pool_t * pool);
 bool is_full_pool(pool_t * pool);
 #endif

@@ -25,9 +25,9 @@ MPIPE_CC=mpipe-cc
 endif
 
 OPT = -Os
-CFLAGS= -std=gnu99 -Wall -g 
-OBJS += pool_manager.o node_queue.o checksum.o config.o \
-	 parse.o packet_generator.o packet_parser.o session_queue.o   \
+CFLAGS= -std=gnu99 -Wall -g -O3
+OBJS += pool_manager.o parser_queue.o checksum.o config.o \
+	 parse.o packet_generator.o packet_parser.o manager_queue.o   \
 	 packet_manager.o  hash.o
 
 

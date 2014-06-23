@@ -86,7 +86,7 @@ static inline void init_single_parser(parser_t * parser)
 {
     parser->queue  = init_queue(NODE_POOL_SIZE);
     parser->pool   = init_pool(MANAGER_NODE_POOL,
-                              SESSION_QUEUE_LENGTH,
+                              MANAGER_QUEUE_LENGTH,
                               sizeof(flow_item_t));
     parser->pool->pool_type = 1;
     parser->total = 0;

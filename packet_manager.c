@@ -35,7 +35,7 @@ manager_set_t * init_manager_set(uint32_t length)
     int i = 0;
     for(i = 0; i < length; i++)
     {
-        set->manager[i].queue = init_session_queue(SESSION_QUEUE_LENGTH,sizeof(flow_item_t));
+        set->manager[i].queue = init_manager_queue(MANAGER_QUEUE_LENGTH,sizeof(flow_item_t));
         set->manager[i].ht = hash_create(1100);
         set->manager[i].session_pool = init_pool(SESSION_POOL,
                                                 SESSION_POOL_LENGTH,
@@ -98,7 +98,7 @@ static inline void make_new_session(struct blist * blist,flow_item_t * flow,mana
     item->upper_port = flow->upper_port;
     item->lower_port = flow->lower_port;
     item->protocol   = flow->protocol;
-    gettimeofday(&item->last_time,NULL);
+    item->last_time  = GET_CYCLE_COUNT();
     memcpy(item->buffer,flow->payload,flow->payload_len);
     item->cur_len  += flow->payload_len;
 }
@@ -107,14 +107,14 @@ void delete_session(hash_table * ht,bucket_t * bucket)
     struct list_head * p, * list;
     struct blist * node;
     struct list_head * next;
-    struct timeval current_time;
+    uint64_t current_time;
     list = &bucket->list;
-    gettimeofday(&current_time,NULL);
+    current_time = GET_CYCLE_COUNT();
     list_for_each_safe(p,next,list)
     {
         node = list_entry(p,struct blist,listhead); 
         if((1.0 * node->item.cur_len > MAX_FACTOR * node->item.length) ||
-        (current_time.tv_sec - node->item.last_time.tv_sec > DESTORY_TIME))
+        (current_time - node->item.last_time > DESTORY_TIME))
         {
             list_del(&node->listhead);
             free_buf(node->item.pool,(void *)node); 
@@ -152,20 +152,19 @@ void * packet_manager_loop(void * arg)
          * */
         pop_session_buf(manager->queue,(void **)&flow);
         /* 首先 copy 释放*/
-        get_buf(manager->session_pool,(void **)&new_blist);
-        make_new_session(new_blist, flow, manager);
-        free_flow(flow);
 
+        get_buf(manager->session_pool,(void **)&new_blist);
+
+        make_new_session(new_blist, flow, manager);
+
+        free_flow(flow);
         session = &new_blist->item;
         index = MAKE_HASH(v1,v2,h1,session->lower_port,
                 session->upper_ip,
                 session->upper_port,
                 session->lower_ip,
                 manager->ht->num_buckets);
-#if 0
-
-#else
         hash_add_item(manager->ht, index, new_blist); 
-#endif
+
     }
 }

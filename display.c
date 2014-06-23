@@ -43,9 +43,10 @@ static void display_generator(window_t * win,generator_set_t * generator_set)
     for(int i = 0; i < generator_set->numbers; ++i)
     {
         pool = generator_set->generator[i].pool; 
-        wprintw(win->win,"pool free:%u total_send_byte:%llu \n",
+        wprintw(win->win,"pool free:%u total_send_byte:%llu drop total :%lu\n",
                 pool->free_num,
-                generator_set->generator[i].total_send_byte 
+                generator_set->generator[i].total_send_byte,
+                generator_set->generator[i].drop_total
                 );
         /* FIXME Only */
         new += generator_set->generator[i].total_send_byte;

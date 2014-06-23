@@ -12,6 +12,7 @@ typedef struct generator
     int         index;
     int         next_thread_id;
     uint64_t    total_send_byte;
+    uint64_t    drop_total;
     config_t  * config;
     pool_t    * pool;
     parser_set_t * parser_set;

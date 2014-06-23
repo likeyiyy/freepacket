@@ -201,18 +201,12 @@ static inline void pop_datalink(void * packet,config_t * config)
     memcpy(eth_hdr->h_source,config->dstmac,ETH_ALEN);
     eth_hdr->h_proto = htons(ETH_P_IP);
 }
-void * packet_generator_loop(void * arg)
+
+static void generator_mode(generator_t * generator,int data_len)
 {
-    pthread_detach(pthread_self());
-    pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, 0);
-    pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, 0);
-    generator_t * generator = (generator_t *)arg;
-    config_t * config = generator->config;
     packet_t * packet;
     int payload_length;
     int tcp_length,udp_length;
-    int data_len = config->pktlen + sizeof(packet_t);
-    srand((unsigned int)time(NULL));
     if(config->protocol == IPPROTO_TCP)
     {
         /*
@@ -224,15 +218,18 @@ void * packet_generator_loop(void * arg)
         int counter = 0;
         while(1)
         {
-            if(counter < 1000000)
+            //if(counter < 3000000)
             {
                 counter++;
             
         /*
         * 1. get buffer from pool
         * */
-            gettimeofday(&generator->old,NULL);
-            get_buf(generator->pool,(void **)&packet);
+            if(get_buf(generator->pool,(void **)&packet) < 0)
+            {
+                generator->drop_total++;
+                continue;
+            }
             bzero(packet,data_len);
             packet->pool   = generator->pool;
             packet->length = config->pktlen;
@@ -248,15 +245,10 @@ void * packet_generator_loop(void * arg)
         * 3. 数据放到下一步的队列里。
         * */
             /* 数据包均匀 分部到 下一个工作的线程里。*/
-            //printf("---------------%d----------\n",generator->next_thread_id);
             parser_t * parser = &generator->parser_set->parser[generator->next_thread_id++];
-            //parser_t * parser = &generator->parser_set->parser[rand()%generator->parser_set->numbers];
             generator->next_thread_id = (generator->next_thread_id == generator->parser_set->numbers)? 0 : generator->next_thread_id;
             push_to_queue(parser->queue,packet);
-            //gettimeofday(&generator->now,NULL);
-            //printf("----------------------period time:%llu\n",(generator->now.tv_usec + 1000000 - generator->old.tv_usec)%1000000) ;
             generator->total_send_byte += config->pktlen;
-            //pthread_testcancel();
 
             }
         }
@@ -282,7 +274,6 @@ void * packet_generator_loop(void * arg)
         /*
         * 3. 数据放到下一步的队列里。
         * */
-            //printf("---------------%d----------\n",generator->next_thread_id);
             parser_t * parser = &generator->parser_set->parser[generator->next_thread_id++];
             generator->next_thread_id = (generator->next_thread_id == generator->parser_set->numbers)? 0 : generator->next_thread_id;
             push_to_queue(parser->queue,(void*)packet);
@@ -294,4 +285,19 @@ void * packet_generator_loop(void * arg)
         printf("NOT UDP NOT TCP config error\n");
         exit(-1);
     }
+
+}
+void * packet_generator_loop(void * arg)
+{
+    pthread_detach(pthread_self());
+    pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, 0);
+    pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, 0);
+    generator_t * generator = (generator_t *)arg;
+    config_t * config = generator->config;
+    packet_t * packet;
+    int payload_length;
+    int tcp_length,udp_length;
+    int data_len = config->pktlen + sizeof(packet_t);
+    srand((unsigned int)time(NULL));
+    generator_mode(generator,data_len);
 }
