@@ -10,6 +10,7 @@
 typedef enum _pool_type
 {
     PACKET_POOL,
+    FLOW_ITEM_POOL,
     SESSION_POOL,
     BUFFER_POOL,
     MANAGER_NODE_POOL
@@ -32,7 +33,7 @@ typedef struct _pool
     pthread_mutex_t mutex;
     pthread_cond_t  empty;
 
-    int pool_type;
+    pool_type_t pool_type;
 }pool_t;
 
 extern pool_t * packet_pool, * session_pool, * buffer_pool;

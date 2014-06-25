@@ -18,6 +18,7 @@ int main(int argc, char ** argv)
 {
 
     int manager_num,parser_num,generator_num;
+    manager_num = parser_num = generator_num = 1;
     int ch;
     while((ch = getopt(argc,argv,"m:p:g:")) != -1)
     {

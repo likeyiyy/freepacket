@@ -51,7 +51,7 @@ static void display_generator(window_t * win,generator_set_t * generator_set)
         /* FIXME Only */
         new += generator_set->generator[i].total_send_byte;
     }
-    wprintw(win->win,"All Byte add:%llu,%llu MB\n",(new-old),(new-old)/(1024*1024));
+    wprintw(win->win,"All Byte add:%llu,%llu Mbps\n",(new-old),(new-old)/(1024*1024)*8);
     old = new;
     new = 0;
     wprintw(win->win,"\n\n\n");

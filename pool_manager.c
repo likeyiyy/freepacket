@@ -132,7 +132,7 @@ int get_buf(pool_t * pool,void ** data)
     while(pool->push_pos == pool->pop_pos)
     {
         //print_pool_type(pool);
-        if(pool->pool_type == PACKET_POOL)
+        if((pool->pool_type == PACKET_POOL) || (pool->pool_type == FLOW_ITEM_POOL))
         {
             pthread_mutex_unlock(&pool->mutex);
             return -1; 

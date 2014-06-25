@@ -52,6 +52,7 @@ bool push_session_buf(manager_queue_t * manager_queue,void * data)
     while(((manager_queue->push_pos + 1) % manager_queue->total == manager_queue->pop_pos))
     {
         DEBUG("Error:manager_queue is full\n");
+        //pthread_mutex_unlock(&manager_queue->mutex);
         pthread_cond_wait(&manager_queue->full,&manager_queue->mutex);
     }
     manager_queue->node[manager_queue->push_pos] = data;

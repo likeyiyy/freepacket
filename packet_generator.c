@@ -5,15 +5,45 @@
 	> Created Time: Wed 30 Apr 2014 03:02:16 PM CST
  ************************************************************************/
 #include "includes.h"
-
 //#define memcpy(a,b,c) do { memcpy(a,b,c);printf("packet_generator_loop memcpy here\n"); } while(0)
 static   const char * config_file = CONFIG_FILE;
 config_t * config;
 generator_set_t * generator_set;
 extern pool_t * packet_pool;
 extern parser_set_t * parser_set;
-extern struct timeval G_old;
-extern struct timeval G_new;
+static uint32_t get_cpu_mhz()
+{
+        int fp; 
+        char buffer[4096];
+        fp = open("/proc/cpuinfo",O_RDONLY);
+        if(fp < 0)
+        {   
+                printf("can not open /proc/cpuinfo \n");
+                exit(-1);
+            }   
+        int result = read(fp,buffer,4096);
+        if(result < 0)
+        {   
+                printf("read file error\n");
+                exit(-1);
+            }   
+        close(fp);
+        char * p = strstr(buffer,"cpu MHz");
+        while(!isdigit(*p++))
+            continue;
+        p--;
+        uint32_t mhz = atoi(p);
+        return mhz;
+}
+#define NS 1000000000
+uint32_t calc_period(double length,double rate,uint32_t thread_num)
+{
+     uint32_t mhz = get_cpu_mhz();
+    printf("cpu mhz %d\n",mhz);
+     double l = 7.8 * NS * length;
+     double x = rate * 1024 * 1024.0;
+     return  (thread_num * l / x);
+}
 void init_generator_set(int numbers)
 {
     int i = 0;
@@ -23,6 +53,9 @@ void init_generator_set(int numbers)
     read_config_file(config_file,config);
     //print_config_file(config);
     config->numbers = PACKET_POOL_SIZE;  
+    printf("speed:%d,length:%d\n",config->speed,config->pktlen);
+    config->period  = calc_period(config->pktlen,config->speed,numbers);
+    printf("period: %d\n",config->period);
     /*
      * 初始化一个缓冲区池。
      * 这个缓冲区的头部是个结构体指针，下面是packet_length的长度的缓冲区。
@@ -34,8 +67,7 @@ void init_generator_set(int numbers)
     for(i = 0; i < numbers; ++i)
     {
         generator_set->generator[i].pool = init_pool(PACKET_POOL,config->numbers,config->pktlen + sizeof(packet_t));
-        generator_set->generator[i].pool->pool_type = 0;
-        
+        generator_set->generator[i].pool->pool_type = PACKET_POOL;
         generator_set->generator[i].config = malloc(sizeof(config_t)); 
         exit_if_ptr_is_null(generator_set->generator[i].config,"config error");
         memcpy(generator_set->generator[i].config,config,sizeof(config_t));
@@ -43,10 +75,14 @@ void init_generator_set(int numbers)
         generator_set->generator[i].index = i;
         generator_set->generator[i].next_thread_id = 0;
         generator_set->generator[i].total_send_byte = 0;
-        pthread_create(&generator_set->generator[i].id,
+        if(pthread_create(&generator_set->generator[i].id,
                       NULL,
                       packet_generator_loop,
-                      &generator_set->generator[i]); 
+                      &generator_set->generator[i]) != 0)
+        {
+            printf("Init Packet Generator thread failed. Exit Now.\n");
+            exit(0);
+        }
     }
 }
 void   destroy_generator(generator_set_t * generator_set)
@@ -201,7 +237,6 @@ static inline void pop_datalink(void * packet,config_t * config)
     memcpy(eth_hdr->h_source,config->dstmac,ETH_ALEN);
     eth_hdr->h_proto = htons(ETH_P_IP);
 }
-
 static void generator_mode(generator_t * generator,int data_len)
 {
     packet_t * packet;
@@ -215,13 +250,63 @@ static void generator_mode(generator_t * generator,int data_len)
         * 或许，一亿次循环能减少一秒把。(@_@)
         * */
         //struct timeval old, new;
+        struct timespec oldtime,newtime;
         int counter = 0;
+        uint64_t old,new;
+        clock_gettime(CLOCK_REALTIME,&oldtime);
+        old = oldtime.tv_sec * NS + oldtime.tv_nsec;
         while(1)
         {
             //if(counter < 3000000)
             {
                 counter++;
-            
+        /*
+        * 1. get buffer from pool
+        * */
+                if(get_buf(generator->pool,(void **)&packet) < 0)
+                {
+                    generator->drop_total++;
+                    continue;
+                }
+                bzero(packet,data_len);
+                packet->pool   = generator->pool;
+                packet->length = config->pktlen;
+                packet->data   = (unsigned char *)packet + sizeof(packet_t);
+        /*
+        * 2. 根据配置文件比如UDP，TCP来产生包结构。
+        * */
+                payload_length = pop_payload(packet->data+54,config->pkt_data,config);
+                tcp_length = pop_transmission_tcp(packet->data + 34,config);
+                pop_iplayer_tcp(packet->data + 14,config);
+                pop_datalink(packet->data,config);
+        /*
+        * 3. 数据放到下一步的队列里。
+        * */
+                /* 数据包均匀 分部到 下一个工作的线程里。*/
+                parser_t * parser = &generator->parser_set->parser[generator->next_thread_id++];
+                generator->next_thread_id = (generator->next_thread_id == generator->parser_set->numbers)? 0 : generator->next_thread_id;
+                push_to_queue(parser->queue,packet);
+                generator->total_send_byte += config->pktlen;
+            }
+            clock_gettime(CLOCK_REALTIME,&newtime);
+            new = newtime.tv_sec * NS + newtime.tv_nsec;
+            new -= old;
+            while((int64_t)new - (int64_t)generator->config->period < 0)
+            { 
+                clock_gettime(CLOCK_REALTIME,&newtime);
+                new = newtime.tv_sec * NS + newtime.tv_nsec;
+                new -= old;
+            } 
+            clock_gettime(CLOCK_REALTIME,&oldtime);
+            old = oldtime.tv_sec * NS + oldtime.tv_nsec;
+        }
+    }
+    else if(config->protocol == IPPROTO_UDP)
+    {
+        uint64_t old,new;
+        old = GET_CYCLE_COUNT();
+        while(1)
+        {
         /*
         * 1. get buffer from pool
         * */
@@ -237,36 +322,6 @@ static void generator_mode(generator_t * generator,int data_len)
         /*
         * 2. 根据配置文件比如UDP，TCP来产生包结构。
         * */
-            //payload_length = pop_payload(packet->data+54,config->pkt_data,config);
-            tcp_length = pop_transmission_tcp(packet->data + 34,config);
-            pop_iplayer_tcp(packet->data + 14,config);
-            pop_datalink(packet->data,config);
-        /*
-        * 3. 数据放到下一步的队列里。
-        * */
-            /* 数据包均匀 分部到 下一个工作的线程里。*/
-            parser_t * parser = &generator->parser_set->parser[generator->next_thread_id++];
-            generator->next_thread_id = (generator->next_thread_id == generator->parser_set->numbers)? 0 : generator->next_thread_id;
-            push_to_queue(parser->queue,packet);
-            generator->total_send_byte += config->pktlen;
-
-            }
-        }
-    }
-    else if(config->protocol == IPPROTO_UDP)
-    {
-        while(1)
-        {
-        /*
-        * 1. get buffer from pool
-        * */
-            get_buf(generator->pool,(void **)&packet);
-            bzero(packet,data_len);
-            packet->length = config->pktlen;
-            packet->data   = (unsigned char *)packet + sizeof(packet_t);
-        /*
-        * 2. 根据配置文件比如UDP，TCP来产生包结构。
-        * */
             payload_length = pop_payload(packet->data+42,config->pkt_data,config);
             udp_length = pop_transmission_udp(packet->data+34,config);
             pop_iplayer_udp(packet->data+14,config);
@@ -277,6 +332,7 @@ static void generator_mode(generator_t * generator,int data_len)
             parser_t * parser = &generator->parser_set->parser[generator->next_thread_id++];
             generator->next_thread_id = (generator->next_thread_id == generator->parser_set->numbers)? 0 : generator->next_thread_id;
             push_to_queue(parser->queue,(void*)packet);
+            generator->total_send_byte += config->pktlen;
             pthread_testcancel();
         }
     }
@@ -285,7 +341,6 @@ static void generator_mode(generator_t * generator,int data_len)
         printf("NOT UDP NOT TCP config error\n");
         exit(-1);
     }
-
 }
 void * packet_generator_loop(void * arg)
 {
