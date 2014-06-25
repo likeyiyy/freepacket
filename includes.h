@@ -39,7 +39,7 @@
 #define SESSION_QUEUE_LENGTH 50000
 #define SESSION_POOL_LENGTH  10000
 #define MAX_FACTOR           0.75
-#define DESTORY_TIME         1
+#define DESTORY_TIME         10000000
 #include "pool_manager.h"
 /*
 * 一个数据包却要有数据部分和长度部分，真的必要吗？
@@ -64,11 +64,10 @@ typedef struct flow_item
     unsigned int    payload_len;
     pool_t * pool;          /* 这个包来自哪个池子*/
 }flow_item_t;
-
 typedef struct _session_item
 {
     uint8_t buffer[SESSION_BUFFER_SIZE];
-    struct timeval last_time;
+    uint64_t last_time;
     uint32_t length;
     uint32_t cur_len;
     uint32_t upper_ip;
@@ -76,13 +75,31 @@ typedef struct _session_item
     uint32_t upper_port;
     uint32_t lower_port;
     uint8_t  protocol;
+    pool_t * pool;
 }session_item_t;
+
+#define INTEL YES
+#ifdef INTEL
+static inline uint64_t get_cycle_count_intel()
+{
+    unsigned int lo,hi; \
+    __asm__ __volatile__ ("rdtsc" : "=a" (lo), "=d" (hi)); \
+    return ((uint64_t)hi << 32) | lo; \
+}
+#define GET_CYCLE_COUNT()  get_cycle_count_intel()
+#elif defined TILERA
+#include <arch/cycle.h>
+#define GET_CYCLE_COUNT() get_cycle_count()
+#else
+#error "get_cycle_count not define"
+#endif
 
 #include "config.h"
 #include "node_queue.h"
 #include "checksum.h"
 #include "session_queue.h"
 #include "list.h"
+#include "hash.h"
 #include "packet_manager.h"
 #include "packet_parser.h"
 #include "parse.h"
