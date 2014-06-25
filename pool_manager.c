@@ -126,12 +126,17 @@ static inline void print_pool_type(pool_t * pool)
 /*
 *  本函数不用is_empty_pool，因为防止锁中锁
 * */
-void get_buf(pool_t * pool,void ** data)
+int get_buf(pool_t * pool,void ** data)
 {
     pthread_mutex_lock(&pool->mutex);
     while(pool->push_pos == pool->pop_pos)
     {
         //print_pool_type(pool);
+        if((pool->pool_type == PACKET_POOL) || (pool->pool_type == FLOW_ITEM_POOL))
+        {
+            pthread_mutex_unlock(&pool->mutex);
+            return -1; 
+        }
         pthread_cond_wait(&pool->empty,&pool->mutex);
     }
     *data = pool->node[pool->pop_pos];
@@ -142,6 +147,7 @@ void get_buf(pool_t * pool,void ** data)
         pool->pop_pos = 0;
     }
     pthread_mutex_unlock(&pool->mutex);
+    return 0;
 }
 /*
 *  

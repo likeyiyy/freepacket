@@ -86,9 +86,9 @@ static inline void init_single_parser(parser_t * parser)
 {
     parser->queue  = init_queue(NODE_POOL_SIZE);
     parser->pool   = init_pool(MANAGER_NODE_POOL,
-                              SESSION_QUEUE_LENGTH,
+                              MANAGER_QUEUE_LENGTH,
                               sizeof(flow_item_t));
-    parser->pool->pool_type = 1;
+    parser->pool->pool_type = FLOW_ITEM_POOL;
     parser->total = 0;
     parser->manager_set  = manager_set;
 }
@@ -191,6 +191,14 @@ static inline void make_flow_item_udp(flow_item_t * flow,packet_t * packet,struc
     flow->payload  = packet->data + header_len;
     flow->payload_len = packet->length - header_len;
 }
+static inline void free_flow(flow_item_t * flow)
+{
+    /* 
+    * 注意这两个free
+    * */
+    free_buf(flow->packet->pool,flow->packet);
+    free_buf(flow->pool,flow);
+}
 //static pthread_mutex_t print_lock = PTHREAD_MUTEX_INITIALIZER;
 void * packet_parser_loop(void * arg)
 {
@@ -233,15 +241,19 @@ void * packet_parser_loop(void * arg)
                 /*
                 * 从pool中取一个包头。
                 * */
-                get_buf(parser->pool,(void **)&flow);        
+                if(get_buf(parser->pool,(void **)&flow) < 0)        
+                {
+                    free_packet(packet);
+                    continue;
+                }
                 flow->pool = parser->pool;
                 make_flow_item_tcp(flow,packet,ip_hdr,tcp_hdr,header_len);
                 /*
                 * 送给下个流水线的队列。
                 * */
                 index = hash_index(flow,parser->manager_set);
-//                printf("INDEX: %u\n",index);
                 push_session_buf(parser->manager_set->manager[index].queue,flow);
+                
             }
         }
         else if(ip_hdr->protocol == IPPROTO_UDP)

@@ -51,6 +51,7 @@ typedef struct __config
     char * pkt_data;
     int numbers;   /* PACKET pool 的大小*/
     int pktlen;
+    uint32_t period;
 }config_t;
 int ether_atoe(const char *a, unsigned char *e);
 char * ether_etoa(const unsigned char *e, char *a);

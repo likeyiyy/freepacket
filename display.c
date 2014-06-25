@@ -43,14 +43,15 @@ static void display_generator(window_t * win,generator_set_t * generator_set)
     for(int i = 0; i < generator_set->numbers; ++i)
     {
         pool = generator_set->generator[i].pool; 
-        wprintw(win->win,"pool free:%u total_send_byte:%llu \n",
+        wprintw(win->win,"pool free:%u total_send_byte:%llu drop total :%lu\n",
                 pool->free_num,
-                generator_set->generator[i].total_send_byte 
+                generator_set->generator[i].total_send_byte,
+                generator_set->generator[i].drop_total
                 );
         /* FIXME Only */
         new += generator_set->generator[i].total_send_byte;
     }
-    wprintw(win->win,"All Byte add:%llu,%llu MB\n",(new-old),(new-old)/(1024*1024));
+    wprintw(win->win,"All Byte add:%llu,%llu Mbps\n",(new-old),(new-old)/(1024*1024)*8);
     old = new;
     new = 0;
     wprintw(win->win,"\n\n\n");
@@ -77,7 +78,7 @@ static void display_manager(window_t * win,manager_set_t * manager_set)
         wprintw(win->win,"Queue Size:%lu pool free:%u hash_count:%d\n",
                manager_set->manager[i].queue->length,
                manager_set->manager[i].session_pool->free_num,
-               manager_set->manager[i].ht->hash_count);
+               hash_count(manager_set->manager[i].ht));
     }
     wprintw(win->win,"\n\n\n");
     wrefresh(win->win);

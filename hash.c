@@ -13,6 +13,7 @@ static int next_prime(int x)
      long i, j;
      int f;
      
+     x = (x==0)?1:x;
      i = x;
      while (i++)
      {
@@ -31,6 +32,7 @@ static int next_prime(int x)
              return (int)i;
           }
      }
+    return 0;
 }
 
 /*
@@ -58,6 +60,7 @@ hash_table * hash_create(int num)
     {
         INIT_LIST_HEAD(&b->list); 
         pthread_mutex_init(&b->lock, NULL);
+        b->count = 0;
         b++;
     }
     return result;
@@ -85,18 +88,20 @@ void  hash_add_item(hash_table * ht, uint32_t key, void * value )
     struct blist * new_blist = (struct blist *)value;
     struct blist * blist;
     struct list_head * ll;
+
     hash_item_t * session = &new_blist->item;
 
     bucket_t * bucket = &ht -> buckets[key % ht->num_buckets];
+
     pthread_mutex_lock(&bucket->lock);
     ll = &bucket->list;
     blist = find_list(ll,session);    
+
     if(!blist)
     {
         INIT_LIST_HEAD(&new_blist->listhead);
         list_add_tail(&new_blist->listhead,ll);
-        //++manager->list_length;
-        ++ht->hash_count;
+        ++bucket->count;
     }
     /* 
     * Found it, and memcpy it.
@@ -110,7 +115,7 @@ void  hash_add_item(hash_table * ht, uint32_t key, void * value )
         {
             memcpy(session->buffer + session->cur_len, new->buffer,new -> cur_len);
             session->cur_len += new->cur_len;
-            gettimeofday(&session->last_time, NULL);
+            session->last_time = GET_CYCLE_COUNT();
         }
         free_buf(new_blist->item.pool, new_blist); 
     }
@@ -129,8 +134,33 @@ void  hash_travel_delete(hash_table * ht)
     {
 
         pthread_mutex_lock(&bucket->lock);
-        delete_session(ht,&bucket->list);
+        delete_session(ht,bucket);
         pthread_mutex_unlock(&bucket->lock);
         bucket++;
     }
+}
+
+
+
+/*
+ * unsigned int hash_count(hash_table *ht)
+ *
+ * Return total number of elements contained in hash table.
+ */
+
+uint32_t hash_count(hash_table * ht)
+
+{
+    register int i = 0;
+    register int cnt = 0;
+    register bucket_t *bucket;
+
+    bucket = ht->buckets;
+    while (i++ < ht->num_buckets)
+    {
+	    cnt += bucket->count;
+	    bucket++;
+    }
+
+    return cnt;
 }

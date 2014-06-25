@@ -11,10 +11,10 @@
 typedef struct bucket { 
     struct list_head list;
     pthread_mutex_t  lock;
+    uint32_t count;
 } bucket_t; 
                
 typedef struct hash_table {
-        uint64_t hash_count;
         int num_buckets;
         bucket_t *buckets;
 } hash_table;
@@ -35,4 +35,5 @@ void * hash_lookup_item(hash_table * ht,uint32_t key, void * value);
 * 4. 遍历并且删除不符合条件的.
 * */
 void   hash_travel_delete(hash_table * ht);
+uint32_t hash_count(hash_table *ht);
 #endif

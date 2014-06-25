@@ -22,7 +22,7 @@ typedef struct _session_manager
     //pthread_mutex_t    list_lock;
     struct hash_table * ht;
     pool_t            * session_pool;
-    session_queue_t   * queue;
+    manager_queue_t   * queue;
 }manager_t;
 typedef struct _set
 {
@@ -39,5 +39,5 @@ manager_set_t * init_manager_set(uint32_t length);
 void * packet_manager_loop(void * arg);
 
 struct blist * find_list(struct list_head * head, session_item_t * session);
-void delete_session(hash_table * ht,struct list_head * list);
+void delete_session(hash_table * ht,bucket_t * bucket);
 #endif

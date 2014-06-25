@@ -36,10 +36,10 @@
 #define DEBUG(format,...)  
 #endif
 #define SESSION_BUFFER_SIZE 65536 
-#define SESSION_QUEUE_LENGTH 50000
+#define MANAGER_QUEUE_LENGTH 50000
 #define SESSION_POOL_LENGTH  10000
 #define MAX_FACTOR           0.75
-#define DESTORY_TIME         10000000
+#define DESTORY_TIME         100000000
 #include "pool_manager.h"
 /*
 * 一个数据包却要有数据部分和长度部分，真的必要吗？
@@ -95,9 +95,9 @@ static inline uint64_t get_cycle_count_intel()
 #endif
 
 #include "config.h"
-#include "node_queue.h"
+#include "parser_queue.h"
 #include "checksum.h"
-#include "session_queue.h"
+#include "manager_queue.h"
 #include "list.h"
 #include "hash.h"
 #include "packet_manager.h"
