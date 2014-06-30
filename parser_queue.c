@@ -69,7 +69,7 @@ int push_to_queue(queue_t * q, void * data)
 {
     pthread_mutex_lock(&q->lock);
     node_t * node = NULL;
-    get_buf(q->node_pool,(void **)&node);
+    get_buf(q->node_pool,NO_WAIT_MODE,(void **)&node);
     if(node == NULL)
     {
         DEBUG("get node error from node pool");

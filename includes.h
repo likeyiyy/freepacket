@@ -35,6 +35,8 @@
 #else
 #define DEBUG(format,...)  
 #endif
+#define WAIT_MODE    0
+#define NO_WAIT_MODE 1
 #define SESSION_BUFFER_SIZE 65536 
 #define MANAGER_QUEUE_LENGTH 50000
 #define SESSION_POOL_LENGTH  10000
@@ -54,27 +56,27 @@ typedef struct packet
 }packet_t;
 typedef struct flow_item
 {
-    packet_t * packet;
     uint32_t upper_ip;
     uint32_t lower_ip;
     uint32_t upper_port;
     uint32_t lower_port;
     uint8_t  protocol;
+    packet_t * packet;
     unsigned char * payload;
     unsigned int    payload_len;
     pool_t * pool;          /* 这个包来自哪个池子*/
 }flow_item_t;
 typedef struct _session_item
 {
-    uint8_t buffer[SESSION_BUFFER_SIZE];
-    uint64_t last_time;
-    uint32_t length;
-    uint32_t cur_len;
     uint32_t upper_ip;
     uint32_t lower_ip;
     uint32_t upper_port;
     uint32_t lower_port;
     uint8_t  protocol;
+    uint8_t buffer[SESSION_BUFFER_SIZE];
+    uint64_t last_time;
+    uint32_t length;
+    uint32_t cur_len;
     pool_t * pool;
 }session_item_t;
 

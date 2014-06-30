@@ -5,8 +5,8 @@
 	> Created Time: Wed 30 Apr 2014 03:30:33 PM CST
  ************************************************************************/
 #include "includes.h"
-pool_t * packet_pool, * session_pool, * buffer_pool;
-pool_t * manager_node_pool;
+//pool_t * packet_pool, * session_pool, * buffer_pool;
+//pool_t * manager_node_pool;
 /*
 * Date:     2014年4月30日15:53:00
 * Author:   likeyi
@@ -41,11 +41,15 @@ pool_t * init_pool(pool_type_t type,int numbers,int item_size)
     pool->push_pos = numbers - 1;
     pthread_mutex_init(&pool->mutex,NULL);
     pthread_cond_init(&pool->empty,NULL);
+#if 0
     switch(type)
     {
         case PACKET_POOL:
         packet_pool = pool;
         break;
+        case FLOW_ITEM_POOL:
+        packet_pool = pool;
+        breakk;
         case SESSION_POOL:
         session_pool = pool;
         break;
@@ -56,6 +60,7 @@ pool_t * init_pool(pool_type_t type,int numbers,int item_size)
         manager_node_pool = pool;
         break;
     }
+#endif
     return pool;
 }
 /*
@@ -73,27 +78,6 @@ void destroy_pool(pool_t * pool)
     pool->buffer = NULL;
     free(pool);
     pool = NULL;
-}
-pool_t * get_pool(pool_type_t type)
-{
-    switch(type)
-    {
-        case PACKET_POOL:
-        return packet_pool;
-        break;
-        case SESSION_POOL:
-        return session_pool;
-        break;
-        case BUFFER_POOL:
-        return buffer_pool;
-        break;
-        case MANAGER_NODE_POOL:
-        return manager_node_pool;
-        break;
-	default:
-	return packet_pool;
-	break;
-    }
 }
 void free_buf(pool_t * pool,void * data)
 {
@@ -121,23 +105,27 @@ static inline void print_pool_type(pool_t * pool)
         case 1:printf("Parser To Seeion Pool\n");break;
         case 2:printf("Session Pool\n");break;
         case 3:printf("Generator To Parser Queue\n");break;
+        case 4:break;
     }
 }
 /*
 *  本函数不用is_empty_pool，因为防止锁中锁
 * */
-int get_buf(pool_t * pool,void ** data)
+int get_buf(pool_t * pool,int flag, void ** data)
 {
     pthread_mutex_lock(&pool->mutex);
     while(pool->push_pos == pool->pop_pos)
     {
         //print_pool_type(pool);
-        if((pool->pool_type == PACKET_POOL) || (pool->pool_type == FLOW_ITEM_POOL))
+        if(flag == NO_WAIT_MODE)
         {
             pthread_mutex_unlock(&pool->mutex);
             return -1; 
         }
-        pthread_cond_wait(&pool->empty,&pool->mutex);
+        else
+        {
+            pthread_cond_wait(&pool->empty,&pool->mutex);
+        }
     }
     *data = pool->node[pool->pop_pos];
     ++pool->pop_pos;

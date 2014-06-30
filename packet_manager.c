@@ -42,6 +42,7 @@ manager_set_t * init_manager_set(uint32_t length)
                                                 sizeof(struct blist));
         set->manager[i].session_pool->pool_type = 2;
         set->manager[i].index = i;
+        set->manager[i].drop_cause_pool_empty = 0;
     }
     for(i = 0; i < length; i++)
     {
@@ -52,55 +53,32 @@ manager_set_t * init_manager_set(uint32_t length)
     }
     return set;
 }
-static inline int compare_session(session_item_t * item , session_item_t * session1)
+static inline int compare_session(session_item_t * item , flow_item_t * flow)
 {
     session_item_t * session = item;
-    if( session->protocol == session1->protocol &&
-        session->upper_ip == session1->upper_ip &&
-        session->lower_ip == session1->lower_ip &&
-        session->upper_port == session1->upper_port &&
-        session->lower_port   == session1->lower_port) 
+    if( session->protocol == flow->protocol &&
+        session->upper_ip == flow->upper_ip &&
+        session->lower_ip == flow->lower_ip &&
+        session->upper_port == flow->upper_port &&
+        session->lower_port   == flow->lower_port) 
     {
         return 0;
     }
     return 1;
 }
-struct blist * find_list(struct list_head * head, session_item_t * session)
+struct blist * find_list(struct list_head * head, flow_item_t * flow)
 {
     struct list_head * p;
     struct blist * node;
     list_for_each(p,head)
     {
         node = list_entry(p,struct blist,listhead);
-        if(compare_session(&node->item,session) == 0)
+        if(compare_session(&node->item, flow) == 0)
         {
             return node;
         }
     }
     return NULL;
-}
-static inline void free_flow(flow_item_t * flow)
-{
-    /* 
-    * 注意这两个free
-    * */
-    free_buf(flow->packet->pool,flow->packet);
-    free_buf(flow->pool,flow);
-}
-static inline void make_new_session(struct blist * blist,flow_item_t * flow,manager_t * manager)
-{
-    session_item_t * item = &blist->item;
-    item->pool       = manager->session_pool;
-    item->length     = SESSION_BUFFER_SIZE;
-    item->cur_len    = 0;
-    item->upper_ip   = flow->upper_ip;
-    item->lower_ip   = flow->lower_ip;
-    item->upper_port = flow->upper_port;
-    item->lower_port = flow->lower_port;
-    item->protocol   = flow->protocol;
-    item->last_time  = GET_CYCLE_COUNT();
-    memcpy(item->buffer,flow->payload,flow->payload_len);
-    item->cur_len  += flow->payload_len;
 }
 void delete_session(hash_table * ht,bucket_t * bucket)
 {
@@ -138,33 +116,31 @@ void * packet_manager_loop(void * arg)
 {
     manager_t * manager = (manager_t *)arg;
     flow_item_t * flow;
-    session_item_t * session;
     pthread_t clean_id;
     pthread_create(&clean_id,NULL,process_session,arg);
-
-    struct blist * new_blist;
 
     uint32_t v1,v2,h1,index;
     while(1)
     {
         /*
-         * 只有确实有数据时才返回。
+         * 1.只有确实有数据时才返回。
          * */
         pop_session_buf(manager->queue,(void **)&flow);
-        /* 首先 copy 释放*/
 
-        get_buf(manager->session_pool,(void **)&new_blist);
+        /*
+         * 2. make hash index
+         * */
 
-        make_new_session(new_blist, flow, manager);
-
-        free_flow(flow);
-        session = &new_blist->item;
-        index = MAKE_HASH(v1,v2,h1,session->lower_port,
-                session->upper_ip,
-                session->upper_port,
-                session->lower_ip,
+        index = MAKE_HASH(v1,v2,h1,flow->lower_port,
+                flow->upper_ip,
+                flow->upper_port,
+                flow->lower_ip,
                 manager->ht->num_buckets);
-        hash_add_item(manager->ht, index, new_blist); 
+
+        /*
+        * 3. insert into hash table
+        * */
+        hash_add_item(manager->ht, index, flow); 
 
     }
 }

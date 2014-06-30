@@ -13,6 +13,7 @@ extern pool_t * packet_pool;
 extern parser_set_t * parser_set;
 static uint32_t get_cpu_mhz()
 {
+#if 0
         int fp; 
         char buffer[4096];
         fp = open("/proc/cpuinfo",O_RDONLY);
@@ -33,16 +34,33 @@ static uint32_t get_cpu_mhz()
             continue;
         p--;
         uint32_t mhz = atoi(p);
-        return mhz;
+
+#endif
+
+    int mhz;
+    int i = 0;
+    uint64_t new,old;
+    int delayms = 500;                            
+    int total = 0;
+    int loop_num = 4;
+    for(i = 0; i < loop_num; i++)                      
+    {                                             
+        old = GET_CYCLE_COUNT();                  
+        usleep(delayms * 1000);                   
+        new = GET_CYCLE_COUNT();                  
+        total += (new - old) / (delayms * 1000);
+    }
+    mhz = total/loop_num;
+    return mhz;
 }
 #define NS 1000000000
 uint32_t calc_period(double length,double rate,uint32_t thread_num)
 {
      uint32_t mhz = get_cpu_mhz();
-    printf("cpu mhz %d\n",mhz);
-     double l = 7.8 * NS * length;
+     printf("cpu mhz %d\n",mhz);
+     double l = 8.0 * NS * length;
      double x = rate * 1024 * 1024.0;
-     return  (thread_num * l / x);
+     return  (uint32_t)((mhz / 1000.0) * (thread_num * l / x));
 }
 void init_generator_set(int numbers)
 {
@@ -237,11 +255,66 @@ static inline void pop_datalink(void * packet,config_t * config)
     memcpy(eth_hdr->h_source,config->dstmac,ETH_ALEN);
     eth_hdr->h_proto = htons(ETH_P_IP);
 }
-static void generator_mode(generator_t * generator,int data_len)
+typedef void (GenerHandler) (packet_t * packet);
+static inline void generator_tcp_packet(packet_t * packet)
+{
+    //pop_payload(packet->data+54,config->pkt_data,config);
+    pop_transmission_tcp(packet->data + 34,config);
+    pop_iplayer_tcp(packet->data + 14,config);
+    pop_datalink(packet->data,config);
+}
+
+static inline void generator_udp_packet(packet_t * packet)
+{
+    //pop_payload(packet->data+42,config->pkt_data,config);
+    pop_transmission_udp(packet->data+34,config);
+    pop_iplayer_udp(packet->data+14,config);
+    pop_datalink(packet->data,config);
+}
+
+static void generator_packet(generator_t * generator,int data_len,GenerHandler * Handler)
 {
     packet_t * packet;
-    int payload_length;
-    int tcp_length,udp_length;
+    //struct timespec oldtime,newtime;
+    uint64_t old,new;
+    //old = GET_CYCLE_COUNT(); 
+    while(1)
+    {
+       old = GET_CYCLE_COUNT();
+       /*
+       * 1. get buffer from pool
+       * */
+       if(get_buf(generator->pool,NO_WAIT_MODE,(void **)&packet) < 0)
+       {
+           generator->drop_total++;
+           continue;
+       }
+       //bzero(packet,data_len);
+       packet->pool   = generator->pool;
+       packet->length = config->pktlen;
+       packet->data   = (unsigned char *)packet + sizeof(packet_t);
+        /*
+        * 2. 根据配置文件比如UDP，TCP来产生包结构。
+        * */
+        Handler(packet);
+        /*
+        * 3. 数据放到下一步的队列里。
+        * */
+        /* 数据包均匀 分部到 下一个工作的线程里。*/
+        parser_t * parser = &generator->parser_set->parser[generator->next_thread_id++];
+        generator->next_thread_id = (generator->next_thread_id == generator->parser_set->numbers)? 0 : generator->next_thread_id;
+        push_to_queue(parser->queue,packet);
+        generator->total_send_byte += config->pktlen;
+        /*4. 延时统计函数 */
+        new = GET_CYCLE_COUNT() - old;
+        while((int64_t)new - (int64_t)generator->config->period < 0)
+        { 
+            new = GET_CYCLE_COUNT() - old;
+        } 
+    }
+}
+static void generator_mode(generator_t * generator,int data_len)
+{
     if(config->protocol == IPPROTO_TCP)
     {
         /*
@@ -249,92 +322,12 @@ static void generator_mode(generator_t * generator,int data_len)
         * 这样会减少判断。
         * 或许，一亿次循环能减少一秒把。(@_@)
         * */
-        //struct timeval old, new;
-        struct timespec oldtime,newtime;
-        int counter = 0;
-        uint64_t old,new;
-        clock_gettime(CLOCK_REALTIME,&oldtime);
-        old = oldtime.tv_sec * NS + oldtime.tv_nsec;
-        while(1)
-        {
-            //if(counter < 3000000)
-            {
-                counter++;
-        /*
-        * 1. get buffer from pool
-        * */
-                if(get_buf(generator->pool,(void **)&packet) < 0)
-                {
-                    generator->drop_total++;
-                    continue;
-                }
-                bzero(packet,data_len);
-                packet->pool   = generator->pool;
-                packet->length = config->pktlen;
-                packet->data   = (unsigned char *)packet + sizeof(packet_t);
-        /*
-        * 2. 根据配置文件比如UDP，TCP来产生包结构。
-        * */
-                payload_length = pop_payload(packet->data+54,config->pkt_data,config);
-                tcp_length = pop_transmission_tcp(packet->data + 34,config);
-                pop_iplayer_tcp(packet->data + 14,config);
-                pop_datalink(packet->data,config);
-        /*
-        * 3. 数据放到下一步的队列里。
-        * */
-                /* 数据包均匀 分部到 下一个工作的线程里。*/
-                parser_t * parser = &generator->parser_set->parser[generator->next_thread_id++];
-                generator->next_thread_id = (generator->next_thread_id == generator->parser_set->numbers)? 0 : generator->next_thread_id;
-                push_to_queue(parser->queue,packet);
-                generator->total_send_byte += config->pktlen;
-            }
-            clock_gettime(CLOCK_REALTIME,&newtime);
-            new = newtime.tv_sec * NS + newtime.tv_nsec;
-            new -= old;
-            while((int64_t)new - (int64_t)generator->config->period < 0)
-            { 
-                clock_gettime(CLOCK_REALTIME,&newtime);
-                new = newtime.tv_sec * NS + newtime.tv_nsec;
-                new -= old;
-            } 
-            clock_gettime(CLOCK_REALTIME,&oldtime);
-            old = oldtime.tv_sec * NS + oldtime.tv_nsec;
-        }
+        generator_packet(generator,data_len,generator_tcp_packet);
+
     }
     else if(config->protocol == IPPROTO_UDP)
     {
-        uint64_t old,new;
-        old = GET_CYCLE_COUNT();
-        while(1)
-        {
-        /*
-        * 1. get buffer from pool
-        * */
-            if(get_buf(generator->pool,(void **)&packet) < 0)
-            {
-                generator->drop_total++;
-                continue;
-            }
-            bzero(packet,data_len);
-            packet->pool   = generator->pool;
-            packet->length = config->pktlen;
-            packet->data   = (unsigned char *)packet + sizeof(packet_t);
-        /*
-        * 2. 根据配置文件比如UDP，TCP来产生包结构。
-        * */
-            payload_length = pop_payload(packet->data+42,config->pkt_data,config);
-            udp_length = pop_transmission_udp(packet->data+34,config);
-            pop_iplayer_udp(packet->data+14,config);
-            pop_datalink(packet->data,config);
-        /*
-        * 3. 数据放到下一步的队列里。
-        * */
-            parser_t * parser = &generator->parser_set->parser[generator->next_thread_id++];
-            generator->next_thread_id = (generator->next_thread_id == generator->parser_set->numbers)? 0 : generator->next_thread_id;
-            push_to_queue(parser->queue,(void*)packet);
-            generator->total_send_byte += config->pktlen;
-            pthread_testcancel();
-        }
+        generator_packet(generator,data_len,generator_udp_packet);
     }
     else 
     {
@@ -349,10 +342,9 @@ void * packet_generator_loop(void * arg)
     pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, 0);
     generator_t * generator = (generator_t *)arg;
     config_t * config = generator->config;
-    packet_t * packet;
-    int payload_length;
-    int tcp_length,udp_length;
     int data_len = config->pktlen + sizeof(packet_t);
     srand((unsigned int)time(NULL));
     generator_mode(generator,data_len);
+
+    pthread_exit(NULL);
 }

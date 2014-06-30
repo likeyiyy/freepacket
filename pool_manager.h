@@ -40,9 +40,8 @@ extern pool_t * packet_pool, * session_pool, * buffer_pool;
 extern pool_t * manager_node_pool;
 pool_t * init_pool(pool_type_t type,int size,int item_size);
 void destroy_pool(pool_t * pool);
-pool_t * get_pool(pool_type_t type);
 void free_buf(pool_t * pool,void * data);
-int get_buf(pool_t * pool,void ** data);
+int get_buf(pool_t * pool,int flag, void ** data);
 bool is_empty_pool(pool_t * pool);
 bool is_full_pool(pool_t * pool);
 #endif

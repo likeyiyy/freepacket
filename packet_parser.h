@@ -16,8 +16,9 @@ typedef struct _parser
     queue_t * queue;
     pool_t  * pool;
     manager_set_t * manager_set;
-    struct timeval old;
-    struct timeval now;
+    uint64_t drop_cause_pool_empty;
+    uint64_t drop_cause_no_payload;
+    uint64_t drop_cause_unsupport_protocol;
 }parser_t;
 typedef struct parser_m
 {
