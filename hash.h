@@ -26,7 +26,7 @@ hash_table * hash_create(int num);
 /*
 * 2. 插入
 * */
-int  hash_add_item(hash_table * ht,uint32_t key, void * value);
+int  hash_add_item(hash_table ** ht,uint32_t key, void * value);
 /*
 * 3. 查找
 * */

@@ -108,20 +108,23 @@ static inline void free_flow(flow_item_t * flow)
 * 严格说来,blist 完全没有任何问题。
 * */
 typedef session_item_t hash_item_t ;
-int  hash_add_item(hash_table * ht, uint32_t key, void * value )
+int  hash_add_item(hash_table ** htp, uint32_t key, void * value )
 {
     struct list_head * ll;
     struct blist * blist;
     struct blist * new_blist;
-
-    manager_t * manager = list_entry(ht,manager_t,ht);
+    hash_table * ht = *htp;
     flow_item_t * flow = (flow_item_t *)value;
+    manager_t * manager = list_entry(htp,manager_t,ht);
     /*
      * 
      * */
     bucket_t * bucket = &ht -> buckets[key % ht->num_buckets];
+
     pthread_mutex_lock(&bucket->lock);
+
     ll = &bucket->list;
+
     blist = find_list(ll,flow);    
     /*
      * 假如不存在于链表中。

@@ -18,8 +18,6 @@ typedef struct _session_manager
 {
     pthread_t          id;
     int                index;
-    //int                list_length;
-    //pthread_mutex_t    list_lock;
     struct hash_table * ht;
     pool_t            * session_pool;
     manager_queue_t   * queue;

@@ -140,7 +140,7 @@ void * packet_manager_loop(void * arg)
         /*
         * 3. insert into hash table
         * */
-        hash_add_item(manager->ht, index, flow); 
+        hash_add_item(&manager->ht, index, flow); 
 
     }
 }
