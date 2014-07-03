@@ -136,6 +136,7 @@ int read_config_file(const char * file_name,config_t * config)
         pname = malloc(q-p+1);
         exit_if_ptr_is_null(pname,"pname alloca error");
         strncpy(pname, p, q-p );
+        pname[q-p] = '\0';
         p = q;
         p = skip_opeartor(p);
         //printf("%s\n",p);

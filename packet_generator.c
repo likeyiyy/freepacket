@@ -251,8 +251,8 @@ static inline void pop_iplayer_udp(void * iph,config_t * config)
 static inline void pop_datalink(void * packet,config_t * config)
 {
     struct ethhdr * eth_hdr = (struct ethhdr *)(packet);
-    memcpy(eth_hdr->h_dest,config->srcmac,ETH_ALEN);
-    memcpy(eth_hdr->h_source,config->dstmac,ETH_ALEN);
+    memcpy(eth_hdr->h_dest,config->dstmac,ETH_ALEN);
+    memcpy(eth_hdr->h_source,config->srcmac,ETH_ALEN);
     eth_hdr->h_proto = htons(ETH_P_IP);
 }
 typedef void (GenerHandler) (packet_t * packet);
