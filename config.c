@@ -153,7 +153,7 @@ int read_config_file(const char * file_name,sim_config_t * config)
         pname = malloc(q-p+1);
         exit_if_ptr_is_null(pname,"pname alloca error");
         strncpy(pname, p, q-p );
-	pname[q-p] = '\0';
+	    pname[q-p] = '\0';
 	//printf("___%d___%s____\n",q-p,pname);
         p = q;
         p = skip_opeartor(p);
@@ -294,6 +294,35 @@ int read_config_file(const char * file_name,sim_config_t * config)
         {
             config->manager_nums = atoi(p);
         }
+        else if(strcmp(pname,"GENERATOR_POOL_SIZE") == 0)
+        {
+            config->generator_pool_size = atoi(p);
+        }
+        else if(strcmp(pname,"PARSER_QUEUE_LENGTH") == 0)
+        {
+            config->parser_queue_length = atoi(p);
+        }
+        else if(strcmp(pname,"PARSER_POOL_SIZE") == 0)
+        {
+            config->parser_pool_size = atoi(p);
+        }
+        else if(strcmp(pname,"MANAGER_POOL_SIZE") == 0)
+        {
+            config->manager_pool_size = atoi(p);
+        }
+        else if(strcmp(pname,"MANAGER_QUEUE_LENGTH") == 0)
+        {
+            config->manager_queue_length = atoi(p);
+        }
+        else if(strcmp(pname,"MANAGER_HASH_LENGTH") == 0)
+        {
+            config->manager_hash_length = atoi(p);
+        }
+        else if(strcmp(pname,"MANAGER_BUFFER_SIZE") == 0)
+        {
+            config->manager_buffer_size = atoi(p);
+        }
+
 #ifdef TILERA_PLATFORM
         else if(strcmp(pname,"NOTIF_RING_ENTRIES") == 0)
         {
