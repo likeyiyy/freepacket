@@ -99,11 +99,11 @@ void print_config_file(config_t * config)
     printf("pkt_data:%s\n",config->pkt_data);
 
 	printf("period:%d\n",config->period);
+	printf("num_workers:%d\n",config->generator_workers);
 #ifdef TILERA_PLATFORM
 	printf("notif_ring_entries:%d\n",config->notif_ring_entries);
 	printf("equeue_entries:%u\n",config->equeue_entries);
 	printf("per_worker_buckets:%d\n",config->per_worker_buckets);
-	printf("num_workers:%d\n",config->num_workers);
 	printf("once packet nums:%d\n",config->once_packet_nums);
 #endif
 
@@ -280,11 +280,11 @@ int read_config_file(const char * file_name,config_t * config)
             strncpy(config->link_name,p,length);
             config -> link_name[length - 1] = '\0';
         }
-#ifdef TILERA_PLATFORM
-        else if(strcmp(pname,"NUM_WORKERS") == 0)
+        else if(strcmp(pname,"GENERATOR_WORKERS") == 0)
         {
-            config->num_workers = atoi(p);
+            config->generator_workers = atoi(p);
         }
+#ifdef TILERA_PLATFORM
         else if(strcmp(pname,"NOTIF_RING_ENTRIES") == 0)
         {
             config->notif_ring_entries = atoi(p);
@@ -308,4 +308,32 @@ int read_config_file(const char * file_name,config_t * config)
     memcpy(config->dmac.octets, config->dstmac, ETH_ALEN);
 #endif
     return 0;
+}
+
+static uint32_t get_cpu_mhz()
+{
+    int mhz;
+    int i = 0;
+    uint64_t new,old;
+    int delayms = 500;                            
+    int total = 0;
+    int loop_num = 4;
+    for(i = 0; i < loop_num; i++)                      
+    {                                             
+        old = GET_CYCLE_COUNT();                  
+        usleep(delayms * 1000);                   
+        new = GET_CYCLE_COUNT();                  
+        total += (new - old) / (delayms * 1000);
+    }
+    mhz = total/loop_num;
+    return mhz;
+}
+#define NS 1000000000
+uint32_t calc_period(double length,double rate,uint32_t thread_num)
+{
+     uint32_t mhz = get_cpu_mhz();
+     printf("cpu mhz %d\n",mhz);
+     double l = 8.0 * NS * length;
+     double x = rate * 1024 * 1024.0;
+     return  (uint32_t)((mhz / 1000.0) * (thread_num * l / x));
 }

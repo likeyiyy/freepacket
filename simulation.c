@@ -9,7 +9,7 @@
 extern manager_set_t * manager_set;
 extern generator_set_t * generator_set;
 extern parser_set_t * parser_set;
-extern config_t * config;
+static   const char * config_file = CONFIG_FILE;
 int top_argc = 0;
 char ** top_argv;
 
@@ -30,12 +30,19 @@ int main(int argc, char ** argv)
             default:printf("other option :%c\n",ch);break;
         }
     }
+
+    config_t * config = malloc(sizeof(config_t));
+    exit_if_ptr_is_null(config,"config error");
+    read_config_file(config_file,config);
+
+    config->period  = calc_period(config->pktlen,config->speed,config->generator_workers);
+
     init_manager_set(manager_num);
 
     init_parser_set(parser_num);
 
     /* Generator */
-    init_generator_set(generator_num);
+    init_generator_set(config);
 
 #ifdef INTEL_PLATFORM
     sys_dispaly(generator_set,parser_set,manager_set);

@@ -7,6 +7,7 @@
 
 #include "includes.h"
 
+#ifdef TILERA_PLATFORM
 static void create_stack(gxio_mpipe_context_t* context, int stack_idx,
              gxio_mpipe_buffer_size_enum_t buf_size, int num_buffers)
 {
@@ -222,7 +223,6 @@ static int init_mpipe_equeue(mpipe_common_t * mpipe)
             channel, mem, edma_ring_size, 0);
     VERIFY(result, "gxio_gxio_equeue_init()");
 
-
     /* 
      * 6.这里才是分配buffer 
      * */
@@ -237,7 +237,6 @@ static int init_mpipe_equeue(mpipe_common_t * mpipe)
     mpipe->stack_idx = stack_idx;
 
     return 0;
-    
 }
 
 static int init_mpipe_rules(mpipe_common_t * mpipe)
@@ -256,8 +255,6 @@ static int init_mpipe_rules(mpipe_common_t * mpipe)
     int per_buckets   = mpipe->per_worker_buckets;
     gxio_mpipe_rules_dmac_t dmac = mpipe->dmac;
     gxio_mpipe_rules_dmac_t temp_dmac;
-
-
 
 	gxio_mpipe_rules_t rules;
 	gxio_mpipe_rules_init(&rules, context);
@@ -286,13 +283,12 @@ static int init_mpipe_rules(mpipe_common_t * mpipe)
 	}
     result = gxio_mpipe_rules_commit(&rules);
     VERIFY(result, "gxio_mpipe_rules_commit()");
-
     return 0;
-		
 }
-
+#endif
 int init_mpipe_config(mpipe_common_t * mpipe,config_t * config)
 {
+#ifdef TILERA_PLATFORM
     assert(mpipe);
     assert(config);
 
@@ -303,17 +299,20 @@ int init_mpipe_config(mpipe_common_t * mpipe,config_t * config)
     mpipe->notif_ring_entries = config->notif_ring_entries;
     mpipe->equeue_entries     = config->equeue_entries;
     mpipe->per_worker_buckets = config->per_worker_buckets;
-    mpipe->num_workers        = config->num_workers;
+    mpipe->num_workers        = config->generator_workers;
     mpipe->dmac               = config->dmac;
 
     mpipe->configed = 1;
     return 0;
+#else
+    return 0;
+#endif
 }
 
 // The main function for each worker thread.
 void init_mpipe_resource(mpipe_common_t * mpipe)
 {
-
+#ifdef TILERA_PLATFORM
     assert(mpipe);
 
     init_mpipe_common(mpipe);
@@ -323,14 +322,13 @@ void init_mpipe_resource(mpipe_common_t * mpipe)
     init_mpipe_equeue(mpipe);
 
     init_mpipe_rules(mpipe);
-
-
+#endif
 }
 void mpipe_send_packet(mpipe_common_t * mpipe,
                        uint16_t size, 
                        void * packet)
 {
-
+#ifdef TILERA_PLATFORM
 	gxio_mpipe_context_t * context = &mpipe->context;
 
     gxio_mpipe_equeue_t * equeue = mpipe->equeue;
@@ -354,4 +352,5 @@ void mpipe_send_packet(mpipe_common_t * mpipe,
         }
     };
     gxio_mpipe_equeue_put(equeue, edesc);
+#endif
 }

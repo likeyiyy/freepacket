@@ -53,7 +53,10 @@
 #else
 #define DEBUG(format,...)  
 #endif
+#define COLLECTOR_MODE 0
+#define GENERATOR_MODE 1
 
+#ifdef TILERA_PLATFORM
 /* Align "p" mod "align", assuming "p" is a "void*". */
 #define ALIGN(p, align) do { (p) += -(long)(p) & ((align) - 1);  } while(0)
 /* Help check for errors. */
@@ -64,6 +67,7 @@
             tmc_task_die("Failure in '%s': %lld: %s.",       \
                 (WHAT), __val, gxio_strerror(__val));        \
         } while (0)
+#endif
 
 #define WAIT_MODE    0
 #define NO_WAIT_MODE 1
@@ -119,6 +123,7 @@ static inline uint64_t get_cycle_count_intel()
 }
 #define GET_CYCLE_COUNT()  get_cycle_count_intel()
 
+
 #elif defined TILERA_PLATFORM
 #include <arch/cycle.h>
 #define GET_CYCLE_COUNT() get_cycle_count()
@@ -129,9 +134,7 @@ static inline uint64_t get_cycle_count_intel()
 
 #include "config.h"
 
-#ifdef TILERA_PLATFORM
 #include "mpipe.h"
-#endif
 
 #include "parser_queue.h"
 #include "checksum.h"

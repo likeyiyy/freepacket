@@ -8,7 +8,7 @@
 #ifndef L_MPIPE_H
 #define L_MPIPE_H
 
-
+#ifdef TILERA_PLATFORM
 typedef struct __mpipe_t
 {
     /*
@@ -51,6 +51,9 @@ typedef struct __mpipe_t
     int stack_idx;
 
 }mpipe_common_t;
+#else
+typedef int mpipe_common_t;
+#endif
 
 int init_mpipe_config(mpipe_common_t * mpipe,config_t * config);
 

@@ -6,103 +6,9 @@
  ************************************************************************/
 #include "includes.h"
 //#define memcpy(a,b,c) do { memcpy(a,b,c);printf("packet_generator_loop memcpy here\n"); } while(0)
-static   const char * config_file = CONFIG_FILE;
-config_t * config;
 generator_set_t * generator_set;
 extern pool_t * packet_pool;
 extern parser_set_t * parser_set;
-static uint32_t get_cpu_mhz()
-{
-#if 0
-        int fp; 
-        char buffer[4096];
-        fp = open("/proc/cpuinfo",O_RDONLY);
-        if(fp < 0)
-        {   
-                printf("can not open /proc/cpuinfo \n");
-                exit(-1);
-            }   
-        int result = read(fp,buffer,4096);
-        if(result < 0)
-        {   
-                printf("read file error\n");
-                exit(-1);
-            }   
-        close(fp);
-        char * p = strstr(buffer,"cpu MHz");
-        while(!isdigit(*p++))
-            continue;
-        p--;
-        uint32_t mhz = atoi(p);
-
-#endif
-
-    int mhz;
-    int i = 0;
-    uint64_t new,old;
-    int delayms = 500;                            
-    int total = 0;
-    int loop_num = 4;
-    for(i = 0; i < loop_num; i++)                      
-    {                                             
-        old = GET_CYCLE_COUNT();                  
-        usleep(delayms * 1000);                   
-        new = GET_CYCLE_COUNT();                  
-        total += (new - old) / (delayms * 1000);
-    }
-    mhz = total/loop_num;
-    return mhz;
-}
-#define NS 1000000000
-uint32_t calc_period(double length,double rate,uint32_t thread_num)
-{
-     uint32_t mhz = get_cpu_mhz();
-     printf("cpu mhz %d\n",mhz);
-     double l = 8.0 * NS * length;
-     double x = rate * 1024 * 1024.0;
-     return  (uint32_t)((mhz / 1000.0) * (thread_num * l / x));
-}
-void init_generator_set(int numbers)
-{
-    int i = 0;
-    generator_set = malloc(sizeof(generator_set_t));
-    config = malloc(sizeof(config_t));
-    exit_if_ptr_is_null(config,"config error");
-    read_config_file(config_file,config);
-    //print_config_file(config);
-    config->packet_pool_size = PACKET_POOL_SIZE;  
-    printf("speed:%d,length:%d\n",config->speed,config->pktlen);
-    config->period  = calc_period(config->pktlen,config->speed,numbers);
-    printf("period: %d\n",config->period);
-    /*
-     * 初始化一个缓冲区池。
-     * 这个缓冲区的头部是个结构体指针，下面是packet_length的长度的缓冲区。
-     * */
-    generator_set->generator = malloc(sizeof(generator_t) * numbers);
-    exit_if_ptr_is_null(generator_set->generator,"generator_set.generator error");
-    generator_set->numbers   = numbers;
-    generator_set->config    = config;
-    for(i = 0; i < numbers; ++i)
-    {
-        generator_set->generator[i].pool = init_pool(PACKET_POOL,config->packet_pool_size,config->pktlen + sizeof(packet_t));
-        generator_set->generator[i].pool->pool_type = PACKET_POOL;
-        generator_set->generator[i].config = malloc(sizeof(config_t)); 
-        exit_if_ptr_is_null(generator_set->generator[i].config,"config error");
-        memcpy(generator_set->generator[i].config,config,sizeof(config_t));
-        generator_set->generator[i].parser_set = parser_set;
-        generator_set->generator[i].index = i;
-        generator_set->generator[i].next_thread_id = 0;
-        generator_set->generator[i].total_send_byte = 0;
-        if(pthread_create(&generator_set->generator[i].id,
-                      NULL,
-                      packet_generator_loop,
-                      &generator_set->generator[i]) != 0)
-        {
-            printf("Init Packet Generator thread failed. Exit Now.\n");
-            exit(0);
-        }
-    }
-}
 void   destroy_generator(generator_set_t * generator_set)
 {
     int i = 0;
@@ -255,8 +161,8 @@ static inline void pop_datalink(void * packet,config_t * config)
     memcpy(eth_hdr->h_source,config->srcmac,ETH_ALEN);
     eth_hdr->h_proto = htons(ETH_P_IP);
 }
-typedef void (GenerHandler) (packet_t * packet);
-static inline void generator_tcp_packet(packet_t * packet)
+typedef void (GenerHandler) (packet_t * packet,config_t * config);
+static inline void generator_tcp_packet(packet_t * packet,config_t * config)
 {
     //pop_payload(packet->data+54,config->pkt_data,config);
     pop_transmission_tcp(packet->data + 34,config);
@@ -264,7 +170,7 @@ static inline void generator_tcp_packet(packet_t * packet)
     pop_datalink(packet->data,config);
 }
 
-static inline void generator_udp_packet(packet_t * packet)
+static inline void generator_udp_packet(packet_t * packet,config_t * config)
 {
     //pop_payload(packet->data+42,config->pkt_data,config);
     pop_transmission_udp(packet->data+34,config);
@@ -272,11 +178,12 @@ static inline void generator_udp_packet(packet_t * packet)
     pop_datalink(packet->data,config);
 }
 
-static void generator_packet(generator_t * generator,int data_len,GenerHandler * Handler)
+static void packet_generator(generator_t * generator,int data_len,GenerHandler * Handler)
 {
     packet_t * packet;
     //struct timespec oldtime,newtime;
     uint64_t old,new;
+    config_t * config = generator->config;
     //old = GET_CYCLE_COUNT(); 
     while(1)
     {
@@ -296,7 +203,7 @@ static void generator_packet(generator_t * generator,int data_len,GenerHandler *
         /*
         * 2. 根据配置文件比如UDP，TCP来产生包结构。
         * */
-        Handler(packet);
+        Handler(packet,config);
         /*
         * 3. 数据放到下一步的队列里。
         * */
@@ -313,8 +220,57 @@ static void generator_packet(generator_t * generator,int data_len,GenerHandler *
         } 
     }
 }
+
+#ifdef TILERA_PLATFORM
+static void tilera_packet_collector(generator_t * generator)
+{
+    packet_t * packet;
+    mpipe_common_t * mpipe = generator->mpipe;
+
+    gxio_mpipe_iqueue_t * iqueue = mpipe->iqueues[generator->rank];
+    config_t * config = generator->config;
+    gxio_mpipe_idesc_t * idesc;
+
+    while(1)
+    {
+		if(gxio_mpipe_iqueue_try_peek(iqueue,&idesc) > 0)
+        {
+            if (gxio_mpipe_iqueue_drop_if_bad(iqueue, idesc))
+                goto done;
+            if(get_buf(generator->pool,NO_WAIT_MODE,(void **)&packet) < 0)
+            {
+                generator -> drop_total++;
+			    gxio_mpipe_iqueue_drop(iqueue, idesc);
+                goto done;
+            }
+
+			unsigned char * va =  gxio_mpipe_idesc_get_va(idesc);
+            uint32_t l2_length =  gxio_mpipe_idesc_get_l2_length(idesc);
+
+            packet->pool   = generator->pool;
+            memcpy(packet->data,va,l2_length);
+            packet->length = l2_length;
+
+            /* 数据包均匀 分部到 下一个工作的线程里。*/
+            parser_t * parser = &generator->parser_set->parser[generator->next_thread_id++];
+            generator->next_thread_id = (generator->next_thread_id == generator->parser_set->numbers)? 0 : generator->next_thread_id;
+            push_to_queue(parser->queue,packet);
+            generator->total_send_byte += config->pktlen;
+			gxio_mpipe_iqueue_drop(iqueue, idesc);
+done:
+            gxio_mpipe_iqueue_consume(iqueue, idesc);
+        }
+        else
+        {
+            continue;
+        }
+    }
+    
+}
+#endif
 static void generator_mode(generator_t * generator,int data_len)
 {
+    config_t * config = generator->config;
     if(config->protocol == IPPROTO_TCP)
     {
         /*
@@ -322,12 +278,12 @@ static void generator_mode(generator_t * generator,int data_len)
         * 这样会减少判断。
         * 或许，一亿次循环能减少一秒把。(@_@)
         * */
-        generator_packet(generator,data_len,generator_tcp_packet);
+        packet_generator(generator,data_len,generator_tcp_packet);
 
     }
     else if(config->protocol == IPPROTO_UDP)
     {
-        generator_packet(generator,data_len,generator_udp_packet);
+        packet_generator(generator,data_len,generator_udp_packet);
     }
     else 
     {
@@ -335,16 +291,99 @@ static void generator_mode(generator_t * generator,int data_len)
         exit(-1);
     }
 }
+
+
 void * packet_generator_loop(void * arg)
 {
     pthread_detach(pthread_self());
     pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, 0);
     pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, 0);
     generator_t * generator = (generator_t *)arg;
+    mpipe_common_t * mpipe = generator->mpipe;
     config_t * config = generator->config;
-    int data_len = config->pktlen + sizeof(packet_t);
-    srand((unsigned int)time(NULL));
-    generator_mode(generator,data_len);
 
+
+    if(config->packet_generator_mode == COLLECTOR_MODE)
+    {
+#ifdef TILERA_PLATFORM
+    /**
+     * Bind to a single cpu
+     * */
+        int rank = generator->rank;
+        int cpu = tmc_cpus_find_nth_cpu(&mpipe->cpus, rank);
+        int result = tmc_cpus_set_my_cpu(cpu);
+        VERIFY(result, "tmc_cpus_set_my_cpu()");
+        tmc_sync_barrier_wait(&mpipe->barrier);
+        tilera_packet_collector(generator);
+
+#else
+        printf("NOW just support tilera platform collector mode\n");
+        exit(0);
+#endif
+    }
+    else if(config->packet_generator_mode == GENERATOR_MODE)
+    {
+        int data_len = config->pktlen + sizeof(packet_t);
+        srand((unsigned int)time(NULL));
+        /* loop here */
+        generator_mode(generator,data_len);
+    }
     pthread_exit(NULL);
+}
+
+void init_generator_set(config_t * config)
+{
+    int i = 0;
+    int numbers = config->generator_workers;
+    generator_set = malloc(sizeof(generator_set_t));
+    /*
+     * 初始化一个缓冲区池。
+     * 这个缓冲区的头部是个结构体指针，下面是packet_length的长度的缓冲区。
+     * */
+    generator_set->generator = malloc(sizeof(generator_t) * numbers);
+    exit_if_ptr_is_null(generator_set->generator,"generator_set.generator error");
+    generator_set->numbers   = numbers;
+    generator_set->config    = config;
+
+#ifdef TILERA_PLATFORM
+    /*
+    * 即使在tilera平台仍然可以采用产生包模式。
+    * */
+    mpipe_common_t * mpipe = NULL;
+    mpipe = malloc(sizeof(mpipe_common_t));
+    exit_if_ptr_is_null(mpipe,"--------malloc mpipe error--------------");
+    if(config->packet_generator_mode == COLLECTOR_MODE)
+    {
+        init_mpipe_config(mpipe,config);
+        init_mpipe_resource(mpipe);    
+        tmc_sync_barrier_init(&mpipe->barrier,mpipe->num_workers);
+    }
+#endif
+
+    for(i = 0; i < numbers; ++i)
+    {
+        generator_set->generator[i].pool = init_pool(PACKET_POOL,
+                                                config->packet_pool_size,
+                                                config->pktlen + sizeof(packet_t));
+        generator_set->generator[i].pool->pool_type = PACKET_POOL;
+        generator_set->generator[i].config = malloc(sizeof(config_t)); 
+        exit_if_ptr_is_null(generator_set->generator[i].config,"config error");
+        memcpy(generator_set->generator[i].config,config,sizeof(config_t));
+        generator_set->generator[i].parser_set = parser_set;
+        generator_set->generator[i].index = i;
+        generator_set->generator[i].next_thread_id = 0;
+        generator_set->generator[i].total_send_byte = 0;
+#ifdef TILERA_PLATFORM
+        generator_set->generator[i].rank = i;
+        generator_set->generator[i].mpipe = mpipe;
+#endif
+        if(pthread_create(&generator_set->generator[i].id,
+                      NULL,
+                      packet_generator_loop,
+                      &generator_set->generator[i]) != 0)
+        {
+            printf("Init Packet Generator thread failed. Exit Now.\n");
+            exit(0);
+        }
+    }
 }

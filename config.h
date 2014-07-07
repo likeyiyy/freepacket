@@ -52,13 +52,15 @@ typedef struct __config
     int pktlen;
     uint32_t period;
     char * link_name;
+    int     generator_workers;
+    int     packet_generator_mode;
 #ifdef TILERA_PLATFORM
     int32_t  notif_ring_entries;
     uint32_t equeue_entries;
     int     per_worker_buckets;
-    int     num_workers;
 	int     once_packet_nums;
     gxio_mpipe_rules_dmac_t dmac;
+
 #endif
 }config_t;
 
@@ -71,4 +73,6 @@ int read_config_file(const char * file_name, config_t * config);
 void print_config_file(config_t * config);
 
 void exit_if_ptr_is_null(void * p,const char * c);
+
+uint32_t calc_period(double length,double rate,uint32_t thread_num);
 #endif

@@ -17,6 +17,8 @@ typedef struct generator
     pool_t    * pool;
     parser_set_t * parser_set;
     struct timeval old,now;
+    int rank;
+    mpipe_common_t * mpipe;
 }generator_t;
 typedef struct generator_set
 {
@@ -24,9 +26,11 @@ typedef struct generator_set
     uint32_t numbers;
     config_t  * config;
 }generator_set_t;
+
 extern generator_set_t * generator_set;
 extern config_t * config;
-void   init_generator_set(int numbers);
+
+void   init_generator_set(config_t * config);
 /*
  * 销毁线程，和销毁线程的数据结构要分两步走。
  * 尤其是当这个线程和其他线程有交互时。
