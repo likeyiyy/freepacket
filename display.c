@@ -92,6 +92,7 @@ void sys_dispaly(generator_set_t * generator_set,
                 parser_set_t * parser_set,
                 manager_set_t * manager_set)
 {
+#ifdef INTEL_PLATFORM
     screen_init();
     while(1)
     {
@@ -104,5 +105,6 @@ void sys_dispaly(generator_set_t * generator_set,
         usleep(1000 * 1000);
     }
     endwin();
+#endif
 }
 

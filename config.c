@@ -88,13 +88,26 @@ void print_config_file(config_t * config)
     printf("srcipaddr.max:%s\n",inet_ntoa(max));
     min.s_addr = ntohl(config->daddr_min);
     max.s_addr = ntohl(config->daddr_max);
+
     printf("dstipaddr.min:%s\t",inet_ntoa(min));
     printf("dstipaddr.max:%s\n",inet_ntoa(max));
     printf("sport_min:%d,sport_max:%d\n",config->sport_min,config->sport_max);
     printf("dport_min:%d,dport_max:%d\n",config->dport_min,config->dport_max);
+
     printf("pktlen:%d\n",config->pktlen);
     printf("speed:%d\n",config->speed);
     printf("pkt_data:%s\n",config->pkt_data);
+
+	printf("period:%d\n",config->period);
+#ifdef TILERA_PLATFORM
+	printf("notif_ring_entries:%d\n",config->notif_ring_entries);
+	printf("equeue_entries:%u\n",config->equeue_entries);
+	printf("per_worker_buckets:%d\n",config->per_worker_buckets);
+	printf("num_workers:%d\n",config->num_workers);
+	printf("once packet nums:%d\n",config->once_packet_nums);
+#endif
+
+    
 }
 int read_config_file(const char * file_name,config_t * config)
 {
@@ -107,8 +120,10 @@ int read_config_file(const char * file_name,config_t * config)
     int count = 0;
     if((fp = fopen(file_name,"r")) == NULL)
     {
+
+		printf("----------file_name:%s----------\n",file_name);
         perror("can't open config file");
-        return -1;
+        exit(-1);
     }
     while(1)
     {
@@ -131,12 +146,13 @@ int read_config_file(const char * file_name,config_t * config)
         {
             continue;
         }
-        //printf("count=%d\t%s",count,p);
         q = skip_var_name(p);
+        //printf("++%s++++++++++++++%s++\n",p,q);
         pname = malloc(q-p+1);
         exit_if_ptr_is_null(pname,"pname alloca error");
         strncpy(pname, p, q-p );
-        pname[q-p] = '\0';
+	pname[q-p] = '\0';
+	//printf("___%d___%s____\n",q-p,pname);
         p = q;
         p = skip_opeartor(p);
         //printf("%s\n",p);
@@ -144,6 +160,8 @@ int read_config_file(const char * file_name,config_t * config)
         unsigned int ipaddr[4] = {0};
         unsigned int counter;
         uint32_t port;
+
+	//printf("--%s--%s--\n",q,pname);
         //switch 判断var_name属于哪一类.
         if(strcmp(pname,"PROTO") == 0)
         {
@@ -253,7 +271,41 @@ int read_config_file(const char * file_name,config_t * config)
         {
             config->speed = atoi(p);
         }
+        else if(strcmp(pname,"LINK_NAME") == 0)
+        {
+            /**         NOTICE "\n"      **/
+            int length = strlen(p);
+            config -> link_name = calloc(length, sizeof(char));
+            exit_if_ptr_is_null(config->link_name,"config->link_name malloc error");
+            strncpy(config->link_name,p,length);
+            config -> link_name[length - 1] = '\0';
+        }
+#ifdef TILERA_PLATFORM
+        else if(strcmp(pname,"NUM_WORKERS") == 0)
+        {
+            config->num_workers = atoi(p);
+        }
+        else if(strcmp(pname,"NOTIF_RING_ENTRIES") == 0)
+        {
+            config->notif_ring_entries = atoi(p);
+        }
+        else if(strcmp(pname,"PER_WORKER_BUCKETS") == 0)
+        {
+            config->per_worker_buckets = atoi(p);
+        }
+        else if(strcmp(pname,"EQUEUE_ENTRIES") == 0)
+        {
+            config->equeue_entries = (uint32_t)atoi(p);
+        }
+        else if(strcmp(pname,"ONCE_PACKET_NUMS") == 0)
+        {
+            config->once_packet_nums = (uint32_t)atoi(p);
+        }
+#endif 
         free(pname);        
     }
+#ifdef TILERA_PLATFORM
+    memcpy(config->dmac.octets, config->dstmac, ETH_ALEN);
+#endif
     return 0;
 }

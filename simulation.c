@@ -37,7 +37,10 @@ int main(int argc, char ** argv)
     /* Generator */
     init_generator_set(generator_num);
 
+#ifdef INTEL_PLATFORM
     sys_dispaly(generator_set,parser_set,manager_set);
+#endif
+
     while(1)
     {
         sleep(10);

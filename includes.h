@@ -26,6 +26,24 @@
 #include <arpa/inet.h>
 #include <strings.h>
 #include <unistd.h>
+
+
+#ifdef TILERA_PLATFORM
+#include <sys/mman.h>
+#include <sys/dataplane.h>
+#include <tmc/alloc.h>
+#include <arch/atomic.h>
+#include <arch/sim.h>
+
+#include <gxio/mpipe.h>
+#include <tmc/cpus.h>
+#include <tmc/mem.h>
+#include <tmc/spin.h>
+#include <tmc/sync.h>
+#include <tmc/task.h>
+#endif
+
+
 #define bool _Bool
 #define true 1
 #define false 0
@@ -35,6 +53,18 @@
 #else
 #define DEBUG(format,...)  
 #endif
+
+/* Align "p" mod "align", assuming "p" is a "void*". */
+#define ALIGN(p, align) do { (p) += -(long)(p) & ((align) - 1);  } while(0)
+/* Help check for errors. */
+#define VERIFY(VAL, WHAT)                                    \
+        do {                                                 \
+        long long __val = (VAL);                             \
+            if (__val < 0)                                   \
+            tmc_task_die("Failure in '%s': %lld: %s.",       \
+                (WHAT), __val, gxio_strerror(__val));        \
+        } while (0)
+
 #define WAIT_MODE    0
 #define NO_WAIT_MODE 1
 #define SESSION_BUFFER_SIZE 65536 
@@ -80,8 +110,7 @@ typedef struct _session_item
     pool_t * pool;
 }session_item_t;
 
-#define INTEL YES
-#ifdef INTEL
+#ifdef INTEL_PLATFORM
 static inline uint64_t get_cycle_count_intel()
 {
     unsigned int lo,hi; \
@@ -89,14 +118,21 @@ static inline uint64_t get_cycle_count_intel()
     return ((uint64_t)hi << 32) | lo; \
 }
 #define GET_CYCLE_COUNT()  get_cycle_count_intel()
-#elif defined TILERA
+
+#elif defined TILERA_PLATFORM
 #include <arch/cycle.h>
 #define GET_CYCLE_COUNT() get_cycle_count()
+
 #else
 #error "get_cycle_count not define"
 #endif
 
 #include "config.h"
+
+#ifdef TILERA_PLATFORM
+#include "mpipe.h"
+#endif
+
 #include "parser_queue.h"
 #include "checksum.h"
 #include "manager_queue.h"

@@ -70,7 +70,7 @@ void init_generator_set(int numbers)
     exit_if_ptr_is_null(config,"config error");
     read_config_file(config_file,config);
     //print_config_file(config);
-    config->numbers = PACKET_POOL_SIZE;  
+    config->packet_pool_size = PACKET_POOL_SIZE;  
     printf("speed:%d,length:%d\n",config->speed,config->pktlen);
     config->period  = calc_period(config->pktlen,config->speed,numbers);
     printf("period: %d\n",config->period);
@@ -84,7 +84,7 @@ void init_generator_set(int numbers)
     generator_set->config    = config;
     for(i = 0; i < numbers; ++i)
     {
-        generator_set->generator[i].pool = init_pool(PACKET_POOL,config->numbers,config->pktlen + sizeof(packet_t));
+        generator_set->generator[i].pool = init_pool(PACKET_POOL,config->packet_pool_size,config->pktlen + sizeof(packet_t));
         generator_set->generator[i].pool->pool_type = PACKET_POOL;
         generator_set->generator[i].config = malloc(sizeof(config_t)); 
         exit_if_ptr_is_null(generator_set->generator[i].config,"config error");

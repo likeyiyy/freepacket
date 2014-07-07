@@ -25,9 +25,8 @@
 #include <string.h>
 #define PROCBLOCK_SIZE 32
 #define PAGE_SHIFT     12
-#define CONFIG_FILE "generator.conf"
-#define PACKET_GENERATOR_NUMS  10
-#define PACKET_POOL_SIZE 100000
+#define CONFIG_FILE "./generator.conf"
+#define PACKET_POOL_SIZE 2048
 #define NODE_POOL_SIZE 1000000
 #define PACKET_PARSER_NUMS 1
 typedef struct __config
@@ -49,13 +48,27 @@ typedef struct __config
     uint32_t dport_max;
     uint32_t speed;
     char * pkt_data;
-    int numbers;   /* PACKET pool 的大小*/
+    int packet_pool_size;   /* PACKET pool 的大小*/
     int pktlen;
     uint32_t period;
+    char * link_name;
+#ifdef TILERA_PLATFORM
+    int32_t  notif_ring_entries;
+    uint32_t equeue_entries;
+    int     per_worker_buckets;
+    int     num_workers;
+	int     once_packet_nums;
+    gxio_mpipe_rules_dmac_t dmac;
+#endif
 }config_t;
+
 int ether_atoe(const char *a, unsigned char *e);
+
 char * ether_etoa(const unsigned char *e, char *a);
+
 int read_config_file(const char * file_name, config_t * config);
+
 void print_config_file(config_t * config);
+
 void exit_if_ptr_is_null(void * p,const char * c);
 #endif
