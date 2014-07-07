@@ -6,43 +6,6 @@
  ************************************************************************/
 #include "includes.h"
 
-uint32_t ipfrag_hash_rnd;
-/* NOTE: Arguments are modified. */
-#define __jhash_mix(a, b, c) \
-        { \
-          a -= b; a -= c; a ^= (c>>13); \
-          b -= c; b -= a; b ^= (a<<8); \
-          c -= a; c -= b; c ^= (b>>13); \
-          a -= b; a -= c; a ^= (c>>12); \
-          b -= c; b -= a; b ^= (a<<16); \
-          c -= a; c -= b; c ^= (b>>5); \
-          a -= b; a -= c; a ^= (c>>3); \
-          b -= c; b -= a; b ^= (a<<10); \
-          c -= a; c -= b; c ^= (b>>15); \
-        } 
-            
-            /* The golden ration: an arbitrary value */
-#define JHASH_GOLDEN_RATIO 0x9e3779b9
-
-
-            /* A special ultra-optimized versions that knows they are hashing exactly
-            *  * 3, 2 or 1 word(s).
-            *   * 
-            *    * NOTE: In partilar the "c += length; __jhash_mix(a,b,c);" normally
-            *     * done at the end is not done here.
-            *      */ 
-static inline uint32_t jhash_3words(uint32_t a, uint32_t b, uint32_t c, uint32_t initval)
-{ 
-                a += JHASH_GOLDEN_RATIO;
-                b += JHASH_GOLDEN_RATIO;
-                c += initval;
-                      
-                __jhash_mix(a, b, c);
-                      
-                return c;
-}   
-
-
 #define MAKE_HASH(v1,v2,h1,f1,f2,f3,f4,SIZE) \
 (\
             v1 = f1 ^ f2,\
@@ -84,37 +47,17 @@ static inline unsigned int hash_index(flow_item_t * flow,manager_set_t * manager
 }
 static inline void init_single_parser(parser_t * parser)
 {
-    parser->queue  = init_queue(NODE_POOL_SIZE);
-    parser->pool   = init_pool(MANAGER_NODE_POOL,
-                              MANAGER_QUEUE_LENGTH,
+    int pool_size = global_config->parser_pool_size;
+    parser->queue  = init_common_queue(PARSER_POOL_SIZE,sizeof(packet_t));
+    parser->pool   = init_pool(PARSER_POOL,
+                              pool_size,
                               sizeof(flow_item_t));
-    parser->pool->pool_type = FLOW_ITEM_POOL;
+    parser->pool->pool_type = PARSER_POOL;
     parser->total = 0;
     parser->manager_set  = manager_set;
     parser->drop_cause_pool_empty = 0;
     parser->drop_cause_no_payload = 0;
     parser->drop_cause_unsupport_protocol = 0;
-}
-void init_parser_set(int numbers)
-{
-    /* 生成制定数量的线程数的结构体。
-     * */
-    parser_set = malloc(sizeof(parser_set_t));
-    exit_if_ptr_is_null(parser_set,"parser_set alloc error");
-    parser_set->parser  = malloc(numbers * sizeof(parser_t));
-    exit_if_ptr_is_null(parser_set->parser,"parser_set->parser alloc error");
-    parser_set->numbers = numbers;
-    srand((unsigned int)time(NULL));
-    ipfrag_hash_rnd = 0xff00ff00;
-    int i = 0;
-    for(i = 0; i < numbers; i++)
-    {
-        init_single_parser(&parser_set->parser[i]); 
-        pthread_create(&parser_set->parser[i].id,
-                NULL,
-                packet_parser_loop,
-                &parser_set->parser[i]);
-    }
 }
 void finish_parser_set(parser_set_t * parser_set)
 {
@@ -126,6 +69,7 @@ void finish_parser_set(parser_set_t * parser_set)
 }
 void destroy_parser_set(parser_set_t * parser_set)
 {
+#if 0
     int i = 0;
     for(i = 0; i < parser_set->numbers;++i)
     {
@@ -135,6 +79,7 @@ void destroy_parser_set(parser_set_t * parser_set)
     parser_set->parser = NULL;
     free(parser_set);
     parser_set = NULL;
+#endif
 }
 static inline void free_packet(packet_t * packet)
 {
@@ -250,7 +195,7 @@ static int parser_process(parser_t * parser,
     * 送给下个流水线的队列。
     * */
         index = hash_index(flow,parser->manager_set);
-        push_session_buf(parser->manager_set->manager[index].queue,flow);
+        push_common_buf(parser->manager_set->manager[index].queue,flow);
     }
     return 0;
 
@@ -268,7 +213,7 @@ void * packet_parser_loop(void * arg)
         /*
         * 从队列中取出一个数据包
         * */
-        pop_from_queue(parser->queue,(void **)&packet);
+        pop_common_buf(parser->queue,(void **)&packet);
         parser->total += packet->length;
         /*
         * 校验数据包。
@@ -300,5 +245,26 @@ void * packet_parser_loop(void * arg)
             parser->drop_cause_unsupport_protocol += packet->length;
         }
         pthread_testcancel();
+    }
+}
+void init_parser_set(sim_config_t * config)
+{
+    /* 生成制定数量的线程数的结构体。
+     * */
+    int numbers = config->parser_nums;
+    parser_set = malloc(sizeof(parser_set_t));
+    exit_if_ptr_is_null(parser_set,"parser_set alloc error");
+    parser_set->parser  = malloc(numbers * sizeof(parser_t));
+    exit_if_ptr_is_null(parser_set->parser,"parser_set->parser alloc error");
+    parser_set->numbers = numbers;
+    srand((unsigned int)time(NULL));
+    int i = 0;
+    for(i = 0; i < numbers; i++)
+    {
+        init_single_parser(&parser_set->parser[i]); 
+        pthread_create(&parser_set->parser[i].id,
+                NULL,
+                packet_parser_loop,
+                &parser_set->parser[i]);
     }
 }

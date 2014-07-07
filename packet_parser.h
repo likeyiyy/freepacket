@@ -13,7 +13,7 @@ typedef struct _parser
      * 这个线程所处理的的包数
      * */
     uint64_t total;
-    queue_t * queue;
+    common_queue_t * queue;
     pool_t  * pool;
     manager_set_t * manager_set;
     uint64_t drop_cause_pool_empty;
@@ -26,7 +26,8 @@ typedef struct parser_m
     uint32_t numbers;
 }parser_set_t;
 extern parser_set_t * parser_set;
-void init_parser_set(int numbers);
+
+void init_parser_set(sim_config_t * config);
 /*
  * 销毁线程和销毁数据分两步走
  * */

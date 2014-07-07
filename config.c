@@ -1,4 +1,6 @@
 #include "includes.h"
+
+sim_config_t * global_config;
 void exit_if_ptr_is_null(void * ptr,const char * message) 
 {
     if(ptr == NULL)
@@ -68,7 +70,7 @@ char * ether_etoa(const unsigned char *e, char *a)
         }
           return a;
 }
-void print_config_file(config_t * config)
+void print_config_file(sim_config_t * config)
 {
     char macaddr[18];
     struct in_addr min,max;
@@ -99,7 +101,7 @@ void print_config_file(config_t * config)
     printf("pkt_data:%s\n",config->pkt_data);
 
 	printf("period:%d\n",config->period);
-	printf("num_workers:%d\n",config->generator_workers);
+	printf("num_workers:%d\n",config->generator_nums);
 #ifdef TILERA_PLATFORM
 	printf("notif_ring_entries:%d\n",config->notif_ring_entries);
 	printf("equeue_entries:%u\n",config->equeue_entries);
@@ -109,7 +111,7 @@ void print_config_file(config_t * config)
 
     
 }
-int read_config_file(const char * file_name,config_t * config)
+int read_config_file(const char * file_name,sim_config_t * config)
 {
     assert(config != NULL);
     assert(file_name != NULL);
@@ -280,9 +282,17 @@ int read_config_file(const char * file_name,config_t * config)
             strncpy(config->link_name,p,length);
             config -> link_name[length - 1] = '\0';
         }
-        else if(strcmp(pname,"GENERATOR_WORKERS") == 0)
+        else if(strcmp(pname,"GENERATOR_NUMS") == 0)
         {
-            config->generator_workers = atoi(p);
+            config->generator_nums = atoi(p);
+        }
+        else if(strcmp(pname,"PARSER_NUMS") == 0)
+        {
+            config->parser_nums = atoi(p);
+        }
+        else if(strcmp(pname,"MANAGER_NUMS") == 0)
+        {
+            config->manager_nums = atoi(p);
         }
 #ifdef TILERA_PLATFORM
         else if(strcmp(pname,"NOTIF_RING_ENTRIES") == 0)
@@ -304,9 +314,6 @@ int read_config_file(const char * file_name,config_t * config)
 #endif 
         free(pname);        
     }
-#ifdef TILERA_PLATFORM
-    memcpy(config->dmac.octets, config->dstmac, ETH_ALEN);
-#endif
     return 0;
 }
 
@@ -336,4 +343,65 @@ uint32_t calc_period(double length,double rate,uint32_t thread_num)
      double l = 8.0 * NS * length;
      double x = rate * 1024 * 1024.0;
      return  (uint32_t)((mhz / 1000.0) * (thread_num * l / x));
+}
+
+int init_config_s(sim_config_t * config)
+{
+    config->protocol = IPPROTO_TCP;
+    config -> srcmac[0] = 0x10;
+    config -> srcmac[1] = 0xBF;
+    config -> srcmac[2] = 0x48;
+    config -> srcmac[3] = 0xD7;
+    config -> srcmac[4] = 0x9C;
+    config -> srcmac[5] = 0xF8;
+
+    config -> dstmac[0] = 0x10;
+    config -> dstmac[1] = 0xBF;
+    config -> dstmac[2] = 0x48;
+    config -> dstmac[3] = 0xD7;
+    config -> dstmac[4] = 0x98;
+    config -> dstmac[5] = 0x3C;
+
+    config -> saddr_min = inet_addr("192.168.103.19");
+    config -> daddr_min = inet_addr("192.168.103.18");
+    config -> saddr_cur = inet_addr("192.168.103.19");
+    config -> daddr_cur = inet_addr("192.168.103.18");
+    config -> saddr_max = inet_addr("192.168.103.19");
+    config -> daddr_max = inet_addr("192.168.103.18");
+
+    config -> sport_min = 100;
+    config -> dport_min = 200;
+    config -> sport_cur = 100;
+    config -> dport_cur = 200;
+    config -> sport_max = 100;
+    config -> dport_max = 200;
+    config -> speed     = 5000;
+    config -> pkt_data  = NULL;
+
+    config -> generator_pool_size = GENERATOR_POOL_SIZE;   
+
+    config -> parser_queue_length = PARSER_QUEUE_LENGTH;
+    config -> parser_pool_size    = PARSER_POOL_SIZE;
+
+    config -> manager_queue_length = MANAGER_QUEUE_LENGTH;
+    config -> manager_pool_size    = MANAGER_POOL_SIZE;
+    config -> manager_hash_length  = MANAGER_HASH_LENGTH;
+    config -> manager_buffer_size  = MANAGER_BUFFER_SIZE;
+
+    config -> pktlen    = 600;
+    config -> period    = 200;
+    config -> link_name = "xgbe1";
+    config -> packet_generator_mode = GENERATOR_MODE;
+#ifdef TILERA_PLATFORM
+    config -> notif_ring_entries = 512;
+    config -> equeue_entries     = 2048;
+    config -> per_worker_buckets = 128;
+	config -> once_packet_nums   = 128;
+#endif
+    config -> generator_nums = 1;
+    config -> parser_nums    = 1;
+    config -> manager_nums   = 1;
+
+    return 0;
+    
 }

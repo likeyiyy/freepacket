@@ -9,11 +9,9 @@
 #define POOL_MANAGER_H
 typedef enum _pool_type
 {
-    PACKET_POOL,
-    FLOW_ITEM_POOL,
-    SESSION_POOL,
-    BUFFER_POOL,
-    MANAGER_NODE_POOL
+    GENERATOR_POOL,
+    PARSER_POOL,
+    MANAGER_POOL
 }pool_type_t;
 #if 0
 typedef struct _node

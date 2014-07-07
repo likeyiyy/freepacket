@@ -286,7 +286,7 @@ static int init_mpipe_rules(mpipe_common_t * mpipe)
     return 0;
 }
 #endif
-int init_mpipe_config(mpipe_common_t * mpipe,config_t * config)
+int init_mpipe_config(mpipe_common_t * mpipe,sim_config_t * config)
 {
 #ifdef TILERA_PLATFORM
     assert(mpipe);
@@ -299,8 +299,7 @@ int init_mpipe_config(mpipe_common_t * mpipe,config_t * config)
     mpipe->notif_ring_entries = config->notif_ring_entries;
     mpipe->equeue_entries     = config->equeue_entries;
     mpipe->per_worker_buckets = config->per_worker_buckets;
-    mpipe->num_workers        = config->generator_workers;
-    mpipe->dmac               = config->dmac;
+    mpipe->num_workers        = config->generator_nums;
 
     mpipe->configed = 1;
     return 0;

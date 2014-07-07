@@ -55,7 +55,7 @@ typedef struct __mpipe_t
 typedef int mpipe_common_t;
 #endif
 
-int init_mpipe_config(mpipe_common_t * mpipe,config_t * config);
+int init_mpipe_config(mpipe_common_t * mpipe,sim_config_t * config);
 
 void init_mpipe_resource(mpipe_common_t * mpipe);
 

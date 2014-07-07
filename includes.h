@@ -12,7 +12,9 @@
 #include <string.h>
 #include <ctype.h>
 #include <signal.h>
+#include <getopt.h>
 #include <pthread.h>
+
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/ioctl.h>
@@ -44,6 +46,9 @@
 #endif
 
 
+#define PROCBLOCK_SIZE 32
+#define PAGE_SHIFT     12
+
 #define bool _Bool
 #define true 1
 #define false 0
@@ -71,11 +76,7 @@
 
 #define WAIT_MODE    0
 #define NO_WAIT_MODE 1
-#define SESSION_BUFFER_SIZE 65536 
-#define MANAGER_QUEUE_LENGTH 50000
-#define SESSION_POOL_LENGTH  10000
-#define MAX_FACTOR           0.75
-#define DESTORY_TIME         100000000
+
 #include "pool_manager.h"
 /*
 * 一个数据包却要有数据部分和长度部分，真的必要吗？
@@ -107,7 +108,7 @@ typedef struct _session_item
     uint32_t upper_port;
     uint32_t lower_port;
     uint8_t  protocol;
-    uint8_t buffer[SESSION_BUFFER_SIZE];
+    uint8_t  * buffer;
     uint64_t last_time;
     uint32_t length;
     uint32_t cur_len;
@@ -133,12 +134,9 @@ static inline uint64_t get_cycle_count_intel()
 #endif
 
 #include "config.h"
-
 #include "mpipe.h"
-
-#include "parser_queue.h"
 #include "checksum.h"
-#include "manager_queue.h"
+#include "queue_manager.h"
 #include "list.h"
 #include "hash.h"
 #include "packet_manager.h"

@@ -27,7 +27,7 @@ pool_t * init_pool(pool_type_t type,int numbers,int item_size)
     for(i = 0; i < numbers; ++i)
     {
         /*
-        * 这个复杂的复制时为了，让node_t[]数组里面的指针指向真实的buffer.
+        * 这个复杂的复制是为了，让node_t[]数组里面的指针指向真实的buffer.
         * */
         pool->node[i] = pool->buffer + i * item_size;
     }
@@ -41,26 +41,6 @@ pool_t * init_pool(pool_type_t type,int numbers,int item_size)
     pool->push_pos = numbers - 1;
     pthread_mutex_init(&pool->mutex,NULL);
     pthread_cond_init(&pool->empty,NULL);
-#if 0
-    switch(type)
-    {
-        case PACKET_POOL:
-        packet_pool = pool;
-        break;
-        case FLOW_ITEM_POOL:
-        packet_pool = pool;
-        breakk;
-        case SESSION_POOL:
-        session_pool = pool;
-        break;
-        case BUFFER_POOL:
-        buffer_pool = pool;
-        break;
-        case MANAGER_NODE_POOL:
-        manager_node_pool = pool;
-        break;
-    }
-#endif
     return pool;
 }
 /*
@@ -104,8 +84,6 @@ static inline void print_pool_type(pool_t * pool)
         case 0:printf("Packet Generator Pool\n");break;
         case 1:printf("Parser To Seeion Pool\n");break;
         case 2:printf("Session Pool\n");break;
-        case 3:printf("Generator To Parser Queue\n");break;
-        case 4:break;
     }
 }
 /*

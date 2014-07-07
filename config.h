@@ -23,12 +23,24 @@
 #include <math.h>
 #include <pthread.h>
 #include <string.h>
-#define PROCBLOCK_SIZE 32
-#define PAGE_SHIFT     12
+
 #define CONFIG_FILE "./generator.conf"
-#define PACKET_POOL_SIZE 2048
-#define NODE_POOL_SIZE 1000000
-#define PACKET_PARSER_NUMS 1
+
+#define GENERATOR_POOL_SIZE 100000
+
+#define PARSER_QUEUE_LENGTH 50000
+#define PARSER_POOL_SIZE    100000
+
+#define MANAGER_QUEUE_LENGTH 50000
+#define MANAGER_POOL_SIZE    50000
+/* a primer*/
+#define MANAGER_HASH_LENGTH  1173
+#define MANAGER_BUFFER_SIZE  65536
+
+#define MAX_FACTOR           0.75
+/* nanosecond */
+#define DESTORY_TIME         100000000
+
 typedef struct __config
 {
     int protocol;
@@ -48,29 +60,43 @@ typedef struct __config
     uint32_t dport_max;
     uint32_t speed;
     char * pkt_data;
-    int packet_pool_size;   /* PACKET pool 的大小*/
     int pktlen;
     uint32_t period;
     char * link_name;
-    int     generator_workers;
     int     packet_generator_mode;
 #ifdef TILERA_PLATFORM
     int32_t  notif_ring_entries;
     uint32_t equeue_entries;
     int     per_worker_buckets;
 	int     once_packet_nums;
-    gxio_mpipe_rules_dmac_t dmac;
-
 #endif
-}config_t;
+
+    int     generator_nums;
+    int     parser_nums;
+    int     manager_nums;
+
+    int generator_pool_size;   
+
+    int parser_queue_length;
+    int parser_pool_size;
+
+    int manager_queue_length;
+    int manager_pool_size;
+    int manager_hash_length;
+    int manager_buffer_size;
+}sim_config_t;
+
+extern sim_config_t * global_config;
 
 int ether_atoe(const char *a, unsigned char *e);
 
 char * ether_etoa(const unsigned char *e, char *a);
 
-int read_config_file(const char * file_name, config_t * config);
+int read_config_file(const char * file_name, sim_config_t * config);
 
-void print_config_file(config_t * config);
+int init_config_s(sim_config_t * config);
+
+void print_config_file(sim_config_t * config);
 
 void exit_if_ptr_is_null(void * p,const char * c);
 

@@ -20,7 +20,7 @@ typedef struct _session_manager
     int                index;
     struct hash_table * ht;
     pool_t            * session_pool;
-    manager_queue_t   * queue;
+    common_queue_t   * queue;
     uint64_t drop_cause_pool_empty;
 }manager_t;
 typedef struct _set
@@ -31,7 +31,7 @@ typedef struct _set
 /*
 * 初始化一个session工作组。
 * */
-manager_set_t * init_manager_set(uint32_t length);
+manager_set_t * init_manager_set(sim_config_t * config);
 /*
 * 真正的工作者。
 * */

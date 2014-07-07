@@ -84,7 +84,7 @@ static inline void make_new_session(struct blist * blist,
 {
     session_item_t * item = &blist->item;
     item->pool       = manager->session_pool;
-    item->length     = SESSION_BUFFER_SIZE;
+    item->length     = global_config->manager_buffer_size;
     item->cur_len    = 0;
     item->upper_ip   = flow->upper_ip;
     item->lower_ip   = flow->lower_ip;

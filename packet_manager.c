@@ -24,35 +24,6 @@
             h1%SIZE\
 )
 manager_set_t * manager_set;
-manager_set_t * init_manager_set(uint32_t length)
-{
-    manager_set_t * set = malloc(sizeof(manager_set_t));
-    manager_set = set;
-    exit_if_ptr_is_null(set,"初始化分配流哈希错误");
-    set->manager = malloc(sizeof(manager_t) * length);
-    exit_if_ptr_is_null(set->manager,"初始化分配manager错误");
-    set->length = length;
-    int i = 0;
-    for(i = 0; i < length; i++)
-    {
-        set->manager[i].queue = init_manager_queue(MANAGER_QUEUE_LENGTH,sizeof(flow_item_t));
-        set->manager[i].ht = hash_create(1100);
-        set->manager[i].session_pool = init_pool(SESSION_POOL,
-                                                SESSION_POOL_LENGTH,
-                                                sizeof(struct blist));
-        set->manager[i].session_pool->pool_type = 2;
-        set->manager[i].index = i;
-        set->manager[i].drop_cause_pool_empty = 0;
-    }
-    for(i = 0; i < length; i++)
-    {
-        pthread_create(&set->manager[i].id,
-                       NULL,
-                     packet_manager_loop,
-                      &set->manager[i]);
-    }
-    return set;
-}
 static inline int compare_session(session_item_t * item , flow_item_t * flow)
 {
     session_item_t * session = item;
@@ -125,7 +96,7 @@ void * packet_manager_loop(void * arg)
         /*
          * 1.只有确实有数据时才返回。
          * */
-        pop_session_buf(manager->queue,(void **)&flow);
+        pop_common_buf(manager->queue,(void **)&flow);
 
         /*
          * 2. make hash index
@@ -143,4 +114,48 @@ void * packet_manager_loop(void * arg)
         hash_add_item(&manager->ht, index, flow); 
 
     }
+}
+manager_set_t * init_manager_set(sim_config_t * config)
+{
+    int numbers = config->manager_nums;
+    int queue_length = config->manager_queue_length;
+    int pool_size    = config->manager_pool_size;
+    int hash_length  = config->manager_hash_length;
+
+    manager_set_t * set = malloc(sizeof(manager_set_t));
+    manager_set = set;
+    exit_if_ptr_is_null(set,"初始化分配流管理错误");
+    set->manager = malloc(sizeof(manager_t) * numbers);
+    exit_if_ptr_is_null(set->manager,"初始化分配manager错误");
+    set->length = numbers;
+
+    session_item_t * session;
+    int i = 0;
+    for(i = 0; i < numbers; i++)
+    {
+        set->manager[i].queue = init_common_queue(queue_length,
+                sizeof(flow_item_t));
+        set->manager[i].ht = hash_create(hash_length);
+        set->manager[i].session_pool = init_pool(MANAGER_POOL,
+                                                pool_size,
+                                                sizeof(struct blist));
+        for(int j = 0; j < pool_size - 1; j++)
+        {
+            get_buf(set->manager[i].session_pool,NO_WAIT_MODE,(void **)&session);
+            session->buffer = malloc(config->manager_buffer_size);
+            exit_if_ptr_is_null(session->buffer,"session->buffer is NULL");
+            free_buf(set->manager[i].session_pool,session);
+        }
+        set->manager[i].session_pool->pool_type = MANAGER_POOL;
+        set->manager[i].index = i;
+        set->manager[i].drop_cause_pool_empty = 0;
+    }
+    for(i = 0; i < numbers; i++)
+    {
+        pthread_create(&set->manager[i].id,
+                       NULL,
+                     packet_manager_loop,
+                      &set->manager[i]);
+    }
+    return set;
 }

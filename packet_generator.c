@@ -7,8 +7,6 @@
 #include "includes.h"
 //#define memcpy(a,b,c) do { memcpy(a,b,c);printf("packet_generator_loop memcpy here\n"); } while(0)
 generator_set_t * generator_set;
-extern pool_t * packet_pool;
-extern parser_set_t * parser_set;
 void   destroy_generator(generator_set_t * generator_set)
 {
     int i = 0;
@@ -39,7 +37,7 @@ void   finish_generator(generator_set_t * generator_set)
         pthread_cancel(generator_set->generator[i].id);
     }
 }
-int pop_payload(void * payload, char * data,config_t * config)
+int pop_payload(void * payload, char * data,sim_config_t * config)
 {
     int i = strlen((const char *)data);
     int j = config->pktlen - 54;
@@ -64,7 +62,7 @@ int pop_payload(void * payload, char * data,config_t * config)
         ((config->saddr_cur == config->saddr_max) ? \
          (config->saddr_cur = config->saddr_min) : \
          (++config->saddr_cur))
-static inline uint32_t get_next_srcip(config_t * config)
+static inline uint32_t get_next_srcip(sim_config_t * config)
 {
     return config->saddr_cur == config->saddr_max ?
     config->saddr_cur = config->saddr_min:
@@ -74,7 +72,7 @@ static inline uint32_t get_next_srcip(config_t * config)
         ((config->daddr_cur == config->daddr_max) ? \
          (config->daddr_cur = config->daddr_min) : \
          (++config->daddr_cur))
-static inline uint32_t get_next_dstip(config_t * config)
+static inline uint32_t get_next_dstip(sim_config_t * config)
 {
     return config->daddr_cur == config->daddr_max ?
     config->daddr_cur = config->daddr_min:
@@ -84,7 +82,7 @@ static inline uint32_t get_next_dstip(config_t * config)
         ((config->sport_cur == config->sport_max) ? \
          (config->sport_cur = config->sport_min) : \
          (++config->sport_cur))
-static inline uint16_t get_next_srcport(config_t * config)
+static inline uint16_t get_next_srcport(sim_config_t * config)
 {
     return config->sport_cur == config->sport_max ?
     config->sport_cur = config->sport_min:
@@ -94,13 +92,13 @@ static inline uint16_t get_next_srcport(config_t * config)
         ((config->dport_cur == config->dport_max) ? \
          (config->dport_cur = config->dport_min) : \
          (++config->dport_cur))
-static inline uint16_t get_next_dstport(config_t * config)
+static inline uint16_t get_next_dstport(sim_config_t * config)
 {
     return config->dport_cur == config->dport_max ?
     config->dport_cur = config->dport_min:
     ++config->dport_cur;
 }
-static inline int pop_transmission_tcp(void * tcph,config_t * config)
+static inline int pop_transmission_tcp(void * tcph,sim_config_t * config)
 {
     struct tcphdr * tcp = (struct tcphdr *)tcph;
     tcp->source = htons(GET_NEXT_SRCPORT(config));
@@ -109,7 +107,7 @@ static inline int pop_transmission_tcp(void * tcph,config_t * config)
     tcp->check = 0;
     return config->pktlen - 34;
 }
-static inline int pop_transmission_udp(void * udph,config_t * config)
+static inline int pop_transmission_udp(void * udph,sim_config_t * config)
 {
     struct udphdr * udp = (struct udphdr *)udph;
     udp->source = htons(GET_NEXT_SRCPORT(config));
@@ -118,7 +116,7 @@ static inline int pop_transmission_udp(void * udph,config_t * config)
     udp->check  = 0;
     return config->pktlen - 34;
 }
-static inline void pop_iplayer_tcp(void * iph,config_t * config)
+static inline void pop_iplayer_tcp(void * iph,sim_config_t * config)
 {
     struct iphdr * ip = (struct iphdr *)iph;
     ip->version = IPVERSION;
@@ -136,7 +134,7 @@ static inline void pop_iplayer_tcp(void * iph,config_t * config)
     uint16_t sum = 0x6 + config->pktlen - 34;
     tcp->check = (~ip_xsum((uint16_t *)&ip->saddr,(config->pktlen-26)/2,htons(sum)));
 }
-static inline void pop_iplayer_udp(void * iph,config_t * config)
+static inline void pop_iplayer_udp(void * iph,sim_config_t * config)
 {
     struct iphdr * ip = (struct iphdr *)iph;
     ip->version = IPVERSION;
@@ -154,15 +152,15 @@ static inline void pop_iplayer_udp(void * iph,config_t * config)
     uint16_t sum = 0x17 + config->pktlen - 34;
     udp->check = (~ip_xsum((uint16_t *)((unsigned char *)ip+12),(config->pktlen-26)/2,htons(sum)));
 }
-static inline void pop_datalink(void * packet,config_t * config)
+static inline void pop_datalink(void * packet,sim_config_t * config)
 {
     struct ethhdr * eth_hdr = (struct ethhdr *)(packet);
     memcpy(eth_hdr->h_dest,config->dstmac,ETH_ALEN);
     memcpy(eth_hdr->h_source,config->srcmac,ETH_ALEN);
     eth_hdr->h_proto = htons(ETH_P_IP);
 }
-typedef void (GenerHandler) (packet_t * packet,config_t * config);
-static inline void generator_tcp_packet(packet_t * packet,config_t * config)
+typedef void (GenerHandler) (packet_t * packet,sim_config_t * config);
+static inline void generator_tcp_packet(packet_t * packet,sim_config_t * config)
 {
     //pop_payload(packet->data+54,config->pkt_data,config);
     pop_transmission_tcp(packet->data + 34,config);
@@ -170,7 +168,7 @@ static inline void generator_tcp_packet(packet_t * packet,config_t * config)
     pop_datalink(packet->data,config);
 }
 
-static inline void generator_udp_packet(packet_t * packet,config_t * config)
+static inline void generator_udp_packet(packet_t * packet,sim_config_t * config)
 {
     //pop_payload(packet->data+42,config->pkt_data,config);
     pop_transmission_udp(packet->data+34,config);
@@ -183,7 +181,7 @@ static void packet_generator(generator_t * generator,int data_len,GenerHandler *
     packet_t * packet;
     //struct timespec oldtime,newtime;
     uint64_t old,new;
-    config_t * config = generator->config;
+    sim_config_t * config = generator->config;
     //old = GET_CYCLE_COUNT(); 
     while(1)
     {
@@ -210,7 +208,7 @@ static void packet_generator(generator_t * generator,int data_len,GenerHandler *
         /* 数据包均匀 分部到 下一个工作的线程里。*/
         parser_t * parser = &generator->parser_set->parser[generator->next_thread_id++];
         generator->next_thread_id = (generator->next_thread_id == generator->parser_set->numbers)? 0 : generator->next_thread_id;
-        push_to_queue(parser->queue,packet);
+        push_common_buf(parser->queue,packet);
         generator->total_send_byte += config->pktlen;
         /*4. 延时统计函数 */
         new = GET_CYCLE_COUNT() - old;
@@ -228,7 +226,7 @@ static void tilera_packet_collector(generator_t * generator)
     mpipe_common_t * mpipe = generator->mpipe;
 
     gxio_mpipe_iqueue_t * iqueue = mpipe->iqueues[generator->rank];
-    config_t * config = generator->config;
+    sim_config_t * config = generator->config;
     gxio_mpipe_idesc_t * idesc;
 
     while(1)
@@ -254,7 +252,7 @@ static void tilera_packet_collector(generator_t * generator)
             /* 数据包均匀 分部到 下一个工作的线程里。*/
             parser_t * parser = &generator->parser_set->parser[generator->next_thread_id++];
             generator->next_thread_id = (generator->next_thread_id == generator->parser_set->numbers)? 0 : generator->next_thread_id;
-            push_to_queue(parser->queue,packet);
+            push_common_buf(parser->queue,packet);
             generator->total_send_byte += config->pktlen;
 			gxio_mpipe_iqueue_drop(iqueue, idesc);
 done:
@@ -270,7 +268,7 @@ done:
 #endif
 static void generator_mode(generator_t * generator,int data_len)
 {
-    config_t * config = generator->config;
+    sim_config_t * config = generator->config;
     if(config->protocol == IPPROTO_TCP)
     {
         /*
@@ -299,13 +297,13 @@ void * packet_generator_loop(void * arg)
     pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, 0);
     pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, 0);
     generator_t * generator = (generator_t *)arg;
-    mpipe_common_t * mpipe = generator->mpipe;
-    config_t * config = generator->config;
+    sim_config_t * config = generator->config;
 
 
     if(config->packet_generator_mode == COLLECTOR_MODE)
     {
 #ifdef TILERA_PLATFORM
+    mpipe_common_t * mpipe = generator->mpipe;
     /**
      * Bind to a single cpu
      * */
@@ -331,10 +329,10 @@ void * packet_generator_loop(void * arg)
     pthread_exit(NULL);
 }
 
-void init_generator_set(config_t * config)
+void init_generator_set(sim_config_t * config)
 {
     int i = 0;
-    int numbers = config->generator_workers;
+    int numbers = config->generator_nums;
     generator_set = malloc(sizeof(generator_set_t));
     /*
      * 初始化一个缓冲区池。
@@ -362,13 +360,13 @@ void init_generator_set(config_t * config)
 
     for(i = 0; i < numbers; ++i)
     {
-        generator_set->generator[i].pool = init_pool(PACKET_POOL,
-                                                config->packet_pool_size,
+        generator_set->generator[i].pool = init_pool(GENERATOR_POOL,
+                                                config->generator_pool_size,
                                                 config->pktlen + sizeof(packet_t));
-        generator_set->generator[i].pool->pool_type = PACKET_POOL;
-        generator_set->generator[i].config = malloc(sizeof(config_t)); 
+        generator_set->generator[i].pool->pool_type = GENERATOR_POOL;
+        generator_set->generator[i].config = malloc(sizeof(sim_config_t)); 
         exit_if_ptr_is_null(generator_set->generator[i].config,"config error");
-        memcpy(generator_set->generator[i].config,config,sizeof(config_t));
+        memcpy(generator_set->generator[i].config,config,sizeof(sim_config_t));
         generator_set->generator[i].parser_set = parser_set;
         generator_set->generator[i].index = i;
         generator_set->generator[i].next_thread_id = 0;
