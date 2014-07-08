@@ -5,9 +5,8 @@
 	> Created Time: Mon 12 May 2014 10:41:38 AM CST
  ************************************************************************/
 #include "includes.h"
-/*
-* 初始化一个session工作组。
-* */
+static manager_set_t * global_manager_set = NULL;
+static pthread_mutex_t global_create_manager_lock = PTHREAD_MUTEX_INITIALIZER;
 //#define memcpy(a,b,c) do { memcpy(a,b,c);printf("session memcpy here\n"); } while(0)
 #define MAKE_HASH(v1,v2,h1,f1,f2,f3,f4,SIZE) \
 (\
@@ -23,7 +22,6 @@
             h1 ^= v2 >> 7,\
             h1%SIZE\
 )
-static manager_set_t * global_manager_set = NULL;
 static inline int compare_session(session_item_t * item , flow_item_t * flow)
 {
     session_item_t * session = item;
@@ -117,6 +115,12 @@ void * packet_manager_loop(void * arg)
 }
 manager_set_t * init_manager_set(sim_config_t * config)
 {
+    pthread_mutex_lock(&global_create_manager_lock);
+    if(global_manager_set != NULL)
+    {
+        pthread_mutex_unlock(&global_create_manager_lock);
+        return NULL;
+    }
     int numbers = config->manager_nums;
     int queue_length = config->manager_queue_length;
     int pool_size    = config->manager_pool_size;
@@ -155,6 +159,7 @@ manager_set_t * init_manager_set(sim_config_t * config)
                      packet_manager_loop,
                       &global_manager_set->manager[i]);
     }
+    pthread_mutex_unlock(&global_create_manager_lock);
     return global_manager_set;
 }
 manager_set_t * get_manager_set()

@@ -7,8 +7,10 @@
 #include "includes.h"
 //#define memcpy(a,b,c) do { memcpy(a,b,c);printf("packet_generator_loop memcpy here\n"); } while(0)
 static generator_set_t * generator_set = NULL;
+static pthread_mutex_t global_create_generator_lock = PTHREAD_MUTEX_INITIALIZER;
 void   destroy_generator(generator_set_t * generator_set)
 {
+    assert(generator_set);
     int i = 0;
     for(i = 0; i < generator_set->numbers; ++i)
     {
@@ -340,8 +342,15 @@ void * packet_generator_loop(void * arg)
     pthread_exit(NULL);
 }
 
-void init_generator_set(sim_config_t * config)
+generator_set_t * init_generator_set(sim_config_t * config)
 {
+    pthread_mutex_lock(&global_create_generator_lock);
+    if(generator_set != NULL)
+    {
+        printf("generator_set is alread");
+        pthread_mutex_unlock(&global_create_generator_lock);
+        return NULL;
+    }
     int i = 0;
     int numbers = config->generator_nums;
     generator_set = malloc(sizeof(generator_set_t));
@@ -394,6 +403,8 @@ void init_generator_set(sim_config_t * config)
             exit(0);
         }
     }
+    pthread_mutex_unlock(&global_create_generator_lock);
+    return generator_set;
 }
 
 generator_set_t * get_generator_set()

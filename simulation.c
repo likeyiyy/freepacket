@@ -20,7 +20,9 @@ struct option long_options[] =
     {"manager_queue_length",1,  NULL,  'q'},
     {"manager_pool_size",   1,  NULL,  'o'},
     {"manager_hash_length", 1,  NULL,  'h'},
-    {"manager_buffer_size", 1,  NULL,  'b'}
+    {"manager_buffer_size", 1,  NULL,  'b'},
+    {"packet_generator_mode", 1,  NULL,  'c'},
+    {0,0,0,0}
 };
 void parse_args(int argc, char * const argv[],sim_config_t * config)
 {
@@ -99,7 +101,6 @@ void parse_args(int argc, char * const argv[],sim_config_t * config)
                 }
                 printf("\n");
             }
-                
                 break;
             case 'h':
                 break;
@@ -107,7 +108,9 @@ void parse_args(int argc, char * const argv[],sim_config_t * config)
             case 'b':
                 break;
                 config->manager_buffer_size = atoi(optarg);
-
+            case 'c':
+                config->packet_generator_mode = atoi(optarg);
+                break;
             case '?':
                 break; 
  

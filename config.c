@@ -322,6 +322,10 @@ int read_config_file(const char * file_name,sim_config_t * config)
         {
             config->manager_buffer_size = atoi(p);
         }
+        else if(strcmp(pname,"PACKET_GENERATOR_MODE") == 0)
+        {
+            config->packet_generator_mode = atoi(p);
+        }
 
 #ifdef TILERA_PLATFORM
         else if(strcmp(pname,"NOTIF_RING_ENTRIES") == 0)

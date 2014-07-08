@@ -7,6 +7,7 @@
 #include "includes.h"
 
 static parser_set_t * global_parser_set = NULL;
+static pthread_mutex_t global_create_parser_lock = PTHREAD_MUTEX_INITIALIZER;
 
 #define MAKE_HASH(v1,v2,h1,f1,f2,f3,f4,SIZE) \
 (\
@@ -252,8 +253,18 @@ void * packet_parser_loop(void * arg)
         pthread_testcancel();
     }
 }
-void init_parser_set(sim_config_t * config)
+parser_set_t * init_parser_set(sim_config_t * config)
 {
+    pthread_mutex_lock(&global_create_parser_lock);
+    if(global_parser_set != NULL)
+    {
+        pthread_mutex_unlock(&global_create_parser_lock);
+        /*
+        * 当global_parser_set不为NULL的时候，我们反而返回NULL
+        * 是因为我们不想让别的线程使用此数据结构。
+        * */
+        return NULL;
+    }
     /* 生成制定数量的线程数的结构体。
      * */
     int numbers = config->parser_nums;
@@ -272,6 +283,8 @@ void init_parser_set(sim_config_t * config)
                 packet_parser_loop,
                 &global_parser_set->parser[i]);
     }
+    pthread_mutex_unlock(&global_create_parser_lock);
+    return global_parser_set;
 }
 parser_set_t * get_parser_set()
 {

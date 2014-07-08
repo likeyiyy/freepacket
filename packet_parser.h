@@ -26,7 +26,7 @@ typedef struct parser_m
 }parser_set_t;
 
 parser_set_t * get_parser_set();
-void init_parser_set(sim_config_t * config);
+parser_set_t * init_parser_set(sim_config_t * config);
 /*
  * 销毁线程和销毁数据分两步走
  * */

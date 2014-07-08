@@ -4,7 +4,21 @@
 	> Mail: likeyiyy@sina.com 
 	> Created Time: Wed 02 Apr 2014 04:07:31 PM CST
  ************************************************************************/
-#include "use_net.h"
+#include <stdio.h>       
+#include <stdlib.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <sys/ioctl.h>
+#include <linux/if_packet.h>
+#include <linux/if.h> 
+#include <linux/if_ether.h>
+#include <linux/ip.h>
+#include <linux/if_ether.h>
+#include <linux/tcp.h>
+#include <arpa/inet.h>
+#include <strings.h>
+#include <string.h>
+#include <ctype.h>
 #include <pthread.h>
 pthread_mutex_t print_lock = PTHREAD_MUTEX_INITIALIZER;
 /* IP flags. */
@@ -241,6 +255,8 @@ void parse_full_packet(void * buffer)
             case IPPROTO_TCP:
                 tcp_header  = (struct tcphdr *)(buffer + sizeof(struct ethhdr) + ip_header->ihl *4 );          
                 parse_tcphdr(tcp_header);
+                break;
+            case IPPROTO_UDP:
                 break;
             default:break;
         }

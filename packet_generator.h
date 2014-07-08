@@ -28,12 +28,11 @@ typedef struct generator_set
 
 
 generator_set_t * get_generator_set();
-void   init_generator_set(sim_config_t * config);
+generator_set_t * init_generator_set(sim_config_t * config);
 /*
  * 销毁线程，和销毁线程的数据结构要分两步走。
  * 尤其是当这个线程和其他线程有交互时。
  * */
 void   destroy_generator(generator_set_t * generator_set);
 void   finish_generator(generator_set_t * generator_set);
-void * packet_generator_loop(void * arg);
 #endif
