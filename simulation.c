@@ -6,9 +6,6 @@
  ************************************************************************/
 
 #include "includes.h"
-extern manager_set_t * manager_set;
-extern generator_set_t * generator_set;
-extern parser_set_t * parser_set;
 static   const char * config_file = CONFIG_FILE;
 
 char * const short_options = "g:p:m:";
@@ -164,6 +161,12 @@ int main(int argc, char ** argv)
     init_generator_set(global_config);
 
 #ifdef INTEL_PLATFORM
+    generator_set_t * generator_set = get_generator_set();
+    exit_if_ptr_is_null(generator_set,"generator_set is null");
+    parser_set_t    * parser_set    = get_parser_set();
+    exit_if_ptr_is_null(parser_set,"parser_set is null");
+    manager_set_t   * manager_set   = get_manager_set();
+    exit_if_ptr_is_null(manager_set,"manager_set is null");
     sys_dispaly(generator_set,parser_set,manager_set);
 #endif
 

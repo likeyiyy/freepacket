@@ -28,6 +28,9 @@ typedef struct _set
     manager_t * manager;
     uint32_t    length;
 }manager_set_t;
+
+
+manager_set_t * get_manager_set();
 /*
 * 初始化一个session工作组。
 * */

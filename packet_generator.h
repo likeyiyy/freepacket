@@ -15,7 +15,6 @@ typedef struct generator
     uint64_t    drop_total;
     sim_config_t  * config;
     pool_t    * pool;
-    parser_set_t * parser_set;
     struct timeval old,now;
     int rank;
     mpipe_common_t * mpipe;
@@ -27,8 +26,8 @@ typedef struct generator_set
     sim_config_t  * config;
 }generator_set_t;
 
-extern generator_set_t * generator_set;
 
+generator_set_t * get_generator_set();
 void   init_generator_set(sim_config_t * config);
 /*
  * 销毁线程，和销毁线程的数据结构要分两步走。

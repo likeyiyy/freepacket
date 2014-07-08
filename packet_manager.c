@@ -23,7 +23,7 @@
             h1 ^= v2 >> 7,\
             h1%SIZE\
 )
-manager_set_t * manager_set;
+static manager_set_t * global_manager_set = NULL;
 static inline int compare_session(session_item_t * item , flow_item_t * flow)
 {
     session_item_t * session = item;
@@ -122,40 +122,42 @@ manager_set_t * init_manager_set(sim_config_t * config)
     int pool_size    = config->manager_pool_size;
     int hash_length  = config->manager_hash_length;
 
-    manager_set_t * set = malloc(sizeof(manager_set_t));
-    manager_set = set;
-    exit_if_ptr_is_null(set,"初始化分配流管理错误");
-    set->manager = malloc(sizeof(manager_t) * numbers);
-    exit_if_ptr_is_null(set->manager,"初始化分配manager错误");
-    set->length = numbers;
-
+    global_manager_set = malloc(sizeof(manager_set_t));
+    exit_if_ptr_is_null(global_manager_set,"初始化分配流管理错误");
+    global_manager_set->manager = malloc(sizeof(manager_t) * numbers);
+    exit_if_ptr_is_null(global_manager_set->manager,"初始化分配manager错误");
+    global_manager_set->length = numbers;
     session_item_t * session;
     int i = 0;
     for(i = 0; i < numbers; i++)
     {
-        set->manager[i].queue = init_common_queue(queue_length,
+        global_manager_set->manager[i].queue = init_common_queue(queue_length,
                 sizeof(flow_item_t));
-        set->manager[i].ht = hash_create(hash_length);
-        set->manager[i].session_pool = init_pool(MANAGER_POOL,
+        global_manager_set->manager[i].ht = hash_create(hash_length);
+        global_manager_set->manager[i].session_pool = init_pool(MANAGER_POOL,
                                                 pool_size,
                                                 sizeof(struct blist));
         for(int j = 0; j < pool_size - 1; j++)
         {
-            get_buf(set->manager[i].session_pool,NO_WAIT_MODE,(void **)&session);
+            get_buf(global_manager_set->manager[i].session_pool,NO_WAIT_MODE,(void **)&session);
             session->buffer = malloc(config->manager_buffer_size);
             exit_if_ptr_is_null(session->buffer,"session->buffer is NULL");
-            free_buf(set->manager[i].session_pool,session);
+            free_buf(global_manager_set->manager[i].session_pool,session);
         }
-        set->manager[i].session_pool->pool_type = MANAGER_POOL;
-        set->manager[i].index = i;
-        set->manager[i].drop_cause_pool_empty = 0;
+        global_manager_set->manager[i].session_pool->pool_type = MANAGER_POOL;
+        global_manager_set->manager[i].index = i;
+        global_manager_set->manager[i].drop_cause_pool_empty = 0;
     }
     for(i = 0; i < numbers; i++)
     {
-        pthread_create(&set->manager[i].id,
+        pthread_create(&global_manager_set->manager[i].id,
                        NULL,
                      packet_manager_loop,
-                      &set->manager[i]);
+                      &global_manager_set->manager[i]);
     }
-    return set;
+    return global_manager_set;
+}
+manager_set_t * get_manager_set()
+{
+    return global_manager_set;
 }

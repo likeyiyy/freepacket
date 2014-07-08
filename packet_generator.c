@@ -6,7 +6,7 @@
  ************************************************************************/
 #include "includes.h"
 //#define memcpy(a,b,c) do { memcpy(a,b,c);printf("packet_generator_loop memcpy here\n"); } while(0)
-generator_set_t * generator_set;
+static generator_set_t * generator_set = NULL;
 void   destroy_generator(generator_set_t * generator_set)
 {
     int i = 0;
@@ -14,7 +14,6 @@ void   destroy_generator(generator_set_t * generator_set)
     {
         generator_set->generator[i].config     = NULL;
         generator_set->generator[i].pool       = NULL;
-        generator_set->generator[i].parser_set = NULL;
     }
     free(generator_set->generator);
     generator_set->generator = NULL;
@@ -179,10 +178,14 @@ static inline void generator_udp_packet(packet_t * packet,sim_config_t * config)
 static void packet_generator(generator_t * generator,int data_len,GenerHandler * Handler)
 {
     packet_t * packet;
-    //struct timespec oldtime,newtime;
     uint64_t old,new;
     sim_config_t * config = generator->config;
-    //old = GET_CYCLE_COUNT(); 
+    parser_set_t * parser_set = get_parser_set();
+    if(parser_set == NULL)
+    {
+        printf("parser_set is null,exit now\n");
+        exit(0);
+    }
     while(1)
     {
        old = GET_CYCLE_COUNT();
@@ -206,8 +209,9 @@ static void packet_generator(generator_t * generator,int data_len,GenerHandler *
         * 3. 数据放到下一步的队列里。
         * */
         /* 数据包均匀 分部到 下一个工作的线程里。*/
-        parser_t * parser = &generator->parser_set->parser[generator->next_thread_id++];
-        generator->next_thread_id = (generator->next_thread_id == generator->parser_set->numbers)? 0 : generator->next_thread_id;
+        parser_t * parser = &parser_set->parser[generator->next_thread_id++];
+        generator->next_thread_id = (generator->next_thread_id == parser_set->numbers)? 0 : generator->next_thread_id;
+
         push_common_buf(parser->queue,packet);
         generator->total_send_byte += config->pktlen;
         /*4. 延时统计函数 */
@@ -228,6 +232,13 @@ static void tilera_packet_collector(generator_t * generator)
     gxio_mpipe_iqueue_t * iqueue = mpipe->iqueues[generator->rank];
     sim_config_t * config = generator->config;
     gxio_mpipe_idesc_t * idesc;
+
+    parser_set_t * parser_set = get_parser_set();
+    if(parser_set == NULL)
+    {
+        printf("parser_set is null,exit now\n");
+        exit(0);
+    }
 
     while(1)
     {
@@ -250,8 +261,8 @@ static void tilera_packet_collector(generator_t * generator)
             packet->length = l2_length;
 
             /* 数据包均匀 分部到 下一个工作的线程里。*/
-            parser_t * parser = &generator->parser_set->parser[generator->next_thread_id++];
-            generator->next_thread_id = (generator->next_thread_id == generator->parser_set->numbers)? 0 : generator->next_thread_id;
+            parser_t * parser = &parser_set->parser[generator->next_thread_id++];
+            generator->next_thread_id = (generator->next_thread_id == parser_set->numbers)? 0 : generator->next_thread_id;
             push_common_buf(parser->queue,packet);
             generator->total_send_byte += config->pktlen;
 			gxio_mpipe_iqueue_drop(iqueue, idesc);
@@ -367,7 +378,6 @@ void init_generator_set(sim_config_t * config)
         generator_set->generator[i].config = malloc(sizeof(sim_config_t)); 
         exit_if_ptr_is_null(generator_set->generator[i].config,"config error");
         memcpy(generator_set->generator[i].config,config,sizeof(sim_config_t));
-        generator_set->generator[i].parser_set = parser_set;
         generator_set->generator[i].index = i;
         generator_set->generator[i].next_thread_id = 0;
         generator_set->generator[i].total_send_byte = 0;
@@ -384,4 +394,9 @@ void init_generator_set(sim_config_t * config)
             exit(0);
         }
     }
+}
+
+generator_set_t * get_generator_set()
+{
+    return generator_set;
 }

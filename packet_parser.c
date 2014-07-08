@@ -6,6 +6,8 @@
  ************************************************************************/
 #include "includes.h"
 
+static parser_set_t * global_parser_set = NULL;
+
 #define MAKE_HASH(v1,v2,h1,f1,f2,f3,f4,SIZE) \
 (\
             v1 = f1 ^ f2,\
@@ -38,8 +40,6 @@ static inline uint32_t make_hash(uint32_t f1,uint32_t f2,uint32_t f3,uint32_t f4
     return h1%SIZE; 
 }   
 
-extern manager_set_t * manager_set;
-parser_set_t * parser_set;
 static inline unsigned int hash_index(flow_item_t * flow,manager_set_t * manager_set)
 {
     uint32_t v1,v2,h1;
@@ -54,7 +54,6 @@ static inline void init_single_parser(parser_t * parser)
                               sizeof(flow_item_t));
     parser->pool->pool_type = PARSER_POOL;
     parser->total = 0;
-    parser->manager_set  = manager_set;
     parser->drop_cause_pool_empty = 0;
     parser->drop_cause_no_payload = 0;
     parser->drop_cause_unsupport_protocol = 0;
@@ -171,6 +170,12 @@ static int parser_process(parser_t * parser,
 
     unsigned int index;
     flow_item_t * flow = NULL;
+    manager_set_t * manager_set = get_manager_set();
+    if(manager_set == NULL)
+    {
+        printf("manager_set is NULL,exit NOW\n");
+        exit(0);
+    }
     /* 说明是空负载。 */
     if(header_len >= packet->length)
     {
@@ -194,8 +199,8 @@ static int parser_process(parser_t * parser,
     /*
     * 送给下个流水线的队列。
     * */
-        index = hash_index(flow,parser->manager_set);
-        push_common_buf(parser->manager_set->manager[index].queue,flow);
+        index = hash_index(flow,manager_set);
+        push_common_buf(manager_set->manager[index].queue,flow);
     }
     return 0;
 
@@ -252,19 +257,23 @@ void init_parser_set(sim_config_t * config)
     /* 生成制定数量的线程数的结构体。
      * */
     int numbers = config->parser_nums;
-    parser_set = malloc(sizeof(parser_set_t));
-    exit_if_ptr_is_null(parser_set,"parser_set alloc error");
-    parser_set->parser  = malloc(numbers * sizeof(parser_t));
-    exit_if_ptr_is_null(parser_set->parser,"parser_set->parser alloc error");
-    parser_set->numbers = numbers;
+    global_parser_set = malloc(sizeof(parser_set_t));
+    exit_if_ptr_is_null(global_parser_set,"parser_set alloc error");
+    global_parser_set->parser  = malloc(numbers * sizeof(parser_t));
+    exit_if_ptr_is_null(global_parser_set->parser,"parser_set->parser alloc error");
+    global_parser_set->numbers = numbers;
     srand((unsigned int)time(NULL));
     int i = 0;
     for(i = 0; i < numbers; i++)
     {
-        init_single_parser(&parser_set->parser[i]); 
-        pthread_create(&parser_set->parser[i].id,
+        init_single_parser(&global_parser_set->parser[i]); 
+        pthread_create(&global_parser_set->parser[i].id,
                 NULL,
                 packet_parser_loop,
-                &parser_set->parser[i]);
+                &global_parser_set->parser[i]);
     }
+}
+parser_set_t * get_parser_set()
+{
+    return global_parser_set;
 }

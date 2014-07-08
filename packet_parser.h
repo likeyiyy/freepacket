@@ -15,7 +15,6 @@ typedef struct _parser
     uint64_t total;
     common_queue_t * queue;
     pool_t  * pool;
-    manager_set_t * manager_set;
     uint64_t drop_cause_pool_empty;
     uint64_t drop_cause_no_payload;
     uint64_t drop_cause_unsupport_protocol;
@@ -25,8 +24,8 @@ typedef struct parser_m
     parser_t * parser;
     uint32_t numbers;
 }parser_set_t;
-extern parser_set_t * parser_set;
 
+parser_set_t * get_parser_set();
 void init_parser_set(sim_config_t * config);
 /*
  * 销毁线程和销毁数据分两步走
