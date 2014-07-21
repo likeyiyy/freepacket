@@ -25,7 +25,7 @@ common_queue_t * init_common_queue(int length,int item_size);
 
 void destroy_common_queue(common_queue_t * common_queue);
 
-bool push_common_buf(common_queue_t * common_queue,void * data);
+bool push_common_buf(common_queue_t * common_queue,int flag,void * data);
 
 bool pop_common_buf(common_queue_t * common_queue,void ** data);
 

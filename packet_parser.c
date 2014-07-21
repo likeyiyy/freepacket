@@ -1,12 +1,12 @@
 /*************************************************************************
-    > File Name: parser_setr.c
+    > File Name: parser_groupr.c
     > Author: likeyi
     > Mail: likeyiyy@sina.com 
     > Created Time: Thu 08 May 2014 10:49:55 AM CST
  ************************************************************************/
 #include "includes.h"
 
-static parser_set_t * global_parser_set = NULL;
+static parser_group_t * global_parser_group = NULL;
 static pthread_mutex_t global_create_parser_lock = PTHREAD_MUTEX_INITIALIZER;
 
 #define MAKE_HASH(v1,v2,h1,f1,f2,f3,f4,SIZE) \
@@ -41,10 +41,10 @@ static inline uint32_t make_hash(uint32_t f1,uint32_t f2,uint32_t f3,uint32_t f4
     return h1%SIZE; 
 }   
 
-static inline unsigned int hash_index(flow_item_t * flow,manager_set_t * manager_set)
+static inline unsigned int hash_index(flow_item_t * flow,manager_group_t * manager_group)
 {
     uint32_t v1,v2,h1;
-    return MAKE_HASH(v1,v2,h1,flow->lower_ip,flow->upper_ip,flow->lower_port,flow->upper_port,manager_set->length);
+    return MAKE_HASH(v1,v2,h1,flow->lower_ip,flow->upper_ip,flow->lower_port,flow->upper_port,manager_group->length);
 }
 static inline void init_single_parser(parser_t * parser)
 {
@@ -59,26 +59,26 @@ static inline void init_single_parser(parser_t * parser)
     parser->drop_cause_no_payload = 0;
     parser->drop_cause_unsupport_protocol = 0;
 }
-void finish_parser_set(parser_set_t * parser_set)
+void finish_parser_group(parser_group_t * parser_group)
 {
     int i = 0;
-    for(i = 0; i < parser_set->numbers;++i)
+    for(i = 0; i < parser_group->numbers;++i)
     {
-        pthread_cancel(parser_set->parser[i].id);
+        pthread_cancel(parser_group->parser[i].id);
     }
 }
-void destroy_parser_set(parser_set_t * parser_set)
+void destroy_parser_group(parser_group_t * parser_group)
 {
 #if 0
     int i = 0;
-    for(i = 0; i < parser_set->numbers;++i)
+    for(i = 0; i < parser_group->numbers;++i)
     {
-        destroy_queue(parser_set->parser[i].queue);
+        destroy_queue(parser_group->parser[i].queue);
     }
-    free(parser_set->parser);
-    parser_set->parser = NULL;
-    free(parser_set);
-    parser_set = NULL;
+    free(parser_group->parser);
+    parser_group->parser = NULL;
+    free(parser_group);
+    parser_group = NULL;
 #endif
 }
 static inline void free_packet(packet_t * packet)
@@ -171,10 +171,10 @@ static int parser_process(parser_t * parser,
 
     unsigned int index;
     flow_item_t * flow = NULL;
-    manager_set_t * manager_set = get_manager_set();
-    if(manager_set == NULL)
+    manager_group_t * manager_group = get_manager_group();
+    if(manager_group == NULL)
     {
-        printf("manager_set is NULL,exit NOW\n");
+        printf("manager_group is NULL,exit NOW\n");
         exit(0);
     }
     /* 说明是空负载。 */
@@ -193,6 +193,7 @@ static int parser_process(parser_t * parser,
         {
             free_packet(packet);
             parser->drop_cause_pool_empty += packet->length;
+            global_loss->drop_cause_parser_pool_empty += packet->length;
             return -1;
         }
         flow->pool = parser->pool;
@@ -200,8 +201,8 @@ static int parser_process(parser_t * parser,
     /*
     * 送给下个流水线的队列。
     * */
-        index = hash_index(flow,manager_set);
-        push_common_buf(manager_set->manager[index].queue,flow);
+        index = hash_index(flow,manager_group);
+        push_common_buf(manager_group->manager[index].queue,WAIT_MODE,flow);
     }
     return 0;
 
@@ -249,18 +250,19 @@ void * packet_parser_loop(void * arg)
         {
             free_packet(packet);
             parser->drop_cause_unsupport_protocol += packet->length;
+            global_loss->drop_cause_unsupport_protocol += packet->length;
         }
         pthread_testcancel();
     }
 }
-parser_set_t * init_parser_set(sim_config_t * config)
+parser_group_t * init_parser_group(sim_config_t * config)
 {
     pthread_mutex_lock(&global_create_parser_lock);
-    if(global_parser_set != NULL)
+    if(global_parser_group != NULL)
     {
         pthread_mutex_unlock(&global_create_parser_lock);
         /*
-        * 当global_parser_set不为NULL的时候，我们反而返回NULL
+        * 当global_parser_group不为NULL的时候，我们反而返回NULL
         * 是因为我们不想让别的线程使用此数据结构。
         * */
         return NULL;
@@ -268,25 +270,25 @@ parser_set_t * init_parser_set(sim_config_t * config)
     /* 生成制定数量的线程数的结构体。
      * */
     int numbers = config->parser_nums;
-    global_parser_set = malloc(sizeof(parser_set_t));
-    exit_if_ptr_is_null(global_parser_set,"parser_set alloc error");
-    global_parser_set->parser  = malloc(numbers * sizeof(parser_t));
-    exit_if_ptr_is_null(global_parser_set->parser,"parser_set->parser alloc error");
-    global_parser_set->numbers = numbers;
+    global_parser_group = malloc(sizeof(parser_group_t));
+    exit_if_ptr_is_null(global_parser_group,"parser_group alloc error");
+    global_parser_group->parser  = malloc(numbers * sizeof(parser_t));
+    exit_if_ptr_is_null(global_parser_group->parser,"parser_group->parser alloc error");
+    global_parser_group->numbers = numbers;
     srand((unsigned int)time(NULL));
     int i = 0;
     for(i = 0; i < numbers; i++)
     {
-        init_single_parser(&global_parser_set->parser[i]); 
-        pthread_create(&global_parser_set->parser[i].id,
+        init_single_parser(&global_parser_group->parser[i]); 
+        pthread_create(&global_parser_group->parser[i].id,
                 NULL,
                 packet_parser_loop,
-                &global_parser_set->parser[i]);
+                &global_parser_group->parser[i]);
     }
     pthread_mutex_unlock(&global_create_parser_lock);
-    return global_parser_set;
+    return global_parser_group;
 }
-parser_set_t * get_parser_set()
+parser_group_t * get_parser_group()
 {
-    return global_parser_set;
+    return global_parser_group;
 }

@@ -13,7 +13,7 @@
 * Author:  likeyi
 * Date:    2014年6月10日13:55:59
 * */
-void sys_dispaly(generator_set_t * generator_set,
-                parser_set_t * parser_set,
-                manager_set_t * manager_set);
+void sys_dispaly(generator_group_t * generator_group,
+                parser_group_t * parser_group,
+                manager_group_t * manager_group);
 #endif

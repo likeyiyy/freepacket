@@ -19,20 +19,20 @@ typedef struct generator
     int rank;
     mpipe_common_t * mpipe;
 }generator_t;
-typedef struct generator_set
+typedef struct generator_group
 {
     generator_t * generator;
     uint32_t numbers;
     sim_config_t  * config;
-}generator_set_t;
+}generator_group_t;
 
 
-generator_set_t * get_generator_set();
-generator_set_t * init_generator_set(sim_config_t * config);
+generator_group_t * get_generator_group();
+generator_group_t * init_generator_group(sim_config_t * config);
 /*
  * 销毁线程，和销毁线程的数据结构要分两步走。
  * 尤其是当这个线程和其他线程有交互时。
  * */
-void   destroy_generator(generator_set_t * generator_set);
-void   finish_generator(generator_set_t * generator_set);
+void   destroy_generator(generator_group_t * generator_group);
+void   finish_generator(generator_group_t * generator_group);
 #endif

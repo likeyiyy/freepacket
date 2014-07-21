@@ -17,6 +17,7 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/un.h> 
 #include <sys/ioctl.h>
 #include <linux/if_packet.h>
 #include <linux/if.h> 
@@ -133,12 +134,15 @@ static inline uint64_t get_cycle_count_intel()
 #error "get_cycle_count not define"
 #endif
 
+
 #include "config.h"
 #include "mpipe.h"
 #include "checksum.h"
 #include "queue_manager.h"
 #include "list.h"
 #include "hash.h"
+
+#include "lossratio.h"
 #include "packet_manager.h"
 #include "packet_parser.h"
 #include "parse.h"

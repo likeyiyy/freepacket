@@ -177,10 +177,6 @@ static inline void generator_udp_packet(packet_t * packet,sim_config_t * config)
     pop_datalink(packet->data,config);
 }
 
-static inline void free_packet(packet_t * packet)
-{
-    free_buf(packet->pool,packet);
-}
 static void packet_generator(generator_t * generator,int data_len,GenerHandler * Handler)
 {
     packet_t * packet;
@@ -201,7 +197,7 @@ static void packet_generator(generator_t * generator,int data_len,GenerHandler *
        if(get_buf(generator->pool,NO_WAIT_MODE,(void **)&packet) < 0)
        {
            generator->drop_total++;
-           global_loss->drop_cause_generator_pool_empty += config->pktlen;
+           global_loss->drop_cause_generator_pool_empty++;
            continue;
        }
        //bzero(packet,data_len);
@@ -219,14 +215,8 @@ static void packet_generator(generator_t * generator,int data_len,GenerHandler *
         parser_t * parser = &parser_group->parser[generator->next_thread_id++];
         generator->next_thread_id = (generator->next_thread_id == parser_group->numbers)? 0 : generator->next_thread_id;
 
-        bool result = push_common_buf(parser->queue,NO_WAIT_MODE,packet);
-        if(result == false)
-        {
-            global_loss->drop_cause_parser_queue_full += config->pktlen;
-            free_packet(packet);
-        }
+        int result = push_common_buf(parser->queue,packet);
         generator->total_send_byte += config->pktlen;
-        global_loss->send_total    += config->pktlen;
         /*4. 延时统计函数 */
         new = GET_CYCLE_COUNT() - old;
         while((int64_t)new - (int64_t)generator->config->period < 0)
@@ -276,16 +266,8 @@ static void tilera_packet_collector(generator_t * generator)
             /* 数据包均匀 分部到 下一个工作的线程里。*/
             parser_t * parser = &parser_group->parser[generator->next_thread_id++];
             generator->next_thread_id = (generator->next_thread_id == parser_group->numbers)? 0 : generator->next_thread_id;
-            bool ret = push_common_buf(parser->queue,NO_WAIT_MODE,packet);
-            if(ret == false)
-            {
-                global_loss->drop_cause_parser_queue_full += packet->length;
-                free_packet(packet);
-            }
-            else
-            {
-                generator->total_send_byte += config->pktlen;
-            }
+            push_common_buf(parser->queue,packet);
+            generator->total_send_byte += config->pktlen;
 			gxio_mpipe_iqueue_drop(iqueue, idesc);
 done:
             gxio_mpipe_iqueue_consume(iqueue, idesc);

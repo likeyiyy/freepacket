@@ -5,7 +5,7 @@
 	> Created Time: Mon 12 May 2014 10:41:38 AM CST
  ************************************************************************/
 #include "includes.h"
-static manager_set_t * global_manager_set = NULL;
+static manager_group_t * global_manager_group = NULL;
 static pthread_mutex_t global_create_manager_lock = PTHREAD_MUTEX_INITIALIZER;
 //#define memcpy(a,b,c) do { memcpy(a,b,c);printf("session memcpy here\n"); } while(0)
 #define MAKE_HASH(v1,v2,h1,f1,f2,f3,f4,SIZE) \
@@ -113,10 +113,10 @@ void * packet_manager_loop(void * arg)
 
     }
 }
-manager_set_t * init_manager_set(sim_config_t * config)
+manager_group_t * init_manager_group(sim_config_t * config)
 {
     pthread_mutex_lock(&global_create_manager_lock);
-    if(global_manager_set != NULL)
+    if(global_manager_group != NULL)
     {
         pthread_mutex_unlock(&global_create_manager_lock);
         return NULL;
@@ -126,43 +126,43 @@ manager_set_t * init_manager_set(sim_config_t * config)
     int pool_size    = config->manager_pool_size;
     int hash_length  = config->manager_hash_length;
 
-    global_manager_set = malloc(sizeof(manager_set_t));
-    exit_if_ptr_is_null(global_manager_set,"初始化分配流管理错误");
-    global_manager_set->manager = malloc(sizeof(manager_t) * numbers);
-    exit_if_ptr_is_null(global_manager_set->manager,"初始化分配manager错误");
-    global_manager_set->length = numbers;
+    global_manager_group = malloc(sizeof(manager_group_t));
+    exit_if_ptr_is_null(global_manager_group,"初始化分配流管理错误");
+    global_manager_group->manager = malloc(sizeof(manager_t) * numbers);
+    exit_if_ptr_is_null(global_manager_group->manager,"初始化分配manager错误");
+    global_manager_group->length = numbers;
     session_item_t * session;
     int i = 0;
     for(i = 0; i < numbers; i++)
     {
-        global_manager_set->manager[i].queue = init_common_queue(queue_length,
+        global_manager_group->manager[i].queue = init_common_queue(queue_length,
                 sizeof(flow_item_t));
-        global_manager_set->manager[i].ht = hash_create(hash_length);
-        global_manager_set->manager[i].session_pool = init_pool(MANAGER_POOL,
+        global_manager_group->manager[i].ht = hash_create(hash_length);
+        global_manager_group->manager[i].session_pool = init_pool(MANAGER_POOL,
                                                 pool_size,
                                                 sizeof(struct blist));
         for(int j = 0; j < pool_size - 1; j++)
         {
-            get_buf(global_manager_set->manager[i].session_pool,NO_WAIT_MODE,(void **)&session);
+            get_buf(global_manager_group->manager[i].session_pool,NO_WAIT_MODE,(void **)&session);
             session->buffer = malloc(config->manager_buffer_size);
             exit_if_ptr_is_null(session->buffer,"session->buffer is NULL");
-            free_buf(global_manager_set->manager[i].session_pool,session);
+            free_buf(global_manager_group->manager[i].session_pool,session);
         }
-        global_manager_set->manager[i].session_pool->pool_type = MANAGER_POOL;
-        global_manager_set->manager[i].index = i;
-        global_manager_set->manager[i].drop_cause_pool_empty = 0;
+        global_manager_group->manager[i].session_pool->pool_type = MANAGER_POOL;
+        global_manager_group->manager[i].index = i;
+        global_manager_group->manager[i].drop_cause_pool_empty = 0;
     }
     for(i = 0; i < numbers; i++)
     {
-        pthread_create(&global_manager_set->manager[i].id,
+        pthread_create(&global_manager_group->manager[i].id,
                        NULL,
                      packet_manager_loop,
-                      &global_manager_set->manager[i]);
+                      &global_manager_group->manager[i]);
     }
     pthread_mutex_unlock(&global_create_manager_lock);
-    return global_manager_set;
+    return global_manager_group;
 }
-manager_set_t * get_manager_set()
+manager_group_t * get_manager_group()
 {
-    return global_manager_set;
+    return global_manager_group;
 }

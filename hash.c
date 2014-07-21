@@ -135,6 +135,7 @@ int  hash_add_item(hash_table ** htp, uint32_t key, void * value )
         {
             /* 插入失败,session_pool is empty */
             manager->drop_cause_pool_empty += flow->packet->length;
+            global_loss->drop_cause_manager_pool_empty += flow->packet->length;
             /* 释放掉flow */
             free_flow(flow);
             pthread_mutex_unlock(&bucket->lock);

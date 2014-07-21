@@ -35,21 +35,21 @@ static void screen_init()
        scrollok(window[i].win,1);
    }
 }
-static void display_generator(window_t * win,generator_set_t * generator_set)
+static void display_generator(window_t * win,generator_group_t * generator_group)
 {
     static uint64_t new = 0;
     static uint64_t old = 0;
     pool_t * pool;
-    for(int i = 0; i < generator_set->numbers; ++i)
+    for(int i = 0; i < generator_group->numbers; ++i)
     {
-        pool = generator_set->generator[i].pool; 
+        pool = generator_group->generator[i].pool; 
         wprintw(win->win,"pool free:%u total_send_byte:%llu drop total :%lu\n",
                 pool->free_num,
-                generator_set->generator[i].total_send_byte,
-                generator_set->generator[i].drop_total
+                generator_group->generator[i].total_send_byte,
+                generator_group->generator[i].drop_total
                 );
         /* FIXME Only */
-        new += generator_set->generator[i].total_send_byte;
+        new += generator_group->generator[i].total_send_byte;
     }
     wprintw(win->win,"All Byte add:%llu,%llu Mbps\n",(new-old),(new-old)/(1024*1024)*8);
     old = new;
@@ -57,28 +57,27 @@ static void display_generator(window_t * win,generator_set_t * generator_set)
     wprintw(win->win,"\n\n\n");
     wrefresh(win->win);
 }
-static void display_parser(window_t * win, parser_set_t *  parser_set)
+static void display_parser(window_t * win, parser_group_t *  parser_group)
 {
-    for(int i = 0; i < parser_set->numbers; ++i)
+    for(int i = 0; i < parser_group->numbers; ++i)
     {
-         wprintw(win->win,"Queue size:%lu pool free:%u recv_byte:%llu\n",
-                 parser_set->parser[i].queue->length,
-                 parser_set->parser[i].pool->free_num,
-                 parser_set->parser[i].total
-                );
+         wprintw(win->win,"Queue size:%lu pool free:%u recv_byte:%luMB\n",
+                 parser_group->parser[i].queue->length,
+                 parser_group->parser[i].pool->free_num,
+                 parser_group->parser[i].total >> 20);
     }
     wprintw(win->win,"\n\n\n");
     wrefresh(win->win);
 }
-static void display_manager(window_t * win,manager_set_t * manager_set)
+static void display_manager(window_t * win,manager_group_t * manager_group)
 {
-    for(int i = 0; i < manager_set->length; ++i)
+    for(int i = 0; i < manager_group->length; ++i)
     {
         
         wprintw(win->win,"Queue Size:%lu pool free:%u hash_count:%d\n",
-               manager_set->manager[i].queue->length,
-               manager_set->manager[i].session_pool->free_num,
-               hash_count(manager_set->manager[i].ht));
+               manager_group->manager[i].queue->length,
+               manager_group->manager[i].session_pool->free_num,
+               hash_count(manager_group->manager[i].ht));
     }
     wprintw(win->win,"\n\n\n");
     wrefresh(win->win);
@@ -88,19 +87,19 @@ static void display_manager(window_t * win,manager_set_t * manager_set)
 * Author:  likeyi
 * Date:    2014年6月10日13:55:59
 * */
-void sys_dispaly(generator_set_t * generator_set,
-                parser_set_t * parser_set,
-                manager_set_t * manager_set)
+void sys_dispaly(generator_group_t * generator_group,
+                parser_group_t * parser_group,
+                manager_group_t * manager_group)
 {
 #ifdef INTEL_PLATFORM
     screen_init();
     while(1)
     {
-        display_generator(&window[0],generator_set);
+        display_generator(&window[0],generator_group);
 
-        display_parser(&window[1],parser_set);
+        display_parser(&window[1],parser_group);
 
-        display_manager(&window[2],manager_set);
+        display_manager(&window[2],manager_group);
 
         usleep(1000 * 1000);
     }

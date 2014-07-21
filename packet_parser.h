@@ -1,11 +1,11 @@
 /*************************************************************************
-	> File Name: parser_setr.h
+	> File Name: parser_groupr.h
 	> Author: likeyi
 	> Mail: likeyiyy@sina.com 
 	> Created Time: Thu 08 May 2014 10:50:13 AM CST
  ************************************************************************/
-#ifndef parser_set_H
-#define parser_set_H
+#ifndef parser_group_H
+#define parser_group_H
 typedef struct _parser
 {
     pthread_t id;
@@ -23,14 +23,13 @@ typedef struct parser_m
 {
     parser_t * parser;
     uint32_t numbers;
-}parser_set_t;
+}parser_group_t;
 
-parser_set_t * get_parser_set();
-parser_set_t * init_parser_set(sim_config_t * config);
+parser_group_t * get_parser_group();
+parser_group_t * init_parser_group(sim_config_t * config);
 /*
  * 销毁线程和销毁数据分两步走
  * */
-void finish_parser_set(parser_set_t * parser_set);
-void destroy_parser_set(parser_set_t * parser_set);
-void * packet_parser_loop(void * arg);
+void finish_parser_group(parser_group_t * parser_group);
+void destroy_parser_group(parser_group_t * parser_group);
 #endif

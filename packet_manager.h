@@ -23,22 +23,18 @@ typedef struct _session_manager
     common_queue_t   * queue;
     uint64_t drop_cause_pool_empty;
 }manager_t;
-typedef struct _set
+typedef struct _group
 {
     manager_t * manager;
     uint32_t    length;
-}manager_set_t;
+}manager_group_t;
 
 
-manager_set_t * get_manager_set();
+manager_group_t * get_manager_group();
 /*
 * 初始化一个session工作组。
 * */
-manager_set_t * init_manager_set(sim_config_t * config);
-/*
-* 真正的工作者。
-* */
-void * packet_manager_loop(void * arg);
+manager_group_t * init_manager_group(sim_config_t * config);
 
 struct blist * find_list(struct list_head * head, flow_item_t * flow);
 void delete_session(hash_table * ht,bucket_t * bucket);

@@ -34,7 +34,7 @@ OPT = -Os
 CFLAGS += -std=gnu99 -Wall -g
 OBJS += pool_manager.o checksum.o config.o 						\
 	 parse.o packet_generator.o packet_parser.o queue_manager.o \
-	 packet_manager.o  hash.o 
+	 packet_manager.o  hash.o lossratio.o
 
 
 .PHONY:clean all

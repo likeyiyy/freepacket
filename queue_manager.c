@@ -46,14 +46,21 @@ void destroy_common_queue(common_queue_t * common_queue)
     free(common_queue);
     common_queue = NULL;
 }
-bool push_common_buf(common_queue_t * common_queue,void * data)
+bool push_common_buf(common_queue_t * common_queue,int flag,void * data)
 {
     pthread_mutex_lock(&common_queue->mutex);
     while(((common_queue->push_pos + 1) % common_queue->total == common_queue->pop_pos))
     {
         DEBUG("Error:common_queue is full\n");
-        //pthread_mutex_unlock(&common_queue->mutex);
-        pthread_cond_wait(&common_queue->full,&common_queue->mutex);
+        if(flag == NO_WAIT_MODE)
+        {
+            pthread_mutex_unlock(&common_queue->mutex);
+            return false;
+        }
+        else
+        {
+            pthread_cond_wait(&common_queue->full,&common_queue->mutex);
+        }
     }
     common_queue->node[common_queue->push_pos] = data;
     ++common_queue->push_pos;
