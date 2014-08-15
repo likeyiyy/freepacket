@@ -372,7 +372,7 @@ static uint32_t get_cpu_mhz()
 uint32_t calc_period(double length,double rate,uint32_t thread_num)
 {
      uint32_t mhz = get_cpu_mhz();
-     printf("cpu mhz %d\n",mhz);
+     //printf("cpu mhz %d\n",mhz);
      double l = 8.0 * NS * length;
      double x = rate * 1024 * 1024.0;
      return  (uint32_t)((mhz / 1000.0) * (thread_num * l / x));

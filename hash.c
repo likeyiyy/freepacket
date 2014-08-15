@@ -131,7 +131,7 @@ int  hash_add_item(hash_table ** htp, uint32_t key, void * value )
      * */
     if(!blist)
     {
-        if(get_buf(manager->session_pool,NO_WAIT_MODE,(void **)&new_blist) < 0)
+        if(get_buf(manager->session_pool,WAIT_MODE,(void **)&new_blist) < 0)
         {
             /* 插入失败,session_pool is empty */
             manager->drop_cause_pool_empty += flow->packet->length;

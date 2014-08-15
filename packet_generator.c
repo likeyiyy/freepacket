@@ -194,20 +194,21 @@ static void packet_generator(generator_t * generator,int data_len,GenerHandler *
     }
     while(1)
     {
-       old = GET_CYCLE_COUNT();
-       /*
-       * 1. get buffer from pool
-       * */
-       if(get_buf(generator->pool,NO_WAIT_MODE,(void **)&packet) < 0)
-       {
-           generator->drop_total++;
-           global_loss->drop_cause_generator_pool_empty += config->pktlen;
-           continue;
-       }
-       //bzero(packet,data_len);
-       packet->pool   = generator->pool;
-       packet->length = config->pktlen;
-       packet->data   = (unsigned char *)packet + sizeof(packet_t);
+        old = GET_CYCLE_COUNT();
+        /*
+        * 1. get buffer from pool
+        * */
+        if(get_buf(generator->pool,WAIT_MODE,(void **)&packet) < 0)
+        {
+            generator->drop_pempty_total++;
+            global_loss->drop_cause_generator_pool_empty += config->pktlen;
+            /*1.1. 延时统计函数 */
+            goto delay;
+        }
+        //bzero(packet,data_len);
+        packet->pool   = generator->pool;
+        packet->length = config->pktlen;
+        packet->data   = (unsigned char *)packet + sizeof(packet_t);
         /*
         * 2. 根据配置文件比如UDP，TCP来产生包结构。
         * */
@@ -217,18 +218,26 @@ static void packet_generator(generator_t * generator,int data_len,GenerHandler *
         * */
         /* 数据包均匀 分部到 下一个工作的线程里。*/
         parser_t * parser = &parser_group->parser[generator->next_thread_id++];
-        generator->next_thread_id = (generator->next_thread_id == parser_group->numbers)? 0 : generator->next_thread_id;
+        generator -> next_thread_id = (generator->next_thread_id == parser_group->numbers)? 0 : generator->next_thread_id;
 
-        bool result = push_common_buf(parser->queue,NO_WAIT_MODE,packet);
+#if 1
+        bool result = push_common_buf(parser->queue,WAIT_MODE,packet);
         if(result == false)
         {
+            generator->drop_qfull_total++;
             global_loss->drop_cause_parser_queue_full += config->pktlen;
             free_packet(packet);
+            goto delay;
         }
+#else
+        free_packet(packet);
+
+#endif
         generator->total_send_byte += config->pktlen;
         global_loss->send_total    += config->pktlen;
         /*4. 延时统计函数 */
-        new = GET_CYCLE_COUNT() - old;
+delay:  continue;
+		new = GET_CYCLE_COUNT() - old;
         while((int64_t)new - (int64_t)generator->config->period < 0)
         { 
             new = GET_CYCLE_COUNT() - old;

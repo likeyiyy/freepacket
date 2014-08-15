@@ -49,7 +49,8 @@ static inline unsigned int hash_index(flow_item_t * flow,manager_group_t * manag
 static inline void init_single_parser(parser_t * parser)
 {
     int pool_size = global_config->parser_pool_size;
-    parser->queue  = init_common_queue(PARSER_POOL_SIZE,sizeof(packet_t));
+    parser->queue  = init_common_queue(global_config->parser_queue_length,
+									   sizeof(packet_t));
     parser->pool   = init_pool(PARSER_POOL,
                               pool_size,
                               sizeof(flow_item_t));
@@ -163,7 +164,8 @@ static inline void free_flow(flow_item_t * flow)
 }
 
 typedef void (TranHandler)(flow_item_t * flow,packet_t * packet,int header_len);
-static int parser_process(parser_t * parser, 
+static int parser_process(manager_group_t * manager_group,
+                          parser_t * parser, 
                           int header_len, 
                           packet_t * packet,
                           TranHandler * tranhandler)
@@ -171,13 +173,12 @@ static int parser_process(parser_t * parser,
 
     unsigned int index;
     flow_item_t * flow = NULL;
-    manager_group_t * manager_group = get_manager_group();
     if(manager_group == NULL)
     {
         printf("manager_group is NULL,exit NOW\n");
         exit(0);
     }
-    /* 说明是空负载。 */
+    /* 说明是空负载。 但是这也是处理过了。*/
     if(header_len >= packet->length)
     {
         free_packet(packet);
@@ -189,7 +190,7 @@ static int parser_process(parser_t * parser,
     /*
     * 从pool中取一个包头。
     * */
-        if(get_buf(parser->pool,NO_WAIT_MODE,(void **)&flow) < 0)        
+        if(get_buf(parser->pool,WAIT_MODE,(void **)&flow) < 0)        
         {
             free_packet(packet);
             parser->drop_cause_pool_empty += packet->length;
@@ -205,7 +206,6 @@ static int parser_process(parser_t * parser,
         push_common_buf(manager_group->manager[index].queue,WAIT_MODE,flow);
     }
     return 0;
-
 }
 //static pthread_mutex_t print_lock = PTHREAD_MUTEX_INITIALIZER;
 void * packet_parser_loop(void * arg)
@@ -215,6 +215,7 @@ void * packet_parser_loop(void * arg)
     pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, 0);
     parser_t * parser = (parser_t *)arg;
     packet_t * packet;
+    manager_group_t * manager_group = get_manager_group();
     while(1)
     {
         /*
@@ -237,22 +238,22 @@ void * packet_parser_loop(void * arg)
                                           ihl);            
             int tcp_len = tcp_hdr->doff * 4;
             header_len = eth_hdr_len + ihl + tcp_len;
-            parser_process(parser,header_len,packet,make_flow_item_tcp);
+            parser_process(manager_group,parser,header_len,packet,make_flow_item_tcp);
 
         }
         else if(ip_hdr->protocol == IPPROTO_UDP)
         {
             int udp_len = 16;
             header_len = eth_hdr_len + ihl + udp_len;
-            parser_process(parser,header_len,packet,make_flow_item_tcp);
+            parser_process(manager_group,parser,header_len,packet,make_flow_item_tcp);
         }
        else
         {
+            /* 坏包 也算处理过了,不算在丢包率里。 */
             free_packet(packet);
-            parser->drop_cause_unsupport_protocol += packet->length;
-            global_loss->drop_cause_unsupport_protocol += packet->length;
+            //global_loss->drop_cause_unsupport_protocol += packet->length;
         }
-        pthread_testcancel();
+        //pthread_testcancel();
     }
 }
 parser_group_t * init_parser_group(sim_config_t * config)

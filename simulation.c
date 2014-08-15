@@ -13,6 +13,7 @@ struct option long_options[] =
 {
     {"generator_nums",      1,  NULL,  'g'},
     {"parser_nums",         1,  NULL,  'p'},
+    {"pktlen",              1,  NULL,  'o'},
     {"manager_nums",        1,  NULL,  'm'},
     {"gpool_size",          1,  NULL,  'o'},
     {"pqueue_length",       1,  NULL,  'q'},
@@ -61,7 +62,7 @@ void parse_args(int argc, char * const argv[],sim_config_t * config)
                 config->manager_nums = atoi(optarg);
                 break;
             case 'o':
-            if(strcmp(long_options[option_index].name,"generator_pool_size") == 0)
+            if(strcmp(long_options[option_index].name,"gpool_size") == 0)
             {
                 config->generator_pool_size = atoi(optarg);
             }
@@ -72,6 +73,10 @@ void parse_args(int argc, char * const argv[],sim_config_t * config)
             else if(strcmp(long_options[option_index].name,"manager_pool_size") == 0)
             {
                 config->manager_pool_size = atoi(optarg);
+            }
+            else if(strcmp(long_options[option_index].name,"pktlen") == 0)
+            {
+                config->pktlen = atoi(optarg);
             }
             else
             {
@@ -84,7 +89,7 @@ void parse_args(int argc, char * const argv[],sim_config_t * config)
             }
                 break;
             case 'q':
-            if(strcmp(long_options[option_index].name,"parser_queue_length") == 0)
+            if(strcmp(long_options[option_index].name,"pqueue_length") == 0)
             {
                 config->parser_queue_length = atoi(optarg);
             }
