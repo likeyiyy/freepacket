@@ -37,6 +37,30 @@ static void screen_init()
        scrollok(window[i].win,1);
    }
 }
+static void display_gen(generator_group_t * generator_group)
+{
+    static uint64_t new = 0;
+    static uint64_t old = 0;
+    pool_t * pool;
+	int drop_flag = 0;
+    for(int i = 0; i < generator_group->numbers; ++i)
+    {
+        /* FIXME Only */
+		if(generator_group->generator[i].drop_pempty_total || generator_group->generator[i].drop_qfull_total )
+		{
+			drop_flag = 1;
+		}
+
+        new += generator_group->generator[i].total_send_byte;
+    }
+	if((new-old) != 0)
+		printf("SPEED: %lu :Mbit/s,DROP: %d \n",(new-old)/(1024*128),drop_flag);
+    //wprintw(win->win,"All Byte add:%llu,%llu Mbps\n",(new-old),(new-old)/(1024*1024)*8);
+
+    old = new;
+    new = 0;
+
+}
 static void display_generator(window_t * win,generator_group_t * generator_group)
 {
     static uint64_t new = 0;

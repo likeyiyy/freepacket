@@ -121,7 +121,7 @@ void * packet_manager_loop(void * arg)
     
     //printf("My cpu: %d\n",tmc_cpus_get_my_current_cpu());
 
-////////////////////////    uint32_t v1,v2,h1,index;
+        uint32_t v1,v2,h1,index;
 //////	uint64_t interval = tmc_perf_get_cpu_speed() ;
 //////	uint64_t start_cycle = get_cycle_count();	
     while(1)

@@ -169,7 +169,7 @@ static int parser_process(manager_group_t * manager_group,
                           TranHandler * tranhandler)
 {
 
-//    unsigned int index;
+    unsigned int index;
     flow_item_t * flow = NULL;
     /* 说明是空负载。 但是这也是处理过了。*/
     if(header_len >= packet->length + PAY_LEN)
@@ -197,7 +197,7 @@ static int parser_process(manager_group_t * manager_group,
     * 送给下个流水线的队列。
     * */
 #if (PIPE_DEPTH > 3)
-        index = MAKE_HASH(flow,manager_group);
+        index = hash_index(flow,manager_group);
 		ghash_view[index]++;
 		//printf("##################################index %d\n",index);
         if(push_common_buf(manager_group->manager[index].queue,WAIT_MODE,flow) == false)
@@ -222,6 +222,7 @@ void * packet_parser_loop(void * arg)
 #if (PIPE_DEPTH > 3)
     manager_group_t * manager_group = get_manager_group();
 #endif
+    unsigned int index;
     while(1)
     {
         /*
@@ -284,7 +285,7 @@ void * packet_parser_loop(void * arg)
             * 送给下个流水线的队列。
             * */
 #if (PIPE_DEPTH > 3)
-                index = MAKE_HASH(flow,manager_group);
+                index = hash_index(flow,manager_group);
         		ghash_view[index]++;
                 push_common_buf(manager_group->manager[index].queue,WAIT_MODE,flow);
 #else

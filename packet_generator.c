@@ -1,4 +1,4 @@
-/*************************************************************************
+                    /*************************************************************************
 	> File Name: packet_generator.c
 	> Author: likeyi
 	> Mail: likeyiyy@sina.com 
@@ -215,6 +215,7 @@ static void packet_generator(generator_t * generator,int data_len,GenerHandler *
 	int g_nums = config->generator_nums;
 	int p_nums = config->parser_nums;
 	int next_thread_id = generator->index;
+    int result = -1;
 #ifdef PIPE_DEPTH
 #if (PIPE_DEPTH > 1)
     parser_group_t * parser_group = get_parser_group();
@@ -270,7 +271,6 @@ static void packet_generator(generator_t * generator,int data_len,GenerHandler *
 #if (PIPE_DEPTH > 1)	
         parser_t * parser = &parser_group->parser[next_thread_id];
 		next_thread_id = (next_thread_id + g_nums < p_nums) ? (next_thread_id + g_nums) : generator->index;
-        bool result = push_common_buf(parser->queue,WAIT_MODE,packet);
         if(result == false)
         {
             generator->drop_qfull_total++;
