@@ -87,9 +87,7 @@ _session_manager	packet_manager.h	/^typedef struct _session_manager$/;"	s
 alive	packet_generator.h	/^	int alive;$/;"	m	struct:generator
 alive	packet_manager.h	/^	int alive;$/;"	m	struct:_session_manager
 alive	packet_parser.h	/^	int alive;$/;"	m	struct:_parser
-args64	test.py	/^args64 = []$/;"	v
 averages	simulation_test.py	/^def averages(listn):$/;"	f
-averages	test.py	/^def averages(listn):$/;"	f
 barrier	mpipe.h	/^    tmc_sync_barrier_t barrier; $/;"	m	struct:__mpipe_t
 blist	list.h	/^struct blist$/;"	s
 bool	includes.h	54;"	d
@@ -103,7 +101,6 @@ calc_period	config.c	/^uint32_t calc_period(double length,double rate,uint32_t t
 channel	mpipe.h	/^    int channel;$/;"	m	struct:__mpipe_t
 checksum_ip	checksum.c	/^void checksum_ip(struct iphdr * iph)$/;"	f
 commands	simulation_test.py	/^import commands $/;"	i
-commands	test.py	/^import commands$/;"	i
 common_queue_MANAGER_H	queue_manager.h	8;"	d
 common_queue_t	queue_manager.h	/^}common_queue_t;$/;"	t	typeref:struct:_common_queue
 compare_session	packet_manager.c	/^static inline int compare_session(session_item_t * item , flow_item_t * flow)$/;"	f	file:
@@ -114,7 +111,6 @@ configed	mpipe.h	/^    int         configed;$/;"	m	struct:__mpipe_t
 context	mpipe.h	/^    gxio_mpipe_context_t   context;$/;"	m	struct:__mpipe_t
 count	hash.h	/^    uint32_t count;$/;"	m	struct:bucket
 counter	simulation_test.py	/^counter = 0$/;"	v
-counter	test.py	/^counter = 0$/;"	v
 cpus	mpipe.h	/^    cpu_set_t cpus;$/;"	m	struct:__mpipe_t
 create_ipc_client	lossratio.c	/^int create_ipc_client()$/;"	f
 create_ipc_server	lossratio.c	/^int create_ipc_server()$/;"	f
@@ -165,12 +161,9 @@ equeue_entries	mpipe.h	/^    uint32_t    equeue_entries;$/;"	m	struct:__mpipe_t
 ether_atoe	config.c	/^int ether_atoe(const char *a, unsigned char *e)$/;"	f
 ether_etoa	config.c	/^char * ether_etoa(const unsigned char *e, char *a)$/;"	f
 exe	simulation_test.py	/^                        exe = '%s --pktlen %d -g %d -p %d -m %d --gpool_size %d --pqueue_length %d' % (exename,(p),(g),(pa),(m),(gp),(pq))$/;"	v
-exe	test.py	/^                        exe = '%s --pktlen %d -g %d -p %d -m %d --gpool_size %d --pqueue_length %d' % (exename,(p),(g),(pa),(m),(gp),(pq))$/;"	v
 exename	simulation_test.py	/^exename = '.\/simulation'$/;"	v
-exename	test.py	/^exename = '.\/simulation'$/;"	v
 exit_if_ptr_is_null	config.c	/^void exit_if_ptr_is_null(void * ptr,const char * message) $/;"	f
 false	includes.h	56;"	d
-fargs	test.py	/^fargs   = open('fargs','w')$/;"	v
 ffile	simulation_test.py	/^ffile = open('.ffile','a')$/;"	v
 find_list	packet_manager.c	/^struct blist * find_list(struct list_head * head, flow_item_t * flow)$/;"	f
 finish_generator	packet_generator.c	/^void   finish_generator(generator_group_t * generator_group)$/;"	f
@@ -186,14 +179,12 @@ free_flow	packet_parser.c	/^static inline void free_flow(flow_item_t * flow)$/;"
 free_num	pool_manager.h	/^    unsigned int    free_num;$/;"	m	struct:_pool
 free_packet	packet_generator.c	/^static inline void free_packet(packet_t * packet)$/;"	f	file:
 free_packet	packet_parser.c	/^static inline void free_packet(packet_t * packet)$/;"	f	file:
-fresult	test.py	/^fresult = open('result','w')$/;"	v
 full	queue_manager.h	/^    pthread_cond_t full;$/;"	m	struct:_common_queue
 full_speed	Makefile	/^full_speed=0$/;"	m
 gbarrier	simulation.c	/^tmc_sync_barrier_t gbarrier; $/;"	v
 generator	packet_generator.h	/^    generator_t * generator;$/;"	m	struct:generator_group
 generator	packet_generator.h	/^typedef struct generator$/;"	s
 generator	simulation_test.py	/^generator = [5,10] $/;"	v
-generator	test.py	/^generator   = range(1,9,1)$/;"	v
 generator_group	packet_generator.c	/^static generator_group_t * generator_group = NULL;$/;"	v	file:
 generator_group	packet_generator.h	/^typedef struct generator_group$/;"	s
 generator_group_t	packet_generator.h	/^}generator_group_t;$/;"	t	typeref:struct:generator_group
@@ -225,7 +216,6 @@ global_loss_body	lossratio.c	/^drop_t global_loss_body;$/;"	v
 global_manager_group	packet_manager.c	/^static manager_group_t * global_manager_group = NULL;$/;"	v	file:
 global_parser_group	packet_parser.c	/^static parser_group_t * global_parser_group = NULL;$/;"	v	file:
 gpool_size	simulation_test.py	/^gpool_size = [500000,800000] $/;"	v
-gpool_size	test.py	/^gpool_size    = range(1000000,11000000,1000000)$/;"	v
 group	mpipe.h	/^    int                     group;$/;"	m	struct:__mpipe_t
 hash_add_item	hash.c	/^int  hash_add_item(hash_table ** htp, uint32_t key, void * value )$/;"	f
 hash_count	hash.c	/^uint32_t hash_count(hash_table * ht)$/;"	f
@@ -282,7 +272,6 @@ list1518	simulation_test.py	/^list1518 = [] $/;"	v
 list256	simulation_test.py	/^list256  = [] $/;"	v
 list512	simulation_test.py	/^list512  = [] $/;"	v
 list64	simulation_test.py	/^list64   = [] $/;"	v
-list64	test.py	/^list64 = []$/;"	v
 list_add	list.h	/^static inline void list_add(struct list_head *new, struct list_head *head)$/;"	f
 list_add_tail	list.h	/^static inline void list_add_tail(struct list_head *new, struct list_head *head)$/;"	f
 list_del	list.h	/^static inline void list_del(struct list_head *entry)$/;"	f
@@ -294,7 +283,6 @@ list_head	list.h	/^struct list_head {$/;"	s
 list_move_tail	list.h	/^static inline void list_move_tail(struct list_head *list,$/;"	f
 listhead	list.h	/^	struct list_head listhead;$/;"	m	struct:blist	typeref:struct:blist::list_head
 listn	simulation_test.py	/^                            listn = result.split("\\n")$/;"	v
-listn	test.py	/^                        listn =  result.split("\\n")$/;"	v
 lock	hash.h	/^    pthread_mutex_t  lock;$/;"	m	struct:bucket
 long_options	simulation.c	/^struct option long_options[] =$/;"	v	typeref:struct:option
 lower_ip	includes.h	/^    uint32_t lower_ip;$/;"	m	struct:_session_item
@@ -309,7 +297,6 @@ make_hash	packet_parser.c	/^static inline uint32_t make_hash(uint32_t f1,uint32_
 make_new_session	hash.c	/^static inline void make_new_session(struct blist * blist,$/;"	f	file:
 manager	packet_manager.h	/^    manager_t * manager;$/;"	m	struct:_group
 manager	simulation_test.py	/^manager = [5,11]$/;"	v
-manager	test.py	/^manager     = range(1,9,1)$/;"	v
 manager_buffer_size	config.h	/^    int manager_buffer_size;$/;"	m	struct:__config
 manager_group_t	packet_manager.h	/^}manager_group_t;$/;"	t	typeref:struct:_group
 manager_hash_length	config.h	/^    int manager_hash_length;$/;"	m	struct:__config
@@ -318,9 +305,7 @@ manager_pool_size	config.h	/^    int manager_pool_size;$/;"	m	struct:__config
 manager_queue_length	config.h	/^    int manager_queue_length;$/;"	m	struct:__config
 manager_t	packet_manager.h	/^}manager_t;$/;"	t	typeref:struct:_session_manager
 max	simulation_test.py	/^                            max = averages(listn)$/;"	v
-max	test.py	/^                        max = averages(listn)$/;"	v
 maxargs	simulation_test.py	/^                            maxargs = [p,g,pa,m,gp,pq]$/;"	v
-maxargs	test.py	/^                        maxargs = [p,g,pa,m,gp,pq]$/;"	v
 mpipe	packet_generator.h	/^    mpipe_common_t * mpipe;$/;"	m	struct:generator
 mpipe_common_t	mpipe.h	/^typedef int mpipe_common_t;$/;"	t
 mpipe_common_t	mpipe.h	/^}mpipe_common_t;$/;"	t	typeref:struct:__mpipe_t
@@ -343,7 +328,6 @@ numbers	packet_parser.h	/^    uint32_t numbers;$/;"	m	struct:parser_m
 old	packet_generator.h	/^    struct timeval old,now;$/;"	m	struct:generator	typeref:struct:generator::timeval
 once_packet_nums	config.h	/^	int     once_packet_nums;$/;"	m	struct:__config
 os	simulation_test.py	/^import os$/;"	i
-p	test.py	/^p = 64$/;"	v
 packet	includes.h	/^    packet_t * packet;$/;"	m	struct:flow_item
 packet	includes.h	/^typedef struct packet$/;"	s
 packet_generator	packet_generator.c	/^static void packet_generator(generator_t * generator,int data_len,GenerHandler * Handler)$/;"	f	file:
@@ -362,7 +346,6 @@ parse_tcphdr	parse.c	/^void parse_tcphdr(struct tcphdr * tcph)$/;"	f
 parse_tos	parse.c	/^static inline void parse_tos(unsigned char tos)$/;"	f	file:
 parser	packet_parser.h	/^    parser_t * parser;$/;"	m	struct:parser_m
 parser	simulation_test.py	/^parser = [5,10]$/;"	v
-parser	test.py	/^parser      = range(1,9,1)$/;"	v
 parser_group_H	packet_parser.h	8;"	d
 parser_group_t	packet_parser.h	/^}parser_group_t;$/;"	t	typeref:struct:parser_m
 parser_m	packet_parser.h	/^typedef struct parser_m$/;"	s
@@ -379,7 +362,6 @@ period	config.h	/^    uint32_t period;$/;"	m	struct:__config
 pkt_data	config.h	/^    char * pkt_data;$/;"	m	struct:__config
 pktlen	config.h	/^    int pktlen;$/;"	m	struct:__config
 pktlen	simulation_test.py	/^pktlen = [64,128,256,512,1024,1280,1518]$/;"	v
-pktlen	test.py	/^pktlen = [64,128,256,512,1024,1280,1518]$/;"	v
 pool	includes.h	/^    pool_t * pool;          \/* 这个包来自哪个池子*\/$/;"	m	struct:flow_item
 pool	includes.h	/^    pool_t * pool;          \/* 这个包来自哪个池子*\/$/;"	m	struct:packet
 pool	includes.h	/^    pool_t * pool;$/;"	m	struct:_session_item
@@ -398,7 +380,6 @@ pop_pos	queue_manager.h	/^    int pop_pos;$/;"	m	struct:_common_queue
 pop_transmission_tcp	packet_generator.c	/^static inline int pop_transmission_tcp(void * tcph,sim_config_t * config)$/;"	f	file:
 pop_transmission_udp	packet_generator.c	/^static inline int pop_transmission_udp(void * udph,sim_config_t * config)$/;"	f	file:
 pqueue_length	simulation_test.py	/^pqueue_length = [500000,800000]$/;"	v
-pqueue_length	test.py	/^pqueue_length = range(1000000,11000000,1000000)$/;"	v
 prev	list.h	/^	struct list_head* prev;$/;"	m	struct:list_head	typeref:struct:list_head::list_head
 print_config_file	config.c	/^void print_config_file(sim_config_t * config)$/;"	f
 print_lock	parse.c	/^pthread_mutex_t print_lock = PTHREAD_MUTEX_INITIALIZER;$/;"	v
