@@ -15,6 +15,7 @@ typedef struct _parser
     uint64_t total;
     common_queue_t * queue;
     pool_t  * pool;
+	int alive;
     uint64_t drop_cause_pool_empty;
     uint64_t drop_cause_no_payload;
     uint64_t drop_cause_unsupport_protocol;

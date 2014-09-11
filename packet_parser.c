@@ -49,7 +49,8 @@ static inline unsigned int hash_index(flow_item_t * flow,manager_group_t * manag
 static inline void init_single_parser(parser_t * parser)
 {
     int pool_size = global_config->parser_pool_size;
-    parser->queue  = init_common_queue(PARSER_POOL_SIZE,sizeof(packet_t));
+    parser->queue  = init_common_queue(global_config->parser_queue_length,
+									   sizeof(packet_t));
     parser->pool   = init_pool(PARSER_POOL,
                               pool_size,
                               sizeof(flow_item_t));
@@ -89,12 +90,9 @@ static inline void make_flow_item_tcp(flow_item_t * flow,packet_t * packet,int h
 {
     flow->packet   = packet;
     int eth_hdr_len = sizeof(struct ethhdr);
-    struct iphdr * ip_hdr = (struct iphdr *)(packet->data + eth_hdr_len);
+    struct iphdr * ip_hdr = (struct iphdr *)(packet->data + PAY_LEN + eth_hdr_len);
     int ihl = ip_hdr->ihl * 4;
-    struct tcphdr * tcp_hdr = 
-                        (struct tcphdr *)(packet->data +
-                                         sizeof(struct ethhdr) +
-                                          ihl);            
+    struct tcphdr * tcp_hdr = (struct tcphdr *)(packet->data + PAY_LEN + eth_hdr_len + ihl);            
     if(ip_hdr->saddr >= ip_hdr->daddr)
     {
         flow->upper_ip = ip_hdr->saddr;
@@ -117,16 +115,17 @@ static inline void make_flow_item_tcp(flow_item_t * flow,packet_t * packet,int h
     }
     flow->protocol = ip_hdr->protocol;
     flow->payload  = packet->data + header_len;
-    flow->payload_len = packet->length - header_len;
+    flow->payload_len = packet->length - header_len + PAY_LEN;
 }
 static inline void make_flow_item_udp(flow_item_t * flow,packet_t * packet,int header_len)
 {
     flow->packet   = packet;
     int eth_hdr_len = sizeof(struct ethhdr);
-    struct iphdr * ip_hdr = (struct iphdr *)(packet->data + eth_hdr_len);
+    struct iphdr * ip_hdr = (struct iphdr *)(packet->data + PAY_LEN + eth_hdr_len);
     int ihl = ip_hdr->ihl * 4;
     struct udphdr * udp_hdr = 
                         (struct udphdr *)(packet->data +
+					  PAY_LEN +
                                           sizeof(struct ethhdr) +
                                           ihl);
     if(ip_hdr->saddr >= ip_hdr->daddr)
@@ -151,7 +150,7 @@ static inline void make_flow_item_udp(flow_item_t * flow,packet_t * packet,int h
     }
     flow->protocol = ip_hdr->protocol;
     flow->payload  = packet->data + header_len;
-    flow->payload_len = packet->length - header_len;
+    flow->payload_len = packet->length - header_len + PAY_LEN;
 }
 static inline void free_flow(flow_item_t * flow)
 {
@@ -163,24 +162,19 @@ static inline void free_flow(flow_item_t * flow)
 }
 
 typedef void (TranHandler)(flow_item_t * flow,packet_t * packet,int header_len);
-static int parser_process(parser_t * parser, 
+static int parser_process(manager_group_t * manager_group,
+                          parser_t * parser, 
                           int header_len, 
                           packet_t * packet,
                           TranHandler * tranhandler)
 {
 
-    unsigned int index;
+//    unsigned int index;
     flow_item_t * flow = NULL;
-    manager_group_t * manager_group = get_manager_group();
-    if(manager_group == NULL)
+    /* 说明是空负载。 但是这也是处理过了。*/
+    if(header_len >= packet->length + PAY_LEN)
     {
-        printf("manager_group is NULL,exit NOW\n");
-        exit(0);
-    }
-    /* 说明是空负载。 */
-    if(header_len >= packet->length)
-    {
-        free_packet(packet);
+    	free_buf(packet->pool,packet);
         parser->drop_cause_no_payload += packet->length;
         return -2;
     }
@@ -189,7 +183,7 @@ static int parser_process(parser_t * parser,
     /*
     * 从pool中取一个包头。
     * */
-        if(get_buf(parser->pool,NO_WAIT_MODE,(void **)&flow) < 0)        
+        if(get_buf(parser->pool,WAIT_MODE,(void **)&flow) < 0)        
         {
             free_packet(packet);
             parser->drop_cause_pool_empty += packet->length;
@@ -197,37 +191,52 @@ static int parser_process(parser_t * parser,
             return -1;
         }
         flow->pool = parser->pool;
-        tranhandler(flow, packet, header_len);
+       	make_flow_item_tcp(flow, packet, header_len);
+		//flow_display(flow);
     /*
     * 送给下个流水线的队列。
     * */
-        index = hash_index(flow,manager_group);
-        push_common_buf(manager_group->manager[index].queue,WAIT_MODE,flow);
+#if (PIPE_DEPTH > 3)
+        index = MAKE_HASH(flow,manager_group);
+		ghash_view[index]++;
+		//printf("##################################index %d\n",index);
+        if(push_common_buf(manager_group->manager[index].queue,WAIT_MODE,flow) == false)
+		{
+			free_flow(flow);
+		}
+#else
+    	free_buf(packet->pool,packet);
+    	free_buf(flow->pool,flow);
+#endif
     }
     return 0;
-
 }
 //static pthread_mutex_t print_lock = PTHREAD_MUTEX_INITIALIZER;
 void * packet_parser_loop(void * arg)
 {
-    pthread_detach(pthread_self());
-    pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, 0);
-    pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, 0);
+    //pthread_detach(pthread_self());
+    //pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, 0);
+    //pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, 0);
     parser_t * parser = (parser_t *)arg;
     packet_t * packet;
+#if (PIPE_DEPTH > 3)
+    manager_group_t * manager_group = get_manager_group();
+#endif
     while(1)
     {
         /*
         * 从队列中取出一个数据包
         * */
+		parser->alive++;
         pop_common_buf(parser->queue,(void **)&packet);
         parser->total += packet->length;
+#if (PIPE_DEPTH > 2)	
         /*
         * 校验数据包。
         * */
         int header_len = 0;
         int eth_hdr_len = sizeof(struct ethhdr);
-        struct iphdr * ip_hdr = (struct iphdr *)(packet->data + eth_hdr_len);
+        struct iphdr * ip_hdr = (struct iphdr *)(packet->data + eth_hdr_len + 2);
         int ihl = ip_hdr->ihl * 4;
         if(ip_hdr->protocol == IPPROTO_TCP)
         {
@@ -236,23 +245,57 @@ void * packet_parser_loop(void * arg)
                                          sizeof(struct ethhdr) +
                                           ihl);            
             int tcp_len = tcp_hdr->doff * 4;
-            header_len = eth_hdr_len + ihl + tcp_len;
-            parser_process(parser,header_len,packet,make_flow_item_tcp);
-
+            header_len = eth_hdr_len + ihl + tcp_len + PAY_LEN;
+            //unsigned int index;
+            flow_item_t * flow = NULL;
+            {
+            /*
+            * 从pool中取一个包头。
+            * */
+                get_buf(parser->pool,WAIT_MODE,(void **)&flow);        
+                flow->pool = parser->pool;
+                {
+                    flow->packet   = packet;
+                    if(ip_hdr->saddr >= ip_hdr->daddr)
+                    {
+                        flow->upper_ip = ip_hdr->saddr;
+                        flow->lower_ip = ip_hdr->daddr;
+                    }
+                    else
+                    {
+                        flow->upper_ip = ip_hdr->daddr;
+                        flow->lower_ip = ip_hdr->saddr;
+                    }
+                    if(tcp_hdr->source >= tcp_hdr->dest)
+                    {
+                        flow->upper_port = tcp_hdr->source;
+                        flow->lower_port = tcp_hdr->dest;
+                    }
+                    else
+                    {
+                        flow->upper_port = tcp_hdr->dest;
+                        flow->lower_port = tcp_hdr->source;
+                    }
+                    flow->protocol = ip_hdr->protocol;
+                    flow->payload  = packet->data + header_len;
+                    flow->payload_len = packet->length - header_len + PAY_LEN;
+                }
+            /*
+            * 送给下个流水线的队列。
+            * */
+#if (PIPE_DEPTH > 3)
+                index = MAKE_HASH(flow,manager_group);
+        		ghash_view[index]++;
+                push_common_buf(manager_group->manager[index].queue,WAIT_MODE,flow);
+#else
+            	free_buf(packet->pool,packet);
+            	free_buf(flow->pool,flow);
+#endif
+            }
         }
-        else if(ip_hdr->protocol == IPPROTO_UDP)
-        {
-            int udp_len = 16;
-            header_len = eth_hdr_len + ihl + udp_len;
-            parser_process(parser,header_len,packet,make_flow_item_tcp);
-        }
-       else
-        {
-            free_packet(packet);
-            parser->drop_cause_unsupport_protocol += packet->length;
-            global_loss->drop_cause_unsupport_protocol += packet->length;
-        }
-        pthread_testcancel();
+#else
+    	free_buf(packet->pool,packet);
+#endif
     }
 }
 parser_group_t * init_parser_group(sim_config_t * config)

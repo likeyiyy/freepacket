@@ -7,6 +7,7 @@
 #include "includes.h"
 static manager_group_t * global_manager_group = NULL;
 static pthread_mutex_t global_create_manager_lock = PTHREAD_MUTEX_INITIALIZER;
+//static pthread_t gclean_id;
 //#define memcpy(a,b,c) do { memcpy(a,b,c);printf("session memcpy here\n"); } while(0)
 #define MAKE_HASH(v1,v2,h1,f1,f2,f3,f4,SIZE) \
 (\
@@ -49,6 +50,14 @@ struct blist * find_list(struct list_head * head, flow_item_t * flow)
     }
     return NULL;
 }
+static inline void free_flow(flow_item_t * flow)
+{
+    /* 
+    * 注意这两个free
+    * */
+    free_buf(flow->packet->pool,flow->packet);
+    free_buf(flow->pool,flow);
+}
 void delete_session(hash_table * ht,bucket_t * bucket)
 {
     struct list_head * p, * list;
@@ -72,11 +81,31 @@ void delete_session(hash_table * ht,bucket_t * bucket)
 void * process_session(void * arg)
 {
     manager_t * manager = (manager_t *)arg;
+	uint64_t interval = tmc_perf_get_cpu_speed() ;
     while(1)
     { 
+		uint64_t start_cycle = get_cycle_count();	
         hash_travel_delete(manager -> ht);
-        usleep(1000*1000);
+		while(get_cycle_count() < (start_cycle + interval))
+			continue;
     }
+}
+
+static void * process_all_session(void * arg)
+{
+	manager_group_t * group = (manager_group_t *)arg;
+	uint64_t interval = tmc_perf_get_cpu_speed() ;
+	uint64_t start_cycle = 0;	
+	while(1)
+	{
+		start_cycle = get_cycle_count();	
+		for(int i = 0; i < group->length; i++)
+		{
+        	hash_travel_delete(group->manager[i].ht);
+		}
+		while(get_cycle_count() < (start_cycle + interval))
+			continue;
+	}
 }
 /*
 * 真正的工作者。
@@ -85,17 +114,25 @@ void * packet_manager_loop(void * arg)
 {
     manager_t * manager = (manager_t *)arg;
     flow_item_t * flow;
+#if (PIPE_DEPTH > 4)
     pthread_t clean_id;
     pthread_create(&clean_id,NULL,process_session,arg);
+#endif
+    
+    //printf("My cpu: %d\n",tmc_cpus_get_my_current_cpu());
 
-    uint32_t v1,v2,h1,index;
+////////////////////////    uint32_t v1,v2,h1,index;
+//////	uint64_t interval = tmc_perf_get_cpu_speed() ;
+//////	uint64_t start_cycle = get_cycle_count();	
     while(1)
     {
+		manager->alive++;
+		//printf("alive ++\n");
         /*
          * 1.只有确实有数据时才返回。
          * */
         pop_common_buf(manager->queue,(void **)&flow);
-
+#if (PIPE_DEPTH > 4)
         /*
          * 2. make hash index
          * */
@@ -105,12 +142,13 @@ void * packet_manager_loop(void * arg)
                 flow->upper_port,
                 flow->lower_ip,
                 manager->ht->num_buckets);
-
         /*
         * 3. insert into hash table
         * */
         hash_add_item(&manager->ht, index, flow); 
-
+#else
+		free_flow(flow);
+#endif
     }
 }
 manager_group_t * init_manager_group(sim_config_t * config)
@@ -159,6 +197,7 @@ manager_group_t * init_manager_group(sim_config_t * config)
                      packet_manager_loop,
                       &global_manager_group->manager[i]);
     }
+	//pthread_create(&gclean_id,NULL,process_all_session,global_manager_group);
     pthread_mutex_unlock(&global_create_manager_lock);
     return global_manager_group;
 }

@@ -21,6 +21,7 @@ typedef struct _session_manager
     struct hash_table * ht;
     pool_t            * session_pool;
     common_queue_t   * queue;
+	int alive;
     uint64_t drop_cause_pool_empty;
 }manager_t;
 typedef struct _group

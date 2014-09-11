@@ -13,7 +13,8 @@
 * Author:  likeyi
 * Date:    2014年6月10日13:55:59
 * */
-void sys_dispaly(generator_group_t * generator_group,
+void sys_display(generator_group_t * generator_group,
                 parser_group_t * parser_group,
                 manager_group_t * manager_group);
+void flow_display(flow_item_t * flow);
 #endif

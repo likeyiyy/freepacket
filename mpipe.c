@@ -70,11 +70,14 @@ static int init_mpipe_common(mpipe_common_t * mpipe)
     gxio_mpipe_link_t link;
     gxio_mpipe_context_t * context = &mpipe->context;
     // 0. Determine the available cpus.
+#if 0
     result = tmc_cpus_get_my_affinity(&mpipe->cpus);
     VERIFY(result, "tmc_cpus_get_my_affinity()");
 
+    printf("cpus %u <---> needs %u\n",tmc_cpus_count(&mpipe->cpus),mpipe->num_workers);
     if (tmc_cpus_count(&mpipe->cpus) < mpipe->num_workers)
         tmc_task_die("Insufficient cpus.");
+#endif
     /* 
     * 1.Get the mPIPE instance for the link.
     * */

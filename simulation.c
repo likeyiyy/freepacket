@@ -7,12 +7,18 @@
 
 #include "includes.h"
 static   const char * config_file = CONFIG_FILE;
+int ghash_view[36] = {0};
+#ifdef TILERA_PLATFORM
+cpu_set_t global_cpus;
+tmc_sync_barrier_t gbarrier; 
+#endif
 
 char * const short_options = "g:p:m:";
 struct option long_options[] =
 {
     {"generator_nums",      1,  NULL,  'g'},
     {"parser_nums",         1,  NULL,  'p'},
+    {"pktlen",              1,  NULL,  'o'},
     {"manager_nums",        1,  NULL,  'm'},
     {"gpool_size",          1,  NULL,  'o'},
     {"pqueue_length",       1,  NULL,  'q'},
@@ -61,7 +67,7 @@ void parse_args(int argc, char * const argv[],sim_config_t * config)
                 config->manager_nums = atoi(optarg);
                 break;
             case 'o':
-            if(strcmp(long_options[option_index].name,"generator_pool_size") == 0)
+            if(strcmp(long_options[option_index].name,"gpool_size") == 0)
             {
                 config->generator_pool_size = atoi(optarg);
             }
@@ -72,6 +78,10 @@ void parse_args(int argc, char * const argv[],sim_config_t * config)
             else if(strcmp(long_options[option_index].name,"manager_pool_size") == 0)
             {
                 config->manager_pool_size = atoi(optarg);
+            }
+            else if(strcmp(long_options[option_index].name,"pktlen") == 0)
+            {
+                config->pktlen = atoi(optarg);
             }
             else
             {
@@ -84,7 +94,7 @@ void parse_args(int argc, char * const argv[],sim_config_t * config)
             }
                 break;
             case 'q':
-            if(strcmp(long_options[option_index].name,"parser_queue_length") == 0)
+            if(strcmp(long_options[option_index].name,"pqueue_length") == 0)
             {
                 config->parser_queue_length = atoi(optarg);
             }
@@ -156,26 +166,34 @@ int main(int argc, char ** argv)
     global_config->period  = calc_period(global_config->pktlen,
                                          global_config->speed,
                                          global_config->generator_nums);
+#ifdef TILERA_PLATFORM
+#if 0
+    int result = tmc_cpus_get_my_affinity(&global_cpus);
+    VERIFY(result, "tmc_cpus_get_my_affinity()");
+
+    printf("cpus %u <---> needs %u\n",tmc_cpus_count(&global_cpus),30);
+    if (tmc_cpus_count(&global_cpus) < 30)
+        tmc_task_die("Insufficient cpus.");
+#endif
+    tmc_sync_barrier_init(&gbarrier,global_config->generator_nums);
+#endif
 
     init_manager_group(global_config);
 
     init_parser_group(global_config);
 
-    /* Generator */
     init_generator_group(global_config);
 
     pthread_t loss_id;
     pthread_create(&loss_id,NULL,start_ipc_server,NULL);
 
-#ifdef INTEL_PLATFORM
     generator_group_t * generator_group = get_generator_group();
     exit_if_ptr_is_null(generator_group,"generator_group is null");
     parser_group_t    * parser_group    = get_parser_group();
     exit_if_ptr_is_null(parser_group,"parser_group is null");
     manager_group_t   * manager_group   = get_manager_group();
     exit_if_ptr_is_null(manager_group,"manager_group is null");
-    sys_dispaly(generator_group,parser_group,manager_group);
-#endif
+    sys_display(generator_group,parser_group,manager_group);
 
     while(1)
     {

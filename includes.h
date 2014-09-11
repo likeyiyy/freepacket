@@ -44,6 +44,7 @@
 #include <tmc/spin.h>
 #include <tmc/sync.h>
 #include <tmc/task.h>
+#include <tmc/perf.h>
 #endif
 
 
@@ -148,4 +149,17 @@ static inline uint64_t get_cycle_count_intel()
 #include "parse.h"
 #include "packet_generator.h"
 #include "display.h"
+
+#ifdef TILERA_PLATFORM
+extern cpu_set_t global_cpus;
+extern tmc_sync_barrier_t gbarrier; 
+#endif
+extern int ghash_view[36];
+#define FULL_SPEED 	0
+#define USER_SPEED 	1
+#define IP_IDX    	16
+#define TCP_IDX          36
+#define UDP_IDX          36
+#define PAY_LEN 	2
+
 #endif

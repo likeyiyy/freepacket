@@ -12,11 +12,14 @@ typedef struct generator
     int         index;
     int         next_thread_id;
     uint64_t    total_send_byte;
+    uint64_t    drop_pempty_total;
+    uint64_t    drop_qfull_total;
     uint64_t    drop_total;
     sim_config_t  * config;
     pool_t    * pool;
     struct timeval old,now;
     int rank;
+	int alive;
     mpipe_common_t * mpipe;
 }generator_t;
 typedef struct generator_group

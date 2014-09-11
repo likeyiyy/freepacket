@@ -30,7 +30,6 @@ typedef struct _pool
     unsigned int    free_num;
     pthread_mutex_t mutex;
     pthread_cond_t  empty;
-
     pool_type_t pool_type;
 }pool_t;
 
