@@ -1,7 +1,7 @@
 #Default Target.
 full_speed=0
 user_speed=1
-depth=5
+depth=3
 display_mode = 1
 ifeq ($(filter tile%,$(shell uname -m)),)
 ifdef CROSS

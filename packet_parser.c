@@ -46,11 +46,14 @@ static inline unsigned int hash_index(flow_item_t * flow,manager_group_t * manag
     uint32_t v1,v2,h1;
     return MAKE_HASH(v1,v2,h1,flow->lower_ip,flow->upper_ip,flow->lower_port,flow->upper_port,manager_group->length);
 }
+
 static inline void init_single_parser(parser_t * parser)
 {
     int pool_size = global_config->parser_pool_size;
-    parser->queue  = init_common_queue(global_config->parser_queue_length,
-									   sizeof(packet_t));
+    parser->queue  =  memalign(64,sizeof(*parser->queue));
+    assert(parser->queue != NULL);
+    free_queue_init(parser->queue);
+    
     parser->pool   = init_pool(PARSER_POOL,
                               pool_size,
                               sizeof(flow_item_t));
@@ -229,7 +232,8 @@ void * packet_parser_loop(void * arg)
         * 从队列中取出一个数据包
         * */
 		parser->alive++;
-        pop_common_buf(parser->queue,(void **)&packet);
+        while(unlikely(free_queue_dequeue(parser->queue,(void **)&packet) != 0))
+			continue;
         parser->total += packet->length;
 #if (PIPE_DEPTH > 2)	
         /*
@@ -289,13 +293,15 @@ void * packet_parser_loop(void * arg)
         		ghash_view[index]++;
                 push_common_buf(manager_group->manager[index].queue,WAIT_MODE,flow);
 #else
-            	free_buf(packet->pool,packet);
+    			while(unlikely(free_pool_enqueue(packet->pool,packet) != 0))
+				{}
             	free_buf(flow->pool,flow);
 #endif
             }
         }
 #else
-    	free_buf(packet->pool,packet);
+    	while(unlikely(free_pool_enqueue(packet->pool,packet) != 0))
+		{}
 #endif
     }
 }

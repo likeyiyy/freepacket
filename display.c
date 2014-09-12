@@ -65,13 +65,13 @@ static void display_generator(window_t * win,generator_group_t * generator_group
 {
     static uint64_t new = 0;
     static uint64_t old = 0;
-    pool_t * pool;
+    free_pool_t * pool;
     for(int i = 0; i < generator_group->numbers; ++i)
     {
         pool = generator_group->generator[i].pool; 
 		wprintw(win->win,"[%u] ",generator_group->generator[i].alive);
         wprintw(win->win,"pool free:%u total_send_byte:%llu \nEmpty: %lu\n",
-                pool->free_num,
+				 (pool->enqueue_count + 1024 - pool->dequeue_count) % 1024,
                 generator_group->generator[i].total_send_byte,
                 generator_group->generator[i].drop_pempty_total
                 //generator_group->generator[i].drop_qfull_total
@@ -90,8 +90,8 @@ static void display_parser(window_t * win, parser_group_t *  parser_group)
     for(int i = 0; i < parser_group->numbers; ++i)
     {
 		wprintw(win->win,"[%u] ",parser_group->parser[i].alive);
-         wprintw(win->win,"Queue size:%lu pool free:%u \n",
-                 parser_group->parser[i].queue->length,
+         wprintw(win->win,"Queue size:%u pool free:%u \n",
+				 (parser_group->parser[i].queue->enqueue_count + 1024 - parser_group->parser[i].queue->dequeue_count) % 1024,
                  parser_group->parser[i].pool->free_num);
                  //parser_group->parser[i].total >> 20);
     }
