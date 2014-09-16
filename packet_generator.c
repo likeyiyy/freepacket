@@ -201,16 +201,24 @@ static void make_all_packet(generator_t * generator,GenerHandler * Handler)
             	Handler(packet,config);
 
     			while(unlikely(free_pool_enqueue(generator->pool,packet) != 0))
+<<<<<<< HEAD
 				{
 					continue;	
 				}
+=======
+				{}
+>>>>>>> 568c01e40f7a8bf36c59c744658dbc6f16f87f25
         	}
     }           
 }  
 static void packet_generator(generator_t * generator,int data_len,GenerHandler * Handler)
 {
     packet_t * packet;
+<<<<<<< HEAD
     uint64_t old,new;
+=======
+    //uint64_t old,new;
+>>>>>>> 568c01e40f7a8bf36c59c744658dbc6f16f87f25
     sim_config_t * config = generator->config;
 	int g_nums = config->generator_nums;
 	int p_nums = config->parser_nums;
@@ -235,7 +243,10 @@ static void packet_generator(generator_t * generator,int data_len,GenerHandler *
         * */
         while(unlikely(free_pool_dequeue(generator->pool,(void **)&packet) !=  0))
         {
+<<<<<<< HEAD
 			continue;
+=======
+>>>>>>> 568c01e40f7a8bf36c59c744658dbc6f16f87f25
         }
         /*
         * 2. 根据配置文件比如UDP，TCP来产生包结构。
@@ -249,6 +260,7 @@ static void packet_generator(generator_t * generator,int data_len,GenerHandler *
         * 3. 数据放到下一步的队列里。
         * */
         /* 数据包均匀 分部到 下一个工作的线程里。*/
+<<<<<<< HEAD
 		if(global_config -> pipe_depth  > 1)
 		{
         	parser_t * parser = &parser_group->parser[next_thread_id];
@@ -266,6 +278,32 @@ static void packet_generator(generator_t * generator,int data_len,GenerHandler *
 				continue;	
 			}
 		}
+=======
+#ifdef PIPE_DEPTH
+#if (PIPE_DEPTH > 1)	
+        parser_t * parser = &parser_group->parser[next_thread_id];
+		next_thread_id = (next_thread_id + g_nums < p_nums) ? (next_thread_id + g_nums) : generator->index;
+        //bool result = free_queue_enqueue(parser->queue,packet);
+		while(unlikely(free_queue_enqueue(parser->queue,packet) != 0))
+		{}
+/*
+        if(result == false)
+        {
+            generator->drop_qfull_total++;
+            global_loss->drop_cause_parser_queue_full += config->pktlen;
+            free_packet(packet);
+            goto delay;
+        }
+*/
+
+#else
+    	while(unlikely(free_pool_enqueue(packet->pool,packet) != 0))
+		{}
+#endif
+#else 
+#error "You should define pipe line depth"
+#endif
+>>>>>>> 568c01e40f7a8bf36c59c744658dbc6f16f87f25
         generator->total_send_byte += config->pktlen;
         global_loss->send_total    += config->pktlen;
         /*4. 延时统计函数 */
@@ -473,7 +511,34 @@ generator_group_t * init_generator_group(sim_config_t * config)
 
     for(i = 0; i < numbers; ++i)
     {
+<<<<<<< HEAD
 		init_signle_generator(generator_group,i);
+=======
+        generator_group->generator[i].pool = memalign(64, sizeof(free_pool_t));
+		assert(generator_group->generator[i].pool);
+		free_pool_init(generator_group->generator[i].pool);
+		int item_size = config->pktlen + PAY_LEN + sizeof(packet_t);
+		int pool_numbers   = 1024;
+    	char * buffer = malloc(pool_numbers * item_size);
+    	exit_if_ptr_is_null(buffer,"alloc pool buffer error");
+    	int j = 0;
+    	for(j = 0; j < pool_numbers; ++j)
+    	{
+        /*
+        * 这个复杂的复制是为了，让node_t[]数组里面的指针指向真实的buffer.
+        * */
+			free_pool_enqueue(generator_group->generator[i].pool,
+							  buffer + j * item_size);
+    	}
+
+        generator_group->generator[i].config = malloc(sizeof(sim_config_t)); 
+        exit_if_ptr_is_null(generator_group->generator[i].config,"config error");
+        memcpy(generator_group->generator[i].config,config,sizeof(sim_config_t));
+        generator_group->generator[i].index = i;
+        generator_group->generator[i].next_thread_id = 0;
+        generator_group->generator[i].total_send_byte = 0;
+        generator_group->generator[i].rank = i;
+>>>>>>> 568c01e40f7a8bf36c59c744658dbc6f16f87f25
         if(pthread_create(&generator_group->generator[i].id,
                       NULL,
                       packet_generator_loop,

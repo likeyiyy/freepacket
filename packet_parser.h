@@ -17,7 +17,11 @@ typedef struct _parser
      * */
     uint64_t total;
     free_queue_t * queue;
+<<<<<<< HEAD
     free_pool_t  * pool;
+=======
+    pool_t  * pool;
+>>>>>>> 568c01e40f7a8bf36c59c744658dbc6f16f87f25
 	int alive;
     uint64_t drop_cause_pool_empty;
     uint64_t drop_cause_no_payload;
