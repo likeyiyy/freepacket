@@ -157,27 +157,6 @@ static inline uint64_t get_cycle_count_intel()
 #error "get_cycle_count not define"
 #endif
 
-#define LG2_CAPACITY                (10)
-
-#ifdef TILERA_PLATFORM
-#define USE_BASIC_QUEUE
-#ifdef USE_BASIC_QUEUE
-#include <tmc/queue.h>
-#elif defined(USE_CACHELINE_QUEUE)
-#include <tmc/cacheline_queue.h>
-#else         
-#error "Must define a queue type!"
-#endif // USE_BASIC_QUEUE
-
-#define unlikely(cond)          __builtin_expect((cond), 0)
-#define likely(cond)          __builtin_expect((cond), 1)
-
-TMC_QUEUE(free_queue, packet_t *, LG2_CAPACITY, (TMC_QUEUE_SINGLE_SENDER | TMC_QUEUE_SINGLE_RECEIVER));
-
-TMC_QUEUE(free_pool,  packet_t *, LG2_CAPACITY, (TMC_QUEUE_SINGLE_SENDER | TMC_QUEUE_SINGLE_RECEIVER));
-
-#endif
-
 
 #include "config.h"
 #include "mpipe.h"

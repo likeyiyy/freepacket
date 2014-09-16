@@ -54,7 +54,6 @@ static inline void init_single_parser(parser_t * parser)
     assert(parser->queue != NULL);
     free_queue_init(parser->queue);
     
-<<<<<<< HEAD
 	/*
 	 * 初始化pool
 	 * */
@@ -69,12 +68,6 @@ static inline void init_single_parser(parser_t * parser)
 		free_pool_enqueue(parser->pool,buffer + j * sizeof(flow_item_t));
 	}
 
-=======
-    parser->pool   = init_pool(PARSER_POOL,
-                              pool_size,
-                              sizeof(flow_item_t));
-    parser->pool->pool_type = PARSER_POOL;
->>>>>>> 568c01e40f7a8bf36c59c744658dbc6f16f87f25
     parser->total = 0;
     parser->drop_cause_pool_empty = 0;
     parser->drop_cause_no_payload = 0;
@@ -248,7 +241,6 @@ void * packet_parser_loop(void * arg)
         * 从队列中取出一个数据包
         * */
 		parser->alive++;
-<<<<<<< HEAD
         while(unlikely(free_queue_dequeue_multiple(parser->queue,packet,COUNT) != 0))
 		{
 			continue;
@@ -259,30 +251,6 @@ void * packet_parser_loop(void * arg)
 			{
 				continue;
 			}
-=======
-        while(unlikely(free_queue_dequeue(parser->queue,(void **)&packet) != 0))
-			continue;
-        parser->total += packet->length;
-#if (PIPE_DEPTH > 2)	
-        /*
-        * 校验数据包。
-        * */
-        int header_len = 0;
-        int eth_hdr_len = sizeof(struct ethhdr);
-        struct iphdr * ip_hdr = (struct iphdr *)(packet->data + eth_hdr_len + 2);
-        int ihl = ip_hdr->ihl * 4;
-        if(ip_hdr->protocol == IPPROTO_TCP)
-        {
-            struct tcphdr * tcp_hdr = 
-                        (struct tcphdr *)(packet->data +
-                                         sizeof(struct ethhdr) +
-                                          ihl);            
-            int tcp_len = tcp_hdr->doff * 4;
-            header_len = eth_hdr_len + ihl + tcp_len + PAY_LEN;
-            //unsigned int index;
-            flow_item_t * flow = NULL;
-            {
->>>>>>> 568c01e40f7a8bf36c59c744658dbc6f16f87f25
             /*
             * 校验数据包。
             * */
@@ -296,7 +264,6 @@ void * packet_parser_loop(void * arg)
             /*
             * 送给下个流水线的队列。
             * */
-<<<<<<< HEAD
 			if(global_config->pipe_depth > 3)
 			{
 				for(int k = 0; k < COUNT; k++)
@@ -327,24 +294,6 @@ void * packet_parser_loop(void * arg)
 			}
 		}
 	}
-=======
-#if (PIPE_DEPTH > 3)
-                index = hash_index(flow,manager_group);
-        		ghash_view[index]++;
-                push_common_buf(manager_group->manager[index].queue,WAIT_MODE,flow);
-#else
-    			while(unlikely(free_pool_enqueue(packet->pool,packet) != 0))
-				{}
-            	free_buf(flow->pool,flow);
-#endif
-            }
-        }
-#else
-    	while(unlikely(free_pool_enqueue(packet->pool,packet) != 0))
-		{}
-#endif
-    }
->>>>>>> 568c01e40f7a8bf36c59c744658dbc6f16f87f25
 }
 parser_group_t * init_parser_group(sim_config_t * config)
 {

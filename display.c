@@ -66,11 +66,7 @@ static void display_parser(window_t * win, parser_group_t *  parser_group)
 		wprintw(win->win,"[%u] ",parser_group->parser[i].alive);
          wprintw(win->win,"Queue size:%u pool free:%u \n",
 				 (parser_group->parser[i].queue->enqueue_count + 1024 - parser_group->parser[i].queue->dequeue_count) % 1024,
-<<<<<<< HEAD
                  parser_group->parser[i].pool->enqueue_count - parser_group->parser[i].pool->dequeue_count);
-=======
-                 parser_group->parser[i].pool->free_num);
->>>>>>> 568c01e40f7a8bf36c59c744658dbc6f16f87f25
                  //parser_group->parser[i].total >> 20);
     }
 	for(int i = 0; i < 16; ++i)
