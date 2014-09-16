@@ -84,6 +84,10 @@ typedef struct __config
     int manager_pool_size;
     int manager_hash_length;
     int manager_buffer_size;
+
+	int pipe_depth;
+	int screen_display;
+	int speed_mode;
 }sim_config_t;
 
 extern sim_config_t * global_config;
@@ -93,6 +97,8 @@ int ether_atoe(const char *a, unsigned char *e);
 char * ether_etoa(const unsigned char *e, char *a);
 
 int read_config_file(const char * file_name, sim_config_t * config);
+
+int read_config_simple(const char * file_name,sim_config_t * config);
 
 int init_config_s(sim_config_t * config);
 

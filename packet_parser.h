@@ -6,6 +6,9 @@
  ************************************************************************/
 #ifndef parser_group_H
 #define parser_group_H
+
+
+
 typedef struct _parser
 {
     pthread_t id;
@@ -13,8 +16,8 @@ typedef struct _parser
      * 这个线程所处理的的包数
      * */
     uint64_t total;
-    common_queue_t * queue;
-    pool_t  * pool;
+    free_queue_t * queue;
+    free_pool_t  * pool;
 	int alive;
     uint64_t drop_cause_pool_empty;
     uint64_t drop_cause_no_payload;

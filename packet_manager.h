@@ -27,7 +27,7 @@ typedef struct _session_manager
 typedef struct _group
 {
     manager_t * manager;
-    uint32_t    length;
+    uint32_t    numbers;
 }manager_group_t;
 
 

@@ -80,6 +80,28 @@
 #define NO_WAIT_MODE 1
 
 #include "pool_manager.h"
+
+#define LG2_CAPACITY                (10)
+#ifdef TILERA_PLATFORM
+#define USE_BASIC_QUEUE
+#ifdef USE_BASIC_QUEUE
+#include "queue.h"
+#elif defined(USE_CACHELINE_QUEUE)
+#include "cacheline_queue.h"
+#else         
+#error "Must define a queue type!"
+#endif // USE_BASIC_QUEUE
+
+#define unlikely(cond)        __builtin_expect((cond), 0)
+#define likely(cond)          __builtin_expect((cond), 1)
+
+TMC_QUEUE(free_queue, void *, LG2_CAPACITY, (TMC_QUEUE_SINGLE_SENDER | TMC_QUEUE_SINGLE_RECEIVER));
+
+TMC_QUEUE(msend_queue, void *, LG2_CAPACITY, (TMC_QUEUE_SINGLE_SENDER | TMC_QUEUE_SINGLE_RECEIVER));
+
+TMC_QUEUE(free_pool,  void *, LG2_CAPACITY, ( TMC_QUEUE_SINGLE_RECEIVER));
+
+#endif
 /*
 * 一个数据包却要有数据部分和长度部分，真的必要吗？
 * 是的，对于generator来说确实不必要，但是对于parser却是需要的。
@@ -89,7 +111,7 @@ typedef struct packet
 {
     unsigned char * data;   /* 一个包的数据部分*/
     unsigned int    length; /* 一个包的长度*/
-    pool_t * pool;          /* 这个包来自哪个池子*/
+    free_pool_t * pool;          /* 这个包来自哪个池子*/
 }packet_t;
 typedef struct flow_item
 {
@@ -134,6 +156,7 @@ static inline uint64_t get_cycle_count_intel()
 #else
 #error "get_cycle_count not define"
 #endif
+
 
 
 #include "config.h"

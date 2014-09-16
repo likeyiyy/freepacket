@@ -99,7 +99,7 @@ static void * process_all_session(void * arg)
 	while(1)
 	{
 		start_cycle = get_cycle_count();	
-		for(int i = 0; i < group->length; i++)
+		for(int i = 0; i < group->numbers; i++)
 		{
         	hash_travel_delete(group->manager[i].ht);
 		}
@@ -168,7 +168,7 @@ manager_group_t * init_manager_group(sim_config_t * config)
     exit_if_ptr_is_null(global_manager_group,"初始化分配流管理错误");
     global_manager_group->manager = malloc(sizeof(manager_t) * numbers);
     exit_if_ptr_is_null(global_manager_group->manager,"初始化分配manager错误");
-    global_manager_group->length = numbers;
+    global_manager_group->numbers = numbers;
     session_item_t * session;
     int i = 0;
     for(i = 0; i < numbers; i++)

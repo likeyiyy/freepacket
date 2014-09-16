@@ -44,17 +44,30 @@ static inline uint32_t make_hash(uint32_t f1,uint32_t f2,uint32_t f3,uint32_t f4
 static inline unsigned int hash_index(flow_item_t * flow,manager_group_t * manager_group)
 {
     uint32_t v1,v2,h1;
-    return MAKE_HASH(v1,v2,h1,flow->lower_ip,flow->upper_ip,flow->lower_port,flow->upper_port,manager_group->length);
+    return MAKE_HASH(v1,v2,h1,flow->lower_ip,flow->upper_ip,flow->lower_port,flow->upper_port,manager_group->numbers);
 }
+
 static inline void init_single_parser(parser_t * parser)
 {
     int pool_size = global_config->parser_pool_size;
-    parser->queue  = init_common_queue(global_config->parser_queue_length,
-									   sizeof(packet_t));
-    parser->pool   = init_pool(PARSER_POOL,
-                              pool_size,
-                              sizeof(flow_item_t));
-    parser->pool->pool_type = PARSER_POOL;
+    parser->queue  =  memalign(64,sizeof(*parser->queue));
+    assert(parser->queue != NULL);
+    free_queue_init(parser->queue);
+    
+	/*
+	 * 初始化pool
+	 * */
+	pool_size = 1024;
+    parser->pool   = memalign(64, sizeof(free_pool_t));
+	assert(parser->pool);
+	free_pool_init(parser->pool);
+	char * buffer = malloc(pool_size * sizeof(flow_item_t));
+	exit_if_ptr_is_null(buffer,"alloc pool buffer error");
+	for(int j = 0; j < pool_size; ++j)
+	{
+		free_pool_enqueue(parser->pool,buffer + j * sizeof(flow_item_t));
+	}
+
     parser->total = 0;
     parser->drop_cause_pool_empty = 0;
     parser->drop_cause_no_payload = 0;
@@ -86,13 +99,15 @@ static inline void free_packet(packet_t * packet)
 {
     free_buf(packet->pool,packet);
 }
-static inline void make_flow_item_tcp(flow_item_t * flow,packet_t * packet,int header_len)
+static inline void make_flow_item_tcp(flow_item_t * flow,packet_t * packet,int len)
 {
     flow->packet   = packet;
     int eth_hdr_len = sizeof(struct ethhdr);
     struct iphdr * ip_hdr = (struct iphdr *)(packet->data + PAY_LEN + eth_hdr_len);
     int ihl = ip_hdr->ihl * 4;
     struct tcphdr * tcp_hdr = (struct tcphdr *)(packet->data + PAY_LEN + eth_hdr_len + ihl);            
+	int tcp_len = tcp_hdr->doff * 4;
+    int header_len = eth_hdr_len + ihl + tcp_len + PAY_LEN;
     if(ip_hdr->saddr >= ip_hdr->daddr)
     {
         flow->upper_ip = ip_hdr->saddr;
@@ -212,99 +227,78 @@ static int parser_process(manager_group_t * manager_group,
     return 0;
 }
 //static pthread_mutex_t print_lock = PTHREAD_MUTEX_INITIALIZER;
+#define COUNT 64
 void * packet_parser_loop(void * arg)
 {
-    //pthread_detach(pthread_self());
-    //pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, 0);
-    //pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, 0);
     parser_t * parser = (parser_t *)arg;
-    packet_t * packet;
-#if (PIPE_DEPTH > 3)
+    packet_t * packet[COUNT];
+    flow_item_t * flow[COUNT];
     manager_group_t * manager_group = get_manager_group();
-#endif
     unsigned int index;
     while(1)
-    {
+   	{
         /*
         * 从队列中取出一个数据包
         * */
 		parser->alive++;
-        pop_common_buf(parser->queue,(void **)&packet);
-        parser->total += packet->length;
-#if (PIPE_DEPTH > 2)	
-        /*
-        * 校验数据包。
-        * */
-        int header_len = 0;
-        int eth_hdr_len = sizeof(struct ethhdr);
-        struct iphdr * ip_hdr = (struct iphdr *)(packet->data + eth_hdr_len + 2);
-        int ihl = ip_hdr->ihl * 4;
-        if(ip_hdr->protocol == IPPROTO_TCP)
-        {
-            struct tcphdr * tcp_hdr = 
-                        (struct tcphdr *)(packet->data +
-                                         sizeof(struct ethhdr) +
-                                          ihl);            
-            int tcp_len = tcp_hdr->doff * 4;
-            header_len = eth_hdr_len + ihl + tcp_len + PAY_LEN;
-            //unsigned int index;
-            flow_item_t * flow = NULL;
-            {
+        while(unlikely(free_queue_dequeue_multiple(parser->queue,packet,COUNT) != 0))
+		{
+			continue;
+		}
+		if(global_config->pipe_depth > 2)
+		{
+			while(unlikely(free_pool_dequeue_multiple(parser->pool,flow,COUNT) != 0))
+			{
+				continue;
+			}
             /*
-            * 从pool中取一个包头。
+            * 校验数据包。
             * */
-                get_buf(parser->pool,WAIT_MODE,(void **)&flow);        
-                flow->pool = parser->pool;
-                {
-                    flow->packet   = packet;
-                    if(ip_hdr->saddr >= ip_hdr->daddr)
-                    {
-                        flow->upper_ip = ip_hdr->saddr;
-                        flow->lower_ip = ip_hdr->daddr;
-                    }
-                    else
-                    {
-                        flow->upper_ip = ip_hdr->daddr;
-                        flow->lower_ip = ip_hdr->saddr;
-                    }
-                    if(tcp_hdr->source >= tcp_hdr->dest)
-                    {
-                        flow->upper_port = tcp_hdr->source;
-                        flow->lower_port = tcp_hdr->dest;
-                    }
-                    else
-                    {
-                        flow->upper_port = tcp_hdr->dest;
-                        flow->lower_port = tcp_hdr->source;
-                    }
-                    flow->protocol = ip_hdr->protocol;
-                    flow->payload  = packet->data + header_len;
-                    flow->payload_len = packet->length - header_len + PAY_LEN;
-                }
+        	int header_len = 0;
+            int eth_hdr_len = sizeof(struct ethhdr);
+
+			for(int k = 0; k < COUNT; k++)
+			{
+				make_flow_item_tcp(flow[k],packet[k],0);
+			}
             /*
             * 送给下个流水线的队列。
             * */
-#if (PIPE_DEPTH > 3)
-                index = hash_index(flow,manager_group);
-        		ghash_view[index]++;
-                push_common_buf(manager_group->manager[index].queue,WAIT_MODE,flow);
-#else
-            	free_buf(packet->pool,packet);
-            	free_buf(flow->pool,flow);
-#endif
-            }
-        }
-#else
-    	free_buf(packet->pool,packet);
-#endif
-    }
+			if(global_config->pipe_depth > 3)
+			{
+				for(int k = 0; k < COUNT; k++)
+				{
+            		index = hash_index(flow[k],manager_group);
+            		ghash_view[index]++;
+                	push_common_buf(manager_group->manager[index].queue,WAIT_MODE,flow[k]);
+				}
+			}
+			else
+			{
+    			while(unlikely(free_pool_enqueue_multiple(packet[0]->pool,packet,COUNT) != 0))
+				{
+						continue;	
+				}
+    			while(unlikely(free_pool_enqueue_multiple(parser->pool,flow,COUNT) != 0))
+				{
+						continue;	
+				}
+			}
+		}
+	
+		else
+		{
+    		while(unlikely(free_pool_enqueue_multiple(packet[0]->pool,packet,COUNT) != 0))
+			{
+				continue;	
+			}
+		}
+	}
 }
 parser_group_t * init_parser_group(sim_config_t * config)
 {
-    pthread_mutex_lock(&global_create_parser_lock);
     if(global_parser_group != NULL)
     {
-        pthread_mutex_unlock(&global_create_parser_lock);
         /*
         * 当global_parser_group不为NULL的时候，我们反而返回NULL
         * 是因为我们不想让别的线程使用此数据结构。
@@ -325,11 +319,10 @@ parser_group_t * init_parser_group(sim_config_t * config)
     {
         init_single_parser(&global_parser_group->parser[i]); 
         pthread_create(&global_parser_group->parser[i].id,
-                NULL,
-                packet_parser_loop,
-                &global_parser_group->parser[i]);
+                		NULL,
+                		packet_parser_loop,
+                		&global_parser_group->parser[i]);
     }
-    pthread_mutex_unlock(&global_create_parser_lock);
     return global_parser_group;
 }
 parser_group_t * get_parser_group()

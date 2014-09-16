@@ -111,6 +111,83 @@ void print_config_file(sim_config_t * config)
 
     
 }
+
+int read_config_simple(const char * file_name,sim_config_t * config)
+{
+	static time_t old,new;
+	struct stat file_stat;
+    assert(config != NULL);
+    assert(file_name != NULL);
+    FILE * fp = NULL;
+    char buf[BUFSIZ] = {0};
+    char * p, *q;
+    char * pname = NULL;
+    int count = 0;
+	if(stat(file_name,&file_stat) == 0)
+	{
+		new = file_stat.st_mtime;
+		if(new != old)
+		{
+			old = new;
+    		if((fp = fopen(file_name,"r")) == NULL)
+    		{
+
+				printf("----------file_name:%s----------\n",file_name);
+        		perror("can't open config file");
+        		exit(-1);
+    		}
+            while(1)
+            {
+                fgets(buf,BUFSIZ,fp);
+                if(feof(fp))
+                {
+                    break;
+                }
+                count = strlen(buf);
+                p = buf;
+                //printf("count=%d\t%s",count,buf);
+                //skip whitespace
+                while(count > 0 &&isspace(p[0]))
+                {
+                    count--;
+                    p++;
+                }
+                //printf("count=%d\t%s",count,buf+i);
+                if(p[0] == '#')
+                {
+                    continue;
+                }
+                q = skip_var_name(p);
+                //printf("++%s++++++++++++++%s++\n",p,q);
+                pname = malloc(q-p+1);
+                exit_if_ptr_is_null(pname,"pname alloca error");
+                strncpy(pname, p, q-p );	    
+				pname[q-p] = '\0';
+                p = q;
+                p = skip_opeartor(p);
+                //printf("%s\n",p);
+                pname = strupr(pname);
+        		if(strcmp(pname,"PIPE_DEPTH") == 0)
+        		{
+            		config -> pipe_depth = atoi(p);
+        		}
+        		else if(strcmp(pname,"SCREEN_DISPLAY") == 0)
+        		{
+            		config -> screen_display = atoi(p);
+        		}
+        		else if(strcmp(pname,"SPEED_MODE") == 0)
+        		{
+            		config -> speed_mode = atoi(p);
+        		}
+				free(pname);
+			}
+			fclose(fp);
+			return 0;
+		}
+	
+	}
+	return 0;
+}
 int read_config_file(const char * file_name,sim_config_t * config)
 {
     assert(config != NULL);
@@ -345,8 +422,21 @@ int read_config_file(const char * file_name,sim_config_t * config)
             config->once_packet_nums = (uint32_t)atoi(p);
         }
 #endif 
+       	else if(strcmp(pname,"PIPE_DEPTH") == 0)
+        		{
+            		config -> pipe_depth = atoi(p);
+        		}
+       	else if(strcmp(pname,"SCREEN_DISPLAY") == 0)
+        		{
+            		config -> screen_display = atoi(p);
+        		}
+       	else if(strcmp(pname,"SPEED_MODE") == 0)
+        		{
+            		config -> speed_mode = atoi(p);
+        		}
         free(pname);        
     }
+	fclose(fp);
     return 0;
 }
 
@@ -435,6 +525,9 @@ int init_config_s(sim_config_t * config)
     config -> parser_nums    = 1;
     config -> manager_nums   = 1;
 
+	config -> screen_display = 1;
+	config -> pipe_depth     = 2;
+	config -> speed_mode     = 0;
+
     return 0;
-    
 }

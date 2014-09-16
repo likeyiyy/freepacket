@@ -6,6 +6,8 @@
  ************************************************************************/
 #include "includes.h"
 //#define memcpy(a,b,c) do { memcpy(a,b,c);printf("packet_generator_loop memcpy here\n"); } while(0)
+
+
 static generator_group_t * generator_group = NULL;
 static pthread_mutex_t global_create_generator_lock = PTHREAD_MUTEX_INITIALIZER;
 void   destroy_generator(generator_group_t * generator_group)
@@ -179,124 +181,103 @@ static inline void generator_udp_packet(packet_t * packet,sim_config_t * config)
     pop_datalink(packet->data + PAY_LEN,config);
 }
 
-static inline void free_packet(packet_t * packet)
-{
-    free_buf(packet->pool,packet);
-}
 static void make_all_packet(generator_t * generator,GenerHandler * Handler)
 {               
     sim_config_t * config = generator->config;
     packet_t * packet;
-    for(int i = 0; i < config->generator_pool_size; i++)
+    for(int i = 0; i <= 1024; i++)
     {           
             /*  
  			** 1. get buffer from pool
  			** */
-            if(get_buf(generator->pool,WAIT_MODE,(void **)&packet) < 0)
-            {   
-                generator->drop_total++;
-                break;
-            }   
-            packet->pool   = generator->pool;
-            packet->length = config->pktlen;
-            packet->data   = (unsigned char *)packet + sizeof(packet_t);
+        	if(likely(free_pool_dequeue(generator->pool,(void **)&packet) ==  0))
+        	{
+            	packet->pool   = generator->pool;
+            	packet->length = config->pktlen;
+            	packet->data   = (unsigned char *)packet + sizeof(packet_t);
             /*  
  			** 2. 根据配置文件比如UDP，TCP来产生包结构。
  			***/
-            Handler(packet,config);
-            free_packet(packet);
+            	Handler(packet,config);
+
+    			while(unlikely(free_pool_enqueue(generator->pool,packet) != 0))
+				{
+					continue;	
+				}
+        	}
     }           
 }  
 static void packet_generator(generator_t * generator,int data_len,GenerHandler * Handler)
 {
     packet_t * packet;
-////////////    uint64_t old,new;
+    uint64_t old,new;
     sim_config_t * config = generator->config;
 	int g_nums = config->generator_nums;
 	int p_nums = config->parser_nums;
 	int next_thread_id = generator->index;
     int result = -1;
-#ifdef PIPE_DEPTH
-#if (PIPE_DEPTH > 1)
     parser_group_t * parser_group = get_parser_group();
     if(parser_group == NULL)
     {
         printf("parser_group is null,exit now\n");
         exit(0);
     }
-#endif
-#else 
-#error "You should define pipe line depth"
-#endif
-//////	uint64_t start = 0;
 	make_all_packet(generator,Handler);
-	//printf("make all packet over\n");
     while(1)
     {
-		//if(start++ > 80000000UL)
-			//continue;
+		if(global_config -> speed_mode == 1)
+		{
+        	old = GET_CYCLE_COUNT();
+		}
 		generator->alive++;
-#if (SPEED_MODE == USER_SPEED)
-        old = GET_CYCLE_COUNT();
-#endif
         /*
         * 1. get buffer from pool
         * */
-        if(get_buf(generator->pool,WAIT_MODE,(void **)&packet) < 0)
+        while(unlikely(free_pool_dequeue(generator->pool,(void **)&packet) !=  0))
         {
-            generator->drop_pempty_total++;
-            global_loss->drop_cause_generator_pool_empty += config->pktlen;
-            /*1.1. 延时统计函数 */
-            goto delay;
+			continue;
         }
-        //bzero(packet,data_len);
-        //packet->pool   = generator->pool;
-        //packet->length = config->pktlen;
-        //packet->data   = (unsigned char *)packet + sizeof(packet_t);
         /*
         * 2. 根据配置文件比如UDP，TCP来产生包结构。
         * */
     	struct tcphdr * tcp = (struct tcphdr *)(packet->data + TCP_IDX);
     	tcp->source = htons(GET_NEXT_SRCPORT(config));
     	tcp->dest   = htons(GET_NEXT_DSTPORT(config));
-    	//struct iphdr * ip = (struct iphdr *)(packet->data + IP_IDX);
     	*(uint32_t *)(packet->data + 28) = htonl(GET_NEXT_SRCIP(config));
     	*(uint32_t *)(packet->data + 32) = htonl(GET_NEXT_DSTIP(config));
-        //Handler(packet,config);
         /*
         * 3. 数据放到下一步的队列里。
         * */
         /* 数据包均匀 分部到 下一个工作的线程里。*/
-#ifdef PIPE_DEPTH
-#if (PIPE_DEPTH > 1)	
-        parser_t * parser = &parser_group->parser[next_thread_id];
-		next_thread_id = (next_thread_id + g_nums < p_nums) ? (next_thread_id + g_nums) : generator->index;
-        if(result == false)
-        {
-            generator->drop_qfull_total++;
-            global_loss->drop_cause_parser_queue_full += config->pktlen;
-            free_packet(packet);
-            goto delay;
-        }
-#else
-    	free_buf(packet->pool,packet);
-#endif
-#else 
-#error "You should define pipe line depth"
-#endif
+		if(global_config -> pipe_depth  > 1)
+		{
+        	parser_t * parser = &parser_group->parser[next_thread_id];
+			next_thread_id = (next_thread_id + g_nums < p_nums) ? (next_thread_id + g_nums) : generator->index;
+			while(unlikely(free_queue_enqueue(parser->queue,packet) != 0))
+			{
+				continue;	
+			}
+		
+		}
+		else
+		{
+    		while(unlikely(free_pool_enqueue(packet->pool,packet) != 0))
+			{
+				continue;	
+			}
+		}
         generator->total_send_byte += config->pktlen;
         global_loss->send_total    += config->pktlen;
         /*4. 延时统计函数 */
 delay:  
-#if (SPEED_MODE == USER_SPEED)
-	new = GET_CYCLE_COUNT() - old;
-        while((int64_t)new - (int64_t)generator->config->period < 0)
-        { 
-            new = GET_CYCLE_COUNT() - old;
-        } 
-#else
-	continue;
-#endif
+		if(global_config -> speed_mode == 1)
+		{
+			new = GET_CYCLE_COUNT() - old;
+        	while((int64_t)new - (int64_t)generator->config->period < 0)
+        	{ 
+            	new = GET_CYCLE_COUNT() - old;
+        	} 
+		}
     }
 }
 
@@ -340,11 +321,10 @@ static void tilera_packet_collector(generator_t * generator)
             /* 数据包均匀 分部到 下一个工作的线程里。*/
             parser_t * parser = &parser_group->parser[generator->next_thread_id++];
             generator->next_thread_id = (generator->next_thread_id == parser_group->numbers)? 0 : generator->next_thread_id;
-            bool ret = push_common_buf(parser->queue,NO_WAIT_MODE,packet);
+        	bool ret = free_queue_enqueue(parser->queue,packet);
             if(ret == false)
             {
                 global_loss->drop_cause_parser_queue_full += packet->length;
-                free_packet(packet);
             }
             else
             {
@@ -418,22 +398,7 @@ void * packet_generator_loop(void * arg)
     else if(config->packet_generator_mode == GENERATOR_MODE)
     {
 #ifdef TILERA_PLATFORM
-//////        mpipe_common_t * mpipe = generator->mpipe;
-    /**
-     * Bind to a single cpu
-     * */
-        //int rank = generator->rank;
-        //printf("###########################rank: %d\n",rank);
-        //printf("+++++++++++++++++++++++++++cpus %d\n",tmc_cpus_count(&global_cpus));
-        //int cpu = tmc_cpus_find_nth_cpu(&global_cpus, rank);
-        //printf("###########################cpu %d \n",cpu);
-        //int result = tmc_cpus_set_my_cpu(cpu);
-        //VERIFY(result, "tmc_cpus_set_my_cpu()\n");
-        //printf("33333333333333333333333333\n");
-        //printf("&mpipe->barrier %p\n",&mpipe->barrier);
-        //printf("22222222222222222222222222\n");
     	tmc_sync_barrier_wait(&gbarrier);
-        //printf("I am passed wait\n");
 #endif
         int data_len = config->pktlen + PAY_LEN + sizeof(packet_t);
         srand((unsigned int)time(NULL));
@@ -441,6 +406,34 @@ void * packet_generator_loop(void * arg)
         generator_mode(generator,data_len);
     }
     pthread_exit(NULL);
+}
+
+static inline void init_signle_generator(generator_group_t * generator_group,int i)
+{
+	generator_group->generator[i].pool = memalign(64, sizeof(free_pool_t));
+	assert(generator_group->generator[i].pool);
+	free_pool_init(generator_group->generator[i].pool);
+	int item_size = global_config->pktlen + PAY_LEN + sizeof(packet_t);
+	int pool_size   = 1024;
+    char * buffer = malloc(pool_size * item_size);
+    exit_if_ptr_is_null(buffer,"alloc pool buffer error");
+    int j = 0;
+    for(j = 0; j < pool_size; ++j)
+    {
+    /*
+    * 这个复杂的复制是为了，让node_t[]数组里面的指针指向真实的buffer.
+    * */
+		free_pool_enqueue(generator_group->generator[i].pool,
+		buffer + j * item_size);
+    }
+
+    generator_group->generator[i].config = malloc(sizeof(sim_config_t)); 
+    exit_if_ptr_is_null(generator_group->generator[i].config,"config error");
+    memcpy(generator_group->generator[i].config,global_config,sizeof(sim_config_t));
+    generator_group->generator[i].index = i;
+    generator_group->generator[i].next_thread_id = 0;
+    generator_group->generator[i].total_send_byte = 0;
+    generator_group->generator[i].rank = i;
 }
 
 generator_group_t * init_generator_group(sim_config_t * config)
@@ -480,17 +473,7 @@ generator_group_t * init_generator_group(sim_config_t * config)
 
     for(i = 0; i < numbers; ++i)
     {
-        generator_group->generator[i].pool = init_pool(GENERATOR_POOL,
-                                                config->generator_pool_size,
-                                                config->pktlen + PAY_LEN + sizeof(packet_t));
-        generator_group->generator[i].pool->pool_type = GENERATOR_POOL;
-        generator_group->generator[i].config = malloc(sizeof(sim_config_t)); 
-        exit_if_ptr_is_null(generator_group->generator[i].config,"config error");
-        memcpy(generator_group->generator[i].config,config,sizeof(sim_config_t));
-        generator_group->generator[i].index = i;
-        generator_group->generator[i].next_thread_id = 0;
-        generator_group->generator[i].total_send_byte = 0;
-        generator_group->generator[i].rank = i;
+		init_signle_generator(generator_group,i);
         if(pthread_create(&generator_group->generator[i].id,
                       NULL,
                       packet_generator_loop,
