@@ -110,20 +110,19 @@ static void * process_all_session(void * arg)
 /*
 * 真正的工作者。
 * */
+#define COUNT 64
 void * packet_manager_loop(void * arg)
 {
     manager_t * manager = (manager_t *)arg;
     flow_item_t * flow;
-#if (PIPE_DEPTH > 4)
-    pthread_t clean_id;
-    pthread_create(&clean_id,NULL,process_session,arg);
-#endif
-    
-    //printf("My cpu: %d\n",tmc_cpus_get_my_current_cpu());
-
-        uint32_t v1,v2,h1,index;
-//////	uint64_t interval = tmc_perf_get_cpu_speed() ;
-//////	uint64_t start_cycle = get_cycle_count();	
+	if(global_config -> pipe_depth  > 4)
+	{
+    	pthread_t clean_id;
+    	pthread_create(&clean_id,NULL,process_session,arg);
+	}
+    uint32_t v1,v2,h1,index;
+	uint64_t interval = tmc_perf_get_cpu_speed() ;
+	uint64_t start_cycle = get_cycle_count();	
     while(1)
     {
 		manager->alive++;
@@ -131,34 +130,69 @@ void * packet_manager_loop(void * arg)
         /*
          * 1.只有确实有数据时才返回。
          * */
-        pop_common_buf(manager->queue,(void **)&flow);
-#if (PIPE_DEPTH > 4)
+        while(unlikely(free_queue_dequeue(manager->queue,&flow) != 0))
+		{
+		manager->alive++;
+			continue;
+		}
+		if(global_config -> pipe_depth  > 4)
+		{
         /*
          * 2. make hash index
          * */
 
-        index = MAKE_HASH(v1,v2,h1,flow->lower_port,
-                flow->upper_ip,
-                flow->upper_port,
-                flow->lower_ip,
-                manager->ht->num_buckets);
+        	index = MAKE_HASH(v1,v2,h1,flow->lower_port,
+                				flow->upper_ip,
+                				flow->upper_port,
+                				flow->lower_ip,
+								manager->ht->num_buckets); 
         /*
         * 3. insert into hash table
         * */
-        hash_add_item(&manager->ht, index, flow); 
-#else
-		free_flow(flow);
-#endif
+        	hash_add_item(&manager->ht, index, flow); 
+		}
+		else
+		{
+    		while(unlikely(free_pool_enqueue(flow->packet->pool,flow->packet) != 0))
+			{
+				continue;	
+			}
+    		while(unlikely(free_pool_enqueue(flow->pool,flow) != 0))
+			{
+				continue;	
+			}
+		}
+
     }
+}
+static inline void init_signle_manager(manager_group_t * manager_group,int i)
+{
+    int pool_size    = global_config->manager_pool_size;
+    int hash_length  = global_config->manager_hash_length;
+    session_item_t * session;
+
+	manager_group->manager[i].queue = memalign(64,sizeof(free_pool_t));
+	assert(manager_group->manager[i].queue);
+	free_pool_init(manager_group->manager[i].queue);
+
+    manager_group->manager[i].ht = hash_create(hash_length);
+    manager_group->manager[i].session_pool = init_pool(MANAGER_POOL,
+                                                pool_size,
+                                                sizeof(struct blist));
+    for(int j = 0; j < pool_size - 1; j++)
+    {
+            get_buf(manager_group->manager[i].session_pool,NO_WAIT_MODE,(void **)&session);
+            session->buffer = malloc(global_config->manager_buffer_size);
+            exit_if_ptr_is_null(session->buffer,"session->buffer is NULL");
+            free_buf(manager_group->manager[i].session_pool,session);
+    }
+    manager_group->manager[i].session_pool->pool_type = MANAGER_POOL;
+    manager_group->manager[i].index = i;
+    manager_group->manager[i].drop_cause_pool_empty = 0;
+	
 }
 manager_group_t * init_manager_group(sim_config_t * config)
 {
-    pthread_mutex_lock(&global_create_manager_lock);
-    if(global_manager_group != NULL)
-    {
-        pthread_mutex_unlock(&global_create_manager_lock);
-        return NULL;
-    }
     int numbers = config->manager_nums;
     int queue_length = config->manager_queue_length;
     int pool_size    = config->manager_pool_size;
@@ -169,36 +203,15 @@ manager_group_t * init_manager_group(sim_config_t * config)
     global_manager_group->manager = malloc(sizeof(manager_t) * numbers);
     exit_if_ptr_is_null(global_manager_group->manager,"初始化分配manager错误");
     global_manager_group->numbers = numbers;
-    session_item_t * session;
-    int i = 0;
-    for(i = 0; i < numbers; i++)
+    for(int i = 0; i < numbers; i++)
     {
-        global_manager_group->manager[i].queue = init_common_queue(queue_length,
-                sizeof(flow_item_t));
-        global_manager_group->manager[i].ht = hash_create(hash_length);
-        global_manager_group->manager[i].session_pool = init_pool(MANAGER_POOL,
-                                                pool_size,
-                                                sizeof(struct blist));
-        for(int j = 0; j < pool_size - 1; j++)
-        {
-            get_buf(global_manager_group->manager[i].session_pool,NO_WAIT_MODE,(void **)&session);
-            session->buffer = malloc(config->manager_buffer_size);
-            exit_if_ptr_is_null(session->buffer,"session->buffer is NULL");
-            free_buf(global_manager_group->manager[i].session_pool,session);
-        }
-        global_manager_group->manager[i].session_pool->pool_type = MANAGER_POOL;
-        global_manager_group->manager[i].index = i;
-        global_manager_group->manager[i].drop_cause_pool_empty = 0;
-    }
-    for(i = 0; i < numbers; i++)
-    {
+		init_signle_manager(global_manager_group,i);
         pthread_create(&global_manager_group->manager[i].id,
                        NULL,
                      packet_manager_loop,
                       &global_manager_group->manager[i]);
     }
 	//pthread_create(&gclean_id,NULL,process_all_session,global_manager_group);
-    pthread_mutex_unlock(&global_create_manager_lock);
     return global_manager_group;
 }
 manager_group_t * get_manager_group()

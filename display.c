@@ -83,7 +83,7 @@ static void display_manager(window_t * win,manager_group_t * manager_group)
         
 		wprintw(win->win,"[%u] ",manager_group->manager[i].alive);
         wprintw(win->win,"Queue Size:%lu pool free:%u hash_count:%d\n",
-               manager_group->manager[i].queue->length,
+			   manager_group->manager[i].queue->enqueue_count - manager_group->manager[i].queue->dequeue_count,
                manager_group->manager[i].session_pool->free_num,
                hash_count(manager_group->manager[i].ht));
     }
@@ -159,13 +159,13 @@ void display_gpm(generator_group_t * generator_group,
 		}
 		else
 		{
-			printf("                                                ");
+			printf("                                                         ");
 		}
 		if(i < manager_group->numbers)
 		{
 			printf("[%4u] ",manager_group->manager[i].alive);
         	printf("Queue :%5u Pool :%4u Hash :%4u",
-               manager_group->manager[i].queue->length,
+               manager_group->manager[i].queue->enqueue_count - manager_group->manager[i].queue->dequeue_count,
                manager_group->manager[i].session_pool->free_num,
                hash_count(manager_group->manager[i].ht));
 		}

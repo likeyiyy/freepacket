@@ -65,7 +65,9 @@ static inline void init_single_parser(parser_t * parser)
 	exit_if_ptr_is_null(buffer,"alloc pool buffer error");
 	for(int j = 0; j < pool_size; ++j)
 	{
-		free_pool_enqueue(parser->pool,buffer + j * sizeof(flow_item_t));
+		flow_item_t * flow = buffer + j * sizeof(flow_item_t);
+		flow->pool = parser->pool;
+		free_pool_enqueue(parser->pool,flow);
 	}
 
     parser->total = 0;
@@ -270,7 +272,10 @@ void * packet_parser_loop(void * arg)
 				{
             		index = hash_index(flow[k],manager_group);
             		ghash_view[index]++;
-                	push_common_buf(manager_group->manager[index].queue,WAIT_MODE,flow[k]);
+					while(unlikely(free_pool_enqueue(manager_group->manager[index].queue,flow[k]) != 0))
+					{
+						continue;	
+					}
 				}
 			}
 			else

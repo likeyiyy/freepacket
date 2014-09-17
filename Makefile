@@ -1,7 +1,4 @@
 #Default Target.
-full_speed=0
-user_speed=1
-depth=3
 ifeq ($(filter tile%,$(shell uname -m)),)
 ifdef CROSS
 #1.1交叉编译
@@ -10,7 +7,6 @@ CC = $(TILERA_ROOT)/bin/tile-gcc
 MPIPE_CC = $(TILERA_ROOT)/bin/tile-mpipe-cc
 LDFLAGS= -lpthread -lgxio -ltmc -lncurses
 CFLAGS += -DTILERA_PLATFORM
-CFLAGS +=  -DPIPE_DEPTH=$(depth) 
 OBJS += mpipe.o display.o
 else
 $(error The 'TILERA_ROOT' enviroment variable is not set.)
@@ -21,7 +17,6 @@ else
 LDFLAGS= -lncurses -lpthread -lrt 
 OBJS = display.o
 CFLAGS += -DINTEL_PLATFORM
-CFLAGS +=  -DPIPE_DEPTH=$(depth) 
 CC = gcc
 endif
 
@@ -32,12 +27,11 @@ CC = gcc
 MPIPE_CC=mpipe-cc
 LDFLAGS= -lpthread -lgxio -ltmc -lncurses
 CFLAGS += -DTILERA_PLATFORM 
-CFLAGS +=  -DPIPE_DEPTH=$(depth) 
 OBJS += mpipe.o display.o
 endif
 
 OPT = -Os
-CFLAGS += -std=gnu99 -Wall  -O3
+CFLAGS += -std=gnu99 -Wall  -g
 OBJS += pool_manager.o checksum.o config.o 						\
 	 parse.o packet_generator.o packet_parser.o queue_manager.o \
 	 packet_manager.o  hash.o lossratio.o
