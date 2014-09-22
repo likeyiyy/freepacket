@@ -188,7 +188,6 @@ static inline void init_signle_manager(manager_group_t * manager_group,int i)
             exit_if_ptr_is_null(session->buffer,"session->buffer is NULL");
             free_buf(manager_group->manager[i].session_pool,session);
     }
-    manager_group->manager[i].session_pool->pool_type = MANAGER_POOL;
     manager_group->manager[i].index = i;
     manager_group->manager[i].drop_cause_pool_empty = 0;
 	

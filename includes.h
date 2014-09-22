@@ -112,7 +112,7 @@ typedef struct packet
 {
     unsigned char * data;   /* 一个包的数据部分*/
     unsigned int    length; /* 一个包的长度*/
-    free_pool_t * pool;          /* 这个包来自哪个池子*/
+    mwsr_pool_t * pool;          /* 这个包来自哪个池子*/
 }packet_t;
 typedef struct flow_item
 {
@@ -124,7 +124,7 @@ typedef struct flow_item
     packet_t * packet;
     unsigned char * payload;
     unsigned int    payload_len;
-    pool_t * pool;          /* 这个包来自哪个池子*/
+    mwsr_pool_t * pool;          /* 这个包来自哪个池子*/
 }flow_item_t;
 typedef struct _session_item
 {
@@ -137,7 +137,7 @@ typedef struct _session_item
     uint64_t last_time;
     uint32_t length;
     uint32_t cur_len;
-    pool_t * pool;
+    swsr_pool_t * pool;
 }session_item_t;
 
 #ifdef INTEL_PLATFORM
