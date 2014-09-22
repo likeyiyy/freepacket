@@ -131,6 +131,7 @@ int  hash_add_item(hash_table ** htp, uint32_t key, void * value )
      * */
     if(!blist)
     {
+#if 0
         if(get_buf(manager->session_pool,WAIT_MODE,(void **)&new_blist) < 0)
         {
             /* 插入失败,session_pool is empty */
@@ -141,6 +142,11 @@ int  hash_add_item(hash_table ** htp, uint32_t key, void * value )
             pthread_mutex_unlock(&bucket->lock);
             return -1;
         }
+#endif
+        while(unlikely(mwsr_queue_dequeue(manager->session_pool,&new_blist) != 0))
+		{
+			continue;
+		}
         /*
          * 把flow里面的数据拷贝到session里面
          * */
@@ -148,7 +154,16 @@ int  hash_add_item(hash_table ** htp, uint32_t key, void * value )
         /*
          * 立即释放掉
          * */
-        free_flow(flow);
+        {
+    		while(unlikely(mwsr_pool_enqueue(flow->packet->pool,flow->packet) != 0))
+			{
+				continue;	
+			}
+    		while(unlikely(mwsr_pool_enqueue(flow->pool,flow) != 0))
+			{
+				continue;	
+			}
+        }
         /*
          * 初始化，并且添加到新建的列表里。
          * */
@@ -171,7 +186,16 @@ int  hash_add_item(hash_table ** htp, uint32_t key, void * value )
             session->cur_len += flow->payload_len;
             session->last_time = GET_CYCLE_COUNT();
         }
-        free_flow(flow);
+        {
+    		while(unlikely(mwsr_pool_enqueue(flow->packet->pool,flow->packet) != 0))
+			{
+				continue;	
+			}
+    		while(unlikely(mwsr_pool_enqueue(flow->pool,flow) != 0))
+			{
+				continue;	
+			}
+        }
 
     }
     pthread_mutex_unlock(&bucket->lock);

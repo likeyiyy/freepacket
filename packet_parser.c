@@ -52,22 +52,22 @@ static inline void init_single_parser(parser_t * parser)
     int pool_size = global_config->parser_pool_size;
     parser->queue  =  memalign(64,sizeof(*parser->queue));
     assert(parser->queue != NULL);
-    free_queue_init(parser->queue);
+    swsr_queue_init(parser->queue);
     
 	/*
 	 * 初始化pool
 	 * */
 	pool_size = 1024;
-    parser->pool   = memalign(64, sizeof(free_pool_t));
+    parser->pool   = memalign(64, sizeof(mwsr_pool_t));
 	assert(parser->pool);
-	free_pool_init(parser->pool);
+	mwsr_pool_init(parser->pool);
 	char * buffer = malloc(pool_size * sizeof(flow_item_t));
 	exit_if_ptr_is_null(buffer,"alloc pool buffer error");
 	for(int j = 0; j < pool_size; ++j)
 	{
 		flow_item_t * flow = buffer + j * sizeof(flow_item_t);
 		flow->pool = parser->pool;
-		free_pool_enqueue(parser->pool,flow);
+		mwsr_pool_enqueue(parser->pool,flow);
 	}
 
     parser->total = 0;
@@ -243,13 +243,13 @@ void * packet_parser_loop(void * arg)
         * 从队列中取出一个数据包
         * */
 		parser->alive++;
-        while(unlikely(free_queue_dequeue_multiple(parser->queue,packet,COUNT) != 0))
+        while(unlikely(swsr_queue_dequeue_multiple(parser->queue,packet,COUNT) != 0))
 		{
 			continue;
 		}
 		if(global_config->pipe_depth > 2)
 		{
-			while(unlikely(free_pool_dequeue_multiple(parser->pool,flow,COUNT) != 0))
+			while(unlikely(mwsr_pool_dequeue_multiple(parser->pool,flow,COUNT) != 0))
 			{
 				continue;
 			}
@@ -272,7 +272,7 @@ void * packet_parser_loop(void * arg)
 				{
             		index = hash_index(flow[k],manager_group);
             		ghash_view[index]++;
-					while(unlikely(free_pool_enqueue(manager_group->manager[index].queue,flow[k]) != 0))
+					while(unlikely(mwsr_pool_enqueue(manager_group->manager[index].queue,flow[k]) != 0))
 					{
 						continue;	
 					}
@@ -280,11 +280,11 @@ void * packet_parser_loop(void * arg)
 			}
 			else
 			{
-    			while(unlikely(free_pool_enqueue_multiple(packet[0]->pool,packet,COUNT) != 0))
+    			while(unlikely(mwsr_pool_enqueue_multiple(packet[0]->pool,packet,COUNT) != 0))
 				{
 						continue;	
 				}
-    			while(unlikely(free_pool_enqueue_multiple(parser->pool,flow,COUNT) != 0))
+    			while(unlikely(mwsr_pool_enqueue_multiple(parser->pool,flow,COUNT) != 0))
 				{
 						continue;	
 				}
@@ -293,7 +293,7 @@ void * packet_parser_loop(void * arg)
 	
 		else
 		{
-    		while(unlikely(free_pool_enqueue_multiple(packet[0]->pool,packet,COUNT) != 0))
+    		while(unlikely(mwsr_pool_enqueue_multiple(packet[0]->pool,packet,COUNT) != 0))
 			{
 				continue;	
 			}

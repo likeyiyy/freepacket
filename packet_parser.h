@@ -16,8 +16,8 @@ typedef struct _parser
      * 这个线程所处理的的包数
      * */
     uint64_t total;
-    free_queue_t * queue;
-    free_pool_t  * pool;
+    swsr_queue_t * queue;
+    mwsr_pool_t  * pool;
 	int alive;
     uint64_t drop_cause_pool_empty;
     uint64_t drop_cause_no_payload;

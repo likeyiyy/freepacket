@@ -95,11 +95,12 @@
 #define unlikely(cond)        __builtin_expect((cond), 0)
 #define likely(cond)          __builtin_expect((cond), 1)
 
-TMC_QUEUE(free_queue, void *, LG2_CAPACITY, (TMC_QUEUE_SINGLE_SENDER | TMC_QUEUE_SINGLE_RECEIVER));
+TMC_QUEUE(swsr_queue, void *, LG2_CAPACITY, (TMC_QUEUE_SINGLE_SENDER | TMC_QUEUE_SINGLE_RECEIVER));
+TMC_QUEUE(mwsr_queue, void *, LG2_CAPACITY, (TMC_QUEUE_SINGLE_RECEIVER));
 
-TMC_QUEUE(mwmr_queue, void *, LG2_CAPACITY, 0);
 
-TMC_QUEUE(free_pool,  void *, LG2_CAPACITY, ( TMC_QUEUE_SINGLE_RECEIVER));
+TMC_QUEUE(swsr_pool, void *, LG2_CAPACITY, (TMC_QUEUE_SINGLE_SENDER | TMC_QUEUE_SINGLE_RECEIVER));
+TMC_QUEUE(mwsr_pool, void *, LG2_CAPACITY, (TMC_QUEUE_SINGLE_RECEIVER));
 
 #endif
 /*

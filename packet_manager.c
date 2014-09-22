@@ -73,7 +73,10 @@ void delete_session(hash_table * ht,bucket_t * bucket)
         (current_time - node->item.last_time > DESTORY_TIME))
         {
             list_del(&node->listhead);
-            free_buf(node->item.pool,(void *)node); 
+    		while(unlikely(swsr_pool_enqueue(node->item.pool,node) != 0))
+			{
+				continue;	
+			}
             --bucket->count;
         }
     }
@@ -126,13 +129,12 @@ void * packet_manager_loop(void * arg)
     while(1)
     {
 		manager->alive++;
-		//printf("alive ++\n");
         /*
          * 1.只有确实有数据时才返回。
          * */
-        while(unlikely(free_queue_dequeue(manager->queue,&flow) != 0))
+        while(unlikely(swsr_queue_dequeue(manager->queue,&flow) != 0))
 		{
-		manager->alive++;
+		    manager->alive++;
 			continue;
 		}
 		if(global_config -> pipe_depth  > 4)
@@ -153,11 +155,11 @@ void * packet_manager_loop(void * arg)
 		}
 		else
 		{
-    		while(unlikely(free_pool_enqueue(flow->packet->pool,flow->packet) != 0))
+    		while(unlikely(mwsr_pool_enqueue(flow->packet->pool,flow->packet) != 0))
 			{
 				continue;	
 			}
-    		while(unlikely(free_pool_enqueue(flow->pool,flow) != 0))
+    		while(unlikely(mwsr_pool_enqueue(flow->pool,flow) != 0))
 			{
 				continue;	
 			}
@@ -171,9 +173,9 @@ static inline void init_signle_manager(manager_group_t * manager_group,int i)
     int hash_length  = global_config->manager_hash_length;
     session_item_t * session;
 
-	manager_group->manager[i].queue = memalign(64,sizeof(free_pool_t));
+	manager_group->manager[i].queue = memalign(64,sizeof(swsr_pool_t));
 	assert(manager_group->manager[i].queue);
-	free_pool_init(manager_group->manager[i].queue);
+	swsr_pool_init(manager_group->manager[i].queue);
 
     manager_group->manager[i].ht = hash_create(hash_length);
     manager_group->manager[i].session_pool = init_pool(MANAGER_POOL,

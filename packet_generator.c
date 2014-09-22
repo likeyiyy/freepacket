@@ -190,7 +190,7 @@ static void make_all_packet(generator_t * generator,GenerHandler * Handler)
             /*  
  			** 1. get buffer from pool
  			** */
-        	if(likely(free_pool_dequeue(generator->pool,(void **)&packet) ==  0))
+        	if(likely(mwsr_pool_dequeue(generator->pool,(void **)&packet) ==  0))
         	{
             	packet->pool   = generator->pool;
             	packet->length = config->pktlen;
@@ -200,7 +200,7 @@ static void make_all_packet(generator_t * generator,GenerHandler * Handler)
  			***/
             	Handler(packet,config);
 
-    			while(unlikely(free_pool_enqueue(generator->pool,packet) != 0))
+    			while(unlikely(mwsr_pool_enqueue(generator->pool,packet) != 0))
 				{
 					continue;	
 				}
@@ -234,7 +234,7 @@ static void packet_generator(generator_t * generator,int data_len,GenerHandler *
         /*
         * 1. get buffer from pool
         * */
-        while(unlikely(free_pool_dequeue(generator->pool,(void **)&packet) !=  0))
+        while(unlikely(mwsr_pool_dequeue(generator->pool,(void **)&packet) !=  0))
         {
 			continue;
         }
@@ -254,7 +254,7 @@ static void packet_generator(generator_t * generator,int data_len,GenerHandler *
 		{
         	parser_t * parser = &parser_group->parser[next_thread_id];
 			next_thread_id = (next_thread_id + g_nums < p_nums) ? (next_thread_id + g_nums) : generator->index;
-			while(unlikely(free_queue_enqueue(parser->queue,packet) != 0))
+			while(unlikely(swsr_queue_enqueue(parser->queue,packet) != 0))
 			{
 				continue;	
 			}
@@ -262,7 +262,7 @@ static void packet_generator(generator_t * generator,int data_len,GenerHandler *
 		}
 		else
 		{
-    		while(unlikely(free_pool_enqueue(packet->pool,packet) != 0))
+    		while(unlikely(mwsr_pool_enqueue(packet->pool,packet) != 0))
 			{
 				continue;	
 			}
@@ -322,7 +322,7 @@ static void tilera_packet_collector(generator_t * generator)
             /* 数据包均匀 分部到 下一个工作的线程里。*/
             parser_t * parser = &parser_group->parser[generator->next_thread_id++];
             generator->next_thread_id = (generator->next_thread_id == parser_group->numbers)? 0 : generator->next_thread_id;
-        	bool ret = free_queue_enqueue(parser->queue,packet);
+        	bool ret = swsr_queue_enqueue(parser->queue,packet);
             if(ret == false)
             {
                 global_loss->drop_cause_parser_queue_full += packet->length;
@@ -411,9 +411,9 @@ void * packet_generator_loop(void * arg)
 
 static inline void init_signle_generator(generator_group_t * generator_group,int i)
 {
-	generator_group->generator[i].pool = memalign(64, sizeof(free_pool_t));
+	generator_group->generator[i].pool = memalign(64, sizeof(mwsr_pool_t));
 	assert(generator_group->generator[i].pool);
-	free_pool_init(generator_group->generator[i].pool);
+	mwsr_pool_init(generator_group->generator[i].pool);
 	int item_size = global_config->pktlen + PAY_LEN + sizeof(packet_t);
 	int pool_size   = 1024;
     char * buffer = malloc(pool_size * item_size);
@@ -424,7 +424,7 @@ static inline void init_signle_generator(generator_group_t * generator_group,int
     /*
     * 这个复杂的复制是为了，让node_t[]数组里面的指针指向真实的buffer.
     * */
-		free_pool_enqueue(generator_group->generator[i].pool,
+		mwsr_pool_enqueue(generator_group->generator[i].pool,
 		buffer + j * item_size);
     }
 

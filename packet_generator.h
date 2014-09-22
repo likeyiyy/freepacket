@@ -16,7 +16,7 @@ typedef struct generator
     uint64_t    drop_qfull_total;
     uint64_t    drop_total;
     sim_config_t  * config;
-    free_pool_t    * pool;
+    mwsr_pool_t   * pool;
     struct timeval old,now;
     int rank;
 	int alive;
