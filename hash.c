@@ -143,7 +143,7 @@ int  hash_add_item(hash_table ** htp, uint32_t key, void * value )
             return -1;
         }
 #endif
-        while(unlikely(mwsr_queue_dequeue(manager->session_pool,&new_blist) != 0))
+        while(unlikely(swsr_pool_dequeue(manager->session_pool,(void **)&new_blist) != 0))
 		{
 			continue;
 		}

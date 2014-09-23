@@ -32,8 +32,8 @@ endif
 
 OPT = -Os
 CFLAGS += -std=gnu99 -Wall  -g
-OBJS += pool_manager.o checksum.o config.o 						\
-	 parse.o packet_generator.o packet_parser.o queue_manager.o \
+OBJS += checksum.o config.o 						\
+	 parse.o packet_generator.o packet_parser.o \
 	 packet_manager.o  hash.o lossratio.o
 
 

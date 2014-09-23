@@ -14,6 +14,7 @@
 #include <signal.h>
 #include <getopt.h>
 #include <pthread.h>
+#include <malloc.h>
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -79,9 +80,19 @@
 #define WAIT_MODE    0
 #define NO_WAIT_MODE 1
 
-#include "pool_manager.h"
 
 #define LG2_CAPACITY                (10)
+#define MANAGER_POOL                (16)
+static inline void exit_if_ptr_is_null(void * ptr,const char * message)   
+{                                                           
+    if(ptr == NULL)                                         
+    {                                                       
+        printf("%s\n",message);                             
+        exit(-1);                                           
+    }                                                       
+}
+
+
 #ifdef TILERA_PLATFORM
 #define USE_BASIC_QUEUE
 #ifdef USE_BASIC_QUEUE
@@ -94,14 +105,18 @@
 
 #define unlikely(cond)        __builtin_expect((cond), 0)
 #define likely(cond)          __builtin_expect((cond), 1)
-
 TMC_QUEUE(swsr_queue, void *, LG2_CAPACITY, (TMC_QUEUE_SINGLE_SENDER | TMC_QUEUE_SINGLE_RECEIVER));
 TMC_QUEUE(mwsr_queue, void *, LG2_CAPACITY, (TMC_QUEUE_SINGLE_RECEIVER));
-
-
-TMC_QUEUE(swsr_pool, void *, LG2_CAPACITY, (TMC_QUEUE_SINGLE_SENDER | TMC_QUEUE_SINGLE_RECEIVER));
+TMC_QUEUE(swsr_pool, void *, MANAGER_POOL, (TMC_QUEUE_SINGLE_SENDER | TMC_QUEUE_SINGLE_RECEIVER));
 TMC_QUEUE(mwsr_pool, void *, LG2_CAPACITY, (TMC_QUEUE_SINGLE_RECEIVER));
-
+#else
+#include "queue_intel.h"
+#define unlikely(cond)        __builtin_expect((cond), 0)
+#define likely(cond)          __builtin_expect((cond), 1)
+INTEL_QUEUE(swsr_queue, void *, LG2_CAPACITY, (TMC_QUEUE_SINGLE_SENDER | TMC_QUEUE_SINGLE_RECEIVER));
+INTEL_QUEUE(mwsr_queue, void *, LG2_CAPACITY, (TMC_QUEUE_SINGLE_RECEIVER));
+INTEL_QUEUE(swsr_pool, void *, MANAGER_POOL, (TMC_QUEUE_SINGLE_SENDER | TMC_QUEUE_SINGLE_RECEIVER));
+INTEL_QUEUE(mwsr_pool, void *, LG2_CAPACITY, (TMC_QUEUE_SINGLE_RECEIVER));
 #endif
 /*
 * 一个数据包却要有数据部分和长度部分，真的必要吗？
@@ -162,7 +177,6 @@ static inline uint64_t get_cycle_count_intel()
 #include "config.h"
 #include "mpipe.h"
 #include "checksum.h"
-#include "queue_manager.h"
 #include "list.h"
 #include "hash.h"
 

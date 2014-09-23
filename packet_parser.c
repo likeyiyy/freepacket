@@ -97,10 +97,6 @@ void destroy_parser_group(parser_group_t * parser_group)
     parser_group = NULL;
 #endif
 }
-static inline void free_packet(packet_t * packet)
-{
-    free_buf(packet->pool,packet);
-}
 static inline void make_flow_item_tcp(flow_item_t * flow,packet_t * packet,int len)
 {
     flow->packet   = packet;
@@ -169,65 +165,7 @@ static inline void make_flow_item_udp(flow_item_t * flow,packet_t * packet,int h
     flow->payload  = packet->data + header_len;
     flow->payload_len = packet->length - header_len + PAY_LEN;
 }
-static inline void free_flow(flow_item_t * flow)
-{
-    /* 
-    * 注意这两个free
-    * */
-    free_buf(flow->packet->pool,flow->packet);
-    free_buf(flow->pool,flow);
-}
 
-typedef void (TranHandler)(flow_item_t * flow,packet_t * packet,int header_len);
-static int parser_process(manager_group_t * manager_group,
-                          parser_t * parser, 
-                          int header_len, 
-                          packet_t * packet,
-                          TranHandler * tranhandler)
-{
-
-    unsigned int index;
-    flow_item_t * flow = NULL;
-    /* 说明是空负载。 但是这也是处理过了。*/
-    if(header_len >= packet->length + PAY_LEN)
-    {
-    	free_buf(packet->pool,packet);
-        parser->drop_cause_no_payload += packet->length;
-        return -2;
-    }
-    else
-    {
-    /*
-    * 从pool中取一个包头。
-    * */
-        if(get_buf(parser->pool,WAIT_MODE,(void **)&flow) < 0)        
-        {
-            free_packet(packet);
-            parser->drop_cause_pool_empty += packet->length;
-            global_loss->drop_cause_parser_pool_empty += packet->length;
-            return -1;
-        }
-        flow->pool = parser->pool;
-       	make_flow_item_tcp(flow, packet, header_len);
-		//flow_display(flow);
-    /*
-    * 送给下个流水线的队列。
-    * */
-#if (PIPE_DEPTH > 3)
-        index = hash_index(flow,manager_group);
-		ghash_view[index]++;
-		//printf("##################################index %d\n",index);
-        if(push_common_buf(manager_group->manager[index].queue,WAIT_MODE,flow) == false)
-		{
-			free_flow(flow);
-		}
-#else
-    	free_buf(packet->pool,packet);
-    	free_buf(flow->pool,flow);
-#endif
-    }
-    return 0;
-}
 //static pthread_mutex_t print_lock = PTHREAD_MUTEX_INITIALIZER;
 #define COUNT 64
 void * packet_parser_loop(void * arg)

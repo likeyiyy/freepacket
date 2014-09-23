@@ -84,12 +84,12 @@ void delete_session(hash_table * ht,bucket_t * bucket)
 void * process_session(void * arg)
 {
     manager_t * manager = (manager_t *)arg;
-	uint64_t interval = tmc_perf_get_cpu_speed() ;
+	uint64_t interval = DESTORY_TIME;
     while(1)
     { 
-		uint64_t start_cycle = get_cycle_count();	
+		uint64_t start_cycle = GET_CYCLE_COUNT();	
         hash_travel_delete(manager -> ht);
-		while(get_cycle_count() < (start_cycle + interval))
+		while(GET_CYCLE_COUNT() < (start_cycle + interval))
 			continue;
     }
 }
@@ -97,16 +97,16 @@ void * process_session(void * arg)
 static void * process_all_session(void * arg)
 {
 	manager_group_t * group = (manager_group_t *)arg;
-	uint64_t interval = tmc_perf_get_cpu_speed() ;
+	uint64_t interval = 10000000;
 	uint64_t start_cycle = 0;	
 	while(1)
 	{
-		start_cycle = get_cycle_count();	
+		start_cycle = GET_CYCLE_COUNT();	
 		for(int i = 0; i < group->numbers; i++)
 		{
         	hash_travel_delete(group->manager[i].ht);
 		}
-		while(get_cycle_count() < (start_cycle + interval))
+		while(GET_CYCLE_COUNT() < (start_cycle + interval))
 			continue;
 	}
 }
@@ -124,8 +124,8 @@ void * packet_manager_loop(void * arg)
     	pthread_create(&clean_id,NULL,process_session,arg);
 	}
     uint32_t v1,v2,h1,index;
-	uint64_t interval = tmc_perf_get_cpu_speed() ;
-	uint64_t start_cycle = get_cycle_count();	
+	uint64_t interval = 10000000 ;
+	uint64_t start_cycle = GET_CYCLE_COUNT();	
     while(1)
     {
 		manager->alive++;
@@ -134,7 +134,6 @@ void * packet_manager_loop(void * arg)
          * */
         while(unlikely(swsr_queue_dequeue(manager->queue,&flow) != 0))
 		{
-		    manager->alive++;
 			continue;
 		}
 		if(global_config -> pipe_depth  > 4)
@@ -171,22 +170,27 @@ static inline void init_signle_manager(manager_group_t * manager_group,int i)
 {
     int pool_size    = global_config->manager_pool_size;
     int hash_length  = global_config->manager_hash_length;
-    session_item_t * session;
+    struct blist * session;
+	struct blist * buffer;
 
 	manager_group->manager[i].queue = memalign(64,sizeof(swsr_pool_t));
 	assert(manager_group->manager[i].queue);
 	swsr_pool_init(manager_group->manager[i].queue);
 
     manager_group->manager[i].ht = hash_create(hash_length);
-    manager_group->manager[i].session_pool = init_pool(MANAGER_POOL,
-                                                pool_size,
-                                                sizeof(struct blist));
-    for(int j = 0; j < pool_size - 1; j++)
+
+	pool_size = (1 << MANAGER_POOL);
+    manager_group->manager[i].session_pool = memalign(64, sizeof(swsr_pool_t));
+	assert(manager_group->manager[i].session_pool);
+	swsr_pool_init(manager_group->manager[i].session_pool);
+	buffer = malloc(pool_size * sizeof(struct blist));
+	exit_if_ptr_is_null(buffer,"alloc pool buffer error");
+	
+    for(int j = 0; j < pool_size; j++)
     {
-            get_buf(manager_group->manager[i].session_pool,NO_WAIT_MODE,(void **)&session);
-            session->buffer = malloc(global_config->manager_buffer_size);
-            exit_if_ptr_is_null(session->buffer,"session->buffer is NULL");
-            free_buf(manager_group->manager[i].session_pool,session);
+		session = buffer++;
+        session->item.buffer = malloc(global_config->manager_buffer_size);
+		swsr_pool_enqueue(manager_group->manager[i].session_pool, session);
     }
     manager_group->manager[i].index = i;
     manager_group->manager[i].drop_cause_pool_empty = 0;

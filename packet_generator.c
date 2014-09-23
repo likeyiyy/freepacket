@@ -185,7 +185,7 @@ static void make_all_packet(generator_t * generator,GenerHandler * Handler)
 {               
     sim_config_t * config = generator->config;
     packet_t * packet;
-    for(int i = 0; i <= 1024; i++)
+    for(int i = 0; i < (1 << LG2_CAPACITY); i++)
     {           
             /*  
  			** 1. get buffer from pool
@@ -230,7 +230,6 @@ static void packet_generator(generator_t * generator,int data_len,GenerHandler *
 		{
         	old = GET_CYCLE_COUNT();
 		}
-		generator->alive++;
         /*
         * 1. get buffer from pool
         * */
@@ -258,17 +257,18 @@ static void packet_generator(generator_t * generator,int data_len,GenerHandler *
 			{
 				continue;	
 			}
-		
 		}
 		else
 		{
     		while(unlikely(mwsr_pool_enqueue(packet->pool,packet) != 0))
 			{
+		        generator->alive++;
 				continue;	
 			}
 		}
         generator->total_send_byte += config->pktlen;
         global_loss->send_total    += config->pktlen;
+		generator->alive++;
         /*4. 延时统计函数 */
 delay:  
 		if(global_config -> speed_mode == 1)
@@ -305,12 +305,6 @@ static void tilera_packet_collector(generator_t * generator)
         {
             if (gxio_mpipe_iqueue_drop_if_bad(iqueue, idesc))
                 goto done;
-            if(get_buf(generator->pool,NO_WAIT_MODE,(void **)&packet) < 0)
-            {
-                generator -> drop_total++;
-			    gxio_mpipe_iqueue_drop(iqueue, idesc);
-                goto done;
-            }
 
 			unsigned char * va =  gxio_mpipe_idesc_get_va(idesc);
             uint32_t l2_length =  gxio_mpipe_idesc_get_l2_length(idesc);
@@ -424,8 +418,7 @@ static inline void init_signle_generator(generator_group_t * generator_group,int
     /*
     * 这个复杂的复制是为了，让node_t[]数组里面的指针指向真实的buffer.
     * */
-		mwsr_pool_enqueue(generator_group->generator[i].pool,
-		buffer + j * item_size);
+		mwsr_pool_enqueue(generator_group->generator[i].pool, buffer + j * item_size);
     }
 
     generator_group->generator[i].config = malloc(sizeof(sim_config_t)); 

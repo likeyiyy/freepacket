@@ -39,7 +39,7 @@
 
 #define MAX_FACTOR           0.75
 /* nanosecond */
-#define DESTORY_TIME         100000000
+#define DESTORY_TIME         10000000
 
 typedef struct __config
 {
@@ -103,8 +103,6 @@ int read_config_simple(const char * file_name,sim_config_t * config);
 int init_config_s(sim_config_t * config);
 
 void print_config_file(sim_config_t * config);
-
-void exit_if_ptr_is_null(void * p,const char * c);
 
 uint32_t calc_period(double length,double rate,uint32_t thread_num);
 #endif

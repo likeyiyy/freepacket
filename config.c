@@ -1,14 +1,6 @@
 #include "includes.h"
 
 sim_config_t * global_config;
-void exit_if_ptr_is_null(void * ptr,const char * message) 
-{
-    if(ptr == NULL)
-    {   
-        printf("%s\n",message);
-        exit(-1);
-    }   
-}
 static inline char * skip_var_name(const char * p)
 {
     while(!isspace(p[0]) && p[0] != '=' && p[0] != '\0')
