@@ -6,7 +6,6 @@
  ************************************************************************/
 #include "includes.h"
 static manager_group_t * global_manager_group = NULL;
-static pthread_mutex_t global_create_manager_lock = PTHREAD_MUTEX_INITIALIZER;
 //static pthread_t gclean_id;
 //#define memcpy(a,b,c) do { memcpy(a,b,c);printf("session memcpy here\n"); } while(0)
 #define MAKE_HASH(v1,v2,h1,f1,f2,f3,f4,SIZE) \
@@ -50,14 +49,6 @@ struct blist * find_list(struct list_head * head, flow_item_t * flow)
     }
     return NULL;
 }
-static inline void free_flow(flow_item_t * flow)
-{
-    /* 
-    * 注意这两个free
-    * */
-    free_buf(flow->packet->pool,flow->packet);
-    free_buf(flow->pool,flow);
-}
 void delete_session(hash_table * ht,bucket_t * bucket)
 {
     struct list_head * p, * list;
@@ -94,6 +85,7 @@ void * process_session(void * arg)
     }
 }
 
+#if 0
 static void * process_all_session(void * arg)
 {
 	manager_group_t * group = (manager_group_t *)arg;
@@ -109,7 +101,9 @@ static void * process_all_session(void * arg)
 		while(GET_CYCLE_COUNT() < (start_cycle + interval))
 			continue;
 	}
+    return NULL;
 }
+#endif
 /*
 * 真正的工作者。
 * */
@@ -124,15 +118,13 @@ void * packet_manager_loop(void * arg)
     	pthread_create(&clean_id,NULL,process_session,arg);
 	}
     uint32_t v1,v2,h1,index;
-	uint64_t interval = 10000000 ;
-	uint64_t start_cycle = GET_CYCLE_COUNT();	
     while(1)
     {
 		manager->alive++;
         /*
          * 1.只有确实有数据时才返回。
          * */
-        while(unlikely(swsr_queue_dequeue(manager->queue,&flow) != 0))
+        while(unlikely(mwsr_queue_dequeue(manager->queue,(void **)&flow) != 0))
 		{
 			continue;
 		}
@@ -173,9 +165,9 @@ static inline void init_signle_manager(manager_group_t * manager_group,int i)
     struct blist * session;
 	struct blist * buffer;
 
-	manager_group->manager[i].queue = memalign(64,sizeof(swsr_pool_t));
+	manager_group->manager[i].queue = memalign(64,sizeof(mwsr_queue_t));
 	assert(manager_group->manager[i].queue);
-	swsr_pool_init(manager_group->manager[i].queue);
+	mwsr_queue_init(manager_group->manager[i].queue);
 
     manager_group->manager[i].ht = hash_create(hash_length);
 
@@ -199,10 +191,6 @@ static inline void init_signle_manager(manager_group_t * manager_group,int i)
 manager_group_t * init_manager_group(sim_config_t * config)
 {
     int numbers = config->manager_nums;
-    int queue_length = config->manager_queue_length;
-    int pool_size    = config->manager_pool_size;
-    int hash_length  = config->manager_hash_length;
-
     global_manager_group = malloc(sizeof(manager_group_t));
     exit_if_ptr_is_null(global_manager_group,"初始化分配流管理错误");
     global_manager_group->manager = malloc(sizeof(manager_t) * numbers);

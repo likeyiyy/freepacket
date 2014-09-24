@@ -7,89 +7,7 @@
 
 #include "includes.h"
 #define WORKER_SET_SIZE 3
-#include <ncurses.h>
-typedef struct 
-{
-    int height;
-    int width;
-    int startx;
-    int starty;
-    WINDOW * win;
-}window_t;
-static window_t window[WORKER_SET_SIZE];
-static void screen_init()
-{
-    initscr();
-   for(int i = 0; i < WORKER_SET_SIZE; ++i) 
-   {
-       window[i].height = LINES - 1;
-       window[i].width  = COLS / WORKER_SET_SIZE;
-       window[i].starty = 0;
-       window[i].startx = i * COLS / WORKER_SET_SIZE;
-       window[i].win    = newwin(
-               window[i].height,
-               window[i].width,
-               window[i].starty,
-               window[i].startx
-                );
-       scrollok(window[i].win,1);
-   }
-}
-static void display_generator(window_t * win,generator_group_t * generator_group)
-{
-    static uint64_t new = 0;
-    static uint64_t old = 0;
-    mwsr_pool_t * pool;
-    for(int i = 0; i < generator_group->numbers; ++i)
-    {
-        pool = generator_group->generator[i].pool; 
-		wprintw(win->win,"[%u] ",generator_group->generator[i].alive);
-        wprintw(win->win,"pool free:%u total_send_byte:%llu \nEmpty: %lu\n",
-				 (pool->enqueue_count + 1024 - pool->dequeue_count) % 1024,
-                generator_group->generator[i].total_send_byte,
-                generator_group->generator[i].drop_pempty_total
-                //generator_group->generator[i].drop_qfull_total
-                );
-        /* FIXME Only */
-        new += generator_group->generator[i].total_send_byte;
-    }
-    wprintw(win->win,"All Byte add:%llu,%llu Mbps\n",(new-old),(new-old)/(1024*1024)*8);
-    old = new;
-    new = 0;
-    wprintw(win->win,"\n\n\n");
-    wrefresh(win->win);
-}
-static void display_parser(window_t * win, parser_group_t *  parser_group)
-{
-    for(int i = 0; i < parser_group->numbers; ++i)
-    {
-		wprintw(win->win,"[%u] ",parser_group->parser[i].alive);
-         wprintw(win->win,"Queue size:%u pool free:%u \n",
-				 (parser_group->parser[i].queue->enqueue_count + 1024 - parser_group->parser[i].queue->dequeue_count) % 1024,
-                 parser_group->parser[i].pool->enqueue_count - parser_group->parser[i].pool->dequeue_count);
-                 //parser_group->parser[i].total >> 20);
-    }
-	for(int i = 0; i < 16; ++i)
-	{
-		wprintw(win->win,"%d ",ghash_view[i]);
-	}
-    wprintw(win->win,"\n\n\n");
-    wrefresh(win->win);
-}
-static void display_manager(window_t * win,manager_group_t * manager_group)
-{
-    for(int i = 0; i < manager_group->numbers; ++i)
-    {
-        
-		wprintw(win->win,"[%u] ",manager_group->manager[i].alive);
-        wprintw(win->win,"Queue Size:%lu pool free:%u hash_count:%d\n",
-			   manager_group->manager[i].queue->enqueue_count - manager_group->manager[i].queue->dequeue_count,
-               manager_group->manager[i].session_pool->enqueue_count - manager_group->manager[i].session_pool->dequeue_count,
-               hash_count(manager_group->manager[i].ht));
-    }
-    wprintw(win->win,"\n\n\n");
-    wrefresh(win->win);
-}
+
 static void display_gen(generator_group_t * generator_group)
 {
     static uint64_t new = 0;
@@ -138,7 +56,7 @@ void display_gpm(generator_group_t * generator_group,
 		{
         	pool = generator_group->generator[i].pool; 
 			printf("[%12u] ",generator_group->generator[i].alive);
-        	printf("pool free:%4u Bytes :%12lu              ",
+        	printf("pool free:%4lu Bytes :%12lu              ",
 				 (pool->enqueue_count - pool->dequeue_count),
 				 send_bytes[i]
                 );
@@ -153,7 +71,7 @@ void display_gpm(generator_group_t * generator_group,
 		{
 			pool = parser_group->parser[i].pool;
 			printf("[%12u] ",parser_group->parser[i].alive);
-        	printf("Queue :%4u Pool :%5u     \t\t",
+        	printf("Queue :%4lu Pool :%5lu     \t\t",
 				 (parser_group->parser[i].queue->enqueue_count - parser_group->parser[i].queue->dequeue_count),
                  pool->enqueue_count - pool->dequeue_count);
 		}
@@ -164,7 +82,7 @@ void display_gpm(generator_group_t * generator_group,
 		if(i < manager_group->numbers)
 		{
 			printf("[%4u] ",manager_group->manager[i].alive);
-        	printf("Queue :%5u Pool :%4u Hash :%4u",
+        	printf("Queue :%5lu Pool :%4lu Hash :%4u",
                manager_group->manager[i].queue->enqueue_count - manager_group->manager[i].queue->dequeue_count,
                manager_group->manager[i].session_pool->enqueue_count - manager_group->manager[i].session_pool->dequeue_count,
                hash_count(manager_group->manager[i].ht));

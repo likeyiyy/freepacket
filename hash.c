@@ -95,14 +95,6 @@ static inline void make_new_session(struct blist * blist,
     memcpy(item->buffer,flow->payload,flow->payload_len);
     item->cur_len  += flow->payload_len;
 }
-static inline void free_flow(flow_item_t * flow)
-{
-    /* 
-    * 注意这两个free
-    * */
-    free_buf(flow->packet->pool,flow->packet);
-    free_buf(flow->pool,flow);
-}
 /*
 * 3. 插入
 * 严格说来,blist 完全没有任何问题。

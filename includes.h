@@ -92,27 +92,17 @@ static inline void exit_if_ptr_is_null(void * ptr,const char * message)
     }                                                       
 }
 
-
-#ifdef TILERA_PLATFORM
-#define USE_BASIC_QUEUE
-#ifdef USE_BASIC_QUEUE
-#include "queue.h"
-#elif defined(USE_CACHELINE_QUEUE)
-#include "cacheline_queue.h"
-#else         
-#error "Must define a queue type!"
-#endif // USE_BASIC_QUEUE
-
 #define unlikely(cond)        __builtin_expect((cond), 0)
 #define likely(cond)          __builtin_expect((cond), 1)
+
+#ifdef TILERA_PLATFORM
+#include "queue_tilegx.h"
 TMC_QUEUE(swsr_queue, void *, LG2_CAPACITY, (TMC_QUEUE_SINGLE_SENDER | TMC_QUEUE_SINGLE_RECEIVER));
 TMC_QUEUE(mwsr_queue, void *, LG2_CAPACITY, (TMC_QUEUE_SINGLE_RECEIVER));
 TMC_QUEUE(swsr_pool, void *, MANAGER_POOL, (TMC_QUEUE_SINGLE_SENDER | TMC_QUEUE_SINGLE_RECEIVER));
 TMC_QUEUE(mwsr_pool, void *, LG2_CAPACITY, (TMC_QUEUE_SINGLE_RECEIVER));
 #else
 #include "queue_intel.h"
-#define unlikely(cond)        __builtin_expect((cond), 0)
-#define likely(cond)          __builtin_expect((cond), 1)
 INTEL_QUEUE(swsr_queue, void *, LG2_CAPACITY, (TMC_QUEUE_SINGLE_SENDER | TMC_QUEUE_SINGLE_RECEIVER));
 INTEL_QUEUE(mwsr_queue, void *, LG2_CAPACITY, (TMC_QUEUE_SINGLE_RECEIVER));
 INTEL_QUEUE(swsr_pool, void *, MANAGER_POOL, (TMC_QUEUE_SINGLE_SENDER | TMC_QUEUE_SINGLE_RECEIVER));

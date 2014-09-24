@@ -215,7 +215,6 @@ static void packet_generator(generator_t * generator,int data_len,GenerHandler *
 	int g_nums = config->generator_nums;
 	int p_nums = config->parser_nums;
 	int next_thread_id = generator->index;
-    int result = -1;
     parser_group_t * parser_group = get_parser_group();
     if(parser_group == NULL)
     {
@@ -270,7 +269,7 @@ static void packet_generator(generator_t * generator,int data_len,GenerHandler *
         global_loss->send_total    += config->pktlen;
 		generator->alive++;
         /*4. 延时统计函数 */
-delay:  
+  
 		if(global_config -> speed_mode == 1)
 		{
 			new = GET_CYCLE_COUNT() - old;
@@ -308,6 +307,10 @@ static void tilera_packet_collector(generator_t * generator)
 
 			unsigned char * va =  gxio_mpipe_idesc_get_va(idesc);
             uint32_t l2_length =  gxio_mpipe_idesc_get_l2_length(idesc);
+            while(unlikely(mwsr_pool_dequeue(generator->pool,(void **)&packet) !=  0))
+            {
+			    continue;
+            }
 
             packet->pool   = generator->pool;
             memcpy(packet->data,va,l2_length);

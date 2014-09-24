@@ -7,7 +7,6 @@
 #include "includes.h"
 
 static parser_group_t * global_parser_group = NULL;
-static pthread_mutex_t global_create_parser_lock = PTHREAD_MUTEX_INITIALIZER;
 
 #define MAKE_HASH(v1,v2,h1,f1,f2,f3,f4,SIZE) \
 (\
@@ -65,7 +64,7 @@ static inline void init_single_parser(parser_t * parser)
 	exit_if_ptr_is_null(buffer,"alloc pool buffer error");
 	for(int j = 0; j < pool_size; ++j)
 	{
-		flow_item_t * flow = buffer + j * sizeof(flow_item_t);
+		flow_item_t * flow = (flow_item_t *)(buffer + j * sizeof(flow_item_t));
 		flow->pool = parser->pool;
 		mwsr_pool_enqueue(parser->pool,flow);
 	}
@@ -181,22 +180,19 @@ void * packet_parser_loop(void * arg)
         * 从队列中取出一个数据包
         * */
 		parser->alive++;
-        while(unlikely(swsr_queue_dequeue_multiple(parser->queue,packet,COUNT) != 0))
+        while(unlikely(swsr_queue_dequeue_multiple(parser->queue,(void **)packet,COUNT) != 0))
 		{
 			continue;
 		}
 		if(global_config->pipe_depth > 2)
 		{
-			while(unlikely(mwsr_pool_dequeue_multiple(parser->pool,flow,COUNT) != 0))
+			while(unlikely(mwsr_pool_dequeue_multiple(parser->pool,(void **)flow,COUNT) != 0))
 			{
 				continue;
 			}
             /*
             * 校验数据包。
             * */
-        	int header_len = 0;
-            int eth_hdr_len = sizeof(struct ethhdr);
-
 			for(int k = 0; k < COUNT; k++)
 			{
 				make_flow_item_tcp(flow[k],packet[k],0);
@@ -210,7 +206,7 @@ void * packet_parser_loop(void * arg)
 				{
             		index = hash_index(flow[k],manager_group);
             		ghash_view[index]++;
-					while(unlikely(mwsr_pool_enqueue(manager_group->manager[index].queue,flow[k]) != 0))
+					while(unlikely(mwsr_queue_enqueue(manager_group->manager[index].queue,flow[k]) != 0))
 					{
 						continue;	
 					}
@@ -218,11 +214,11 @@ void * packet_parser_loop(void * arg)
 			}
 			else
 			{
-    			while(unlikely(mwsr_pool_enqueue_multiple(packet[0]->pool,packet,COUNT) != 0))
+    			while(unlikely(mwsr_pool_enqueue_multiple(packet[0]->pool,(void **)packet,COUNT) != 0))
 				{
 						continue;	
 				}
-    			while(unlikely(mwsr_pool_enqueue_multiple(parser->pool,flow,COUNT) != 0))
+    			while(unlikely(mwsr_pool_enqueue_multiple(parser->pool,(void **)flow,COUNT) != 0))
 				{
 						continue;	
 				}
@@ -231,7 +227,7 @@ void * packet_parser_loop(void * arg)
 	
 		else
 		{
-    		while(unlikely(mwsr_pool_enqueue_multiple(packet[0]->pool,packet,COUNT) != 0))
+    		while(unlikely(mwsr_pool_enqueue_multiple(packet[0]->pool,(void **)packet,COUNT) != 0))
 			{
 				continue;	
 			}
