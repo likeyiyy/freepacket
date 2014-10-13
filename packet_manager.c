@@ -60,8 +60,7 @@ void delete_session(hash_table * ht,bucket_t * bucket)
     list_for_each_safe(p,next,list)
     {
         node = list_entry(p,struct blist,listhead); 
-        if((1.0 * node->item.cur_len > MAX_FACTOR * node->item.length) ||
-        (current_time - node->item.last_time > DESTORY_TIME))
+        if((current_time - node->item.last_time > DESTORY_TIME * 1000000UL * global_config->mhz))
         {
             list_del(&node->listhead);
     		while(unlikely(swsr_pool_enqueue(node->item.pool,node) != 0))
@@ -75,7 +74,7 @@ void delete_session(hash_table * ht,bucket_t * bucket)
 void * process_session(void * arg)
 {
     manager_t * manager = (manager_t *)arg;
-	uint64_t interval = DESTORY_TIME;
+	uint64_t interval = DESTORY_TIME * 1000000UL * global_config->mhz;
     while(1)
     { 
 		uint64_t start_cycle = GET_CYCLE_COUNT();	
