@@ -39,7 +39,7 @@
 
 #define MAX_FACTOR           0.75
 /* nanosecond */
-#define DESTORY_TIME         10000000
+#define DESTORY_TIME         3
 
 typedef struct __config
 {
@@ -88,6 +88,9 @@ typedef struct __config
 	int pipe_depth;
 	int screen_display;
 	int speed_mode;
+
+    int mhz;
+	int destory_time;
 }sim_config_t;
 
 extern sim_config_t * global_config;

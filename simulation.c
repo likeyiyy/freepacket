@@ -163,6 +163,8 @@ int main(int argc, char ** argv)
 
     parse_args(argc,argv,global_config);
 
+    printf("cpu mhz : %d \n",global_config->mhz);
+
     global_config->period  = calc_period(global_config->pktlen,
                                          global_config->speed,
                                          global_config->generator_nums);
@@ -177,6 +179,12 @@ int main(int argc, char ** argv)
 #endif
     tmc_sync_barrier_init(&gbarrier,global_config->generator_nums);
 #endif
+
+	if(global_config->generator_nums > global_config->parser_nums)
+	{
+		printf("parser nums must bigger than generator nums\n");
+		exit(0);
+	}
 
     init_manager_group(global_config);
 

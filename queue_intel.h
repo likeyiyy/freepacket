@@ -107,7 +107,7 @@ static inline int NAME##_dequeue_multiple(NAME##_t * queue,void ** data,unsigned
   	unsigned int dequeue_count = queue->dequeue_count;                                              \
     while(dequeue_num--)					                                                        \
     {					                                                                            \
-    	unsigned int i = queue->dequeue_count & ((1 << LOG2_ENTRIES) - 1);                          \
+    	unsigned int i = dequeue_count & ((1 << LOG2_ENTRIES) - 1);                          \
         *(data++) = queue->node[i];					                                                \
         --queue -> length;					                                                        \
 		dequeue_count++;													                        \

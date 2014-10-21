@@ -222,7 +222,7 @@ static void packet_generator(generator_t * generator,int data_len,GenerHandler *
         exit(0);
     }
 	make_all_packet(generator,Handler);
-	int times = 50000;
+	int times = 500000;
     while(times)
     {
 		if(global_config -> speed_mode == 1)

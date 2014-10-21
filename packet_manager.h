@@ -19,7 +19,7 @@ typedef struct _session_manager
     pthread_t          id;
     int                index;
     struct hash_table * ht;
-    swsr_pool_t       * session_pool;
+    mwsr_mpool_t       * session_pool;
     mwsr_queue_t      * queue;
 	int alive;
     uint64_t drop_cause_pool_empty;

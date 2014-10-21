@@ -99,13 +99,13 @@ static inline void exit_if_ptr_is_null(void * ptr,const char * message)
 #include "queue_tilegx.h"
 TMC_QUEUE(swsr_queue, void *, LG2_CAPACITY, (TMC_QUEUE_SINGLE_SENDER | TMC_QUEUE_SINGLE_RECEIVER));
 TMC_QUEUE(mwsr_queue, void *, LG2_CAPACITY, (TMC_QUEUE_SINGLE_RECEIVER));
-TMC_QUEUE(swsr_pool, void *, MANAGER_POOL, (TMC_QUEUE_SINGLE_SENDER | TMC_QUEUE_SINGLE_RECEIVER));
+TMC_QUEUE(mwsr_mpool, void *, MANAGER_POOL, (TMC_QUEUE_SINGLE_RECEIVER));
 TMC_QUEUE(mwsr_pool, void *, LG2_CAPACITY, (TMC_QUEUE_SINGLE_RECEIVER));
 #else
 #include "queue_intel.h"
 INTEL_QUEUE(swsr_queue, void *, LG2_CAPACITY, (TMC_QUEUE_SINGLE_SENDER | TMC_QUEUE_SINGLE_RECEIVER));
 INTEL_QUEUE(mwsr_queue, void *, LG2_CAPACITY, (TMC_QUEUE_SINGLE_RECEIVER));
-INTEL_QUEUE(swsr_pool, void *, MANAGER_POOL, (TMC_QUEUE_SINGLE_SENDER | TMC_QUEUE_SINGLE_RECEIVER));
+INTEL_QUEUE(mwsr_mpool, void *, MANAGER_POOL, (TMC_QUEUE_SINGLE_RECEIVER));
 INTEL_QUEUE(mwsr_pool, void *, LG2_CAPACITY, (TMC_QUEUE_SINGLE_RECEIVER));
 #endif
 /*
@@ -142,7 +142,7 @@ typedef struct _session_item
     uint64_t last_time;
     uint32_t length;
     uint32_t cur_len;
-    swsr_pool_t * pool;
+    mwsr_mpool_t * pool;
 }session_item_t;
 
 #ifdef INTEL_PLATFORM

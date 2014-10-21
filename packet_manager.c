@@ -6,7 +6,7 @@
  ************************************************************************/
 #include "includes.h"
 static manager_group_t * global_manager_group = NULL;
-//static pthread_t gclean_id;
+static pthread_t gclean_id;
 //#define memcpy(a,b,c) do { memcpy(a,b,c);printf("session memcpy here\n"); } while(0)
 #define MAKE_HASH(v1,v2,h1,f1,f2,f3,f4,SIZE) \
 (\
@@ -60,11 +60,10 @@ void delete_session(hash_table * ht,bucket_t * bucket)
     list_for_each_safe(p,next,list)
     {
         node = list_entry(p,struct blist,listhead); 
-        if((1.0 * node->item.cur_len > MAX_FACTOR * node->item.length) ||
-        (current_time - node->item.last_time > DESTORY_TIME))
+        if((current_time - node->item.last_time > global_config->destory_time * 1000UL * global_config->mhz))
         {
             list_del(&node->listhead);
-    		while(unlikely(swsr_pool_enqueue(node->item.pool,node) != 0))
+    		while(unlikely(mwsr_mpool_enqueue(node->item.pool,node) != 0))
 			{
 				continue;	
 			}
@@ -75,7 +74,7 @@ void delete_session(hash_table * ht,bucket_t * bucket)
 void * process_session(void * arg)
 {
     manager_t * manager = (manager_t *)arg;
-	uint64_t interval = DESTORY_TIME;
+	uint64_t interval = global_config->destory_time * 1000UL * global_config->mhz;
     while(1)
     { 
 		uint64_t start_cycle = GET_CYCLE_COUNT();	
@@ -85,7 +84,7 @@ void * process_session(void * arg)
     }
 }
 
-#if 0
+#if 1
 static void * process_all_session(void * arg)
 {
 	manager_group_t * group = (manager_group_t *)arg;
@@ -115,9 +114,12 @@ void * packet_manager_loop(void * arg)
 	if(global_config -> pipe_depth  > 4)
 	{
     	pthread_t clean_id;
-    	pthread_create(&clean_id,NULL,process_session,arg);
+    	//pthread_create(&clean_id,NULL,process_session,arg);
 	}
     uint32_t v1,v2,h1,index;
+	uint64_t interval = global_config->destory_time * 1000UL * global_config->mhz;
+	uint64_t start_cycle = 0;	
+	start_cycle = GET_CYCLE_COUNT();	
     while(1)
     {
 		manager->alive++;
@@ -143,6 +145,7 @@ void * packet_manager_loop(void * arg)
         * 3. insert into hash table
         * */
         	hash_add_item(&manager->ht, index, flow); 
+
 		}
 		else
 		{
@@ -172,9 +175,9 @@ static inline void init_signle_manager(manager_group_t * manager_group,int i)
     manager_group->manager[i].ht = hash_create(hash_length);
 
 	pool_size = (1 << MANAGER_POOL);
-    manager_group->manager[i].session_pool = memalign(64, sizeof(swsr_pool_t));
+    manager_group->manager[i].session_pool = memalign(64, sizeof(mwsr_mpool_t));
 	assert(manager_group->manager[i].session_pool);
-	swsr_pool_init(manager_group->manager[i].session_pool);
+	mwsr_mpool_init(manager_group->manager[i].session_pool);
 	buffer = malloc(pool_size * sizeof(struct blist));
 	exit_if_ptr_is_null(buffer,"alloc pool buffer error");
 	
@@ -182,7 +185,7 @@ static inline void init_signle_manager(manager_group_t * manager_group,int i)
     {
 		session = buffer++;
         session->item.buffer = malloc(global_config->manager_buffer_size);
-		swsr_pool_enqueue(manager_group->manager[i].session_pool, session);
+		mwsr_mpool_enqueue(manager_group->manager[i].session_pool, session);
     }
     manager_group->manager[i].index = i;
     manager_group->manager[i].drop_cause_pool_empty = 0;
@@ -204,7 +207,10 @@ manager_group_t * init_manager_group(sim_config_t * config)
                      packet_manager_loop,
                       &global_manager_group->manager[i]);
     }
-	//pthread_create(&gclean_id,NULL,process_all_session,global_manager_group);
+	if(global_config -> pipe_depth  > 4)
+	{
+		pthread_create(&gclean_id,NULL,process_all_session,global_manager_group);
+	}
     return global_manager_group;
 }
 manager_group_t * get_manager_group()

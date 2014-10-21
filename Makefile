@@ -31,7 +31,7 @@ OBJS += mpipe.o display.o
 endif
 
 OPT = -Os
-CFLAGS += -std=gnu99 -Wall  -g
+CFLAGS += -std=gnu99 -Wall  -O3
 OBJS += checksum.o config.o 						\
 	 parse.o packet_generator.o packet_parser.o \
 	 packet_manager.o  hash.o lossratio.o
