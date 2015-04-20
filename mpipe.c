@@ -256,16 +256,13 @@ static int init_mpipe_rules(mpipe_common_t * mpipe)
     unsigned int ring = mpipe->ring;
     int bucket        = mpipe->bucket;
     int per_buckets   = mpipe->per_worker_buckets;
-    gxio_mpipe_rules_dmac_t dmac = mpipe->dmac;
-    gxio_mpipe_rules_dmac_t temp_dmac;
 
 	gxio_mpipe_rules_t rules;
 	gxio_mpipe_rules_init(&rules, context);
-    	gxio_mpipe_bucket_mode_t mode = GXIO_MPIPE_BUCKET_ROUND_ROBIN; 
+    gxio_mpipe_bucket_mode_t mode = GXIO_MPIPE_BUCKET_ROUND_ROBIN; 
 	int i = 0;
 	for(i = 0; i < mpipe->num_workers; i++)
 	{
-                temp_dmac = dmac;
         	/*
         	* 可以起到每个线程一个ring
         	* 每个线程per_workers_buckets个buckets的效果吗？
@@ -281,8 +278,6 @@ static int init_mpipe_rules(mpipe_common_t * mpipe)
                                bucket + i * per_buckets,
                                per_buckets,
                                NULL);
-        	temp_dmac.octets[5] = dmac.octets[5] + i;
-        	gxio_mpipe_rules_add_dmac(&rules,temp_dmac);
 	}
     result = gxio_mpipe_rules_commit(&rules);
     VERIFY(result, "gxio_mpipe_rules_commit()");
@@ -312,9 +307,9 @@ int init_mpipe_config(mpipe_common_t * mpipe,sim_config_t * config)
 }
 
 // The main function for each worker thread.
+#ifdef TILERA_PLATFORM
 void init_mpipe_resource(mpipe_common_t * mpipe)
 {
-#ifdef TILERA_PLATFORM
     assert(mpipe);
 
     init_mpipe_common(mpipe);
@@ -324,13 +319,11 @@ void init_mpipe_resource(mpipe_common_t * mpipe)
     init_mpipe_equeue(mpipe);
 
     init_mpipe_rules(mpipe);
-#endif
 }
 void mpipe_send_packet(mpipe_common_t * mpipe,
                        uint16_t size, 
                        void * packet)
 {
-#ifdef TILERA_PLATFORM
 	gxio_mpipe_context_t * context = &mpipe->context;
 
     gxio_mpipe_equeue_t * equeue = mpipe->equeue;
@@ -354,5 +347,5 @@ void mpipe_send_packet(mpipe_common_t * mpipe,
         }
     };
     gxio_mpipe_equeue_put(equeue, edesc);
-#endif
 }
+#endif

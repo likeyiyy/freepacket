@@ -14,7 +14,7 @@ endif
 
 else
 #1.2编译X86平台上的
-LDFLAGS= -lncurses -lpthread -lrt 
+LDFLAGS= -lncurses -lpthread -lrt  -linac
 OBJS = display.o
 CFLAGS += -DINTEL_PLATFORM
 CC = gcc

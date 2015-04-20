@@ -20,6 +20,7 @@ typedef struct generator
     struct timeval old,now;
     int rank;
 	int alive;
+    int dev_id;
     mpipe_common_t * mpipe;
 }generator_t;
 typedef struct generator_group

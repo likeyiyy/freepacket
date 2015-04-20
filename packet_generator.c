@@ -9,6 +9,7 @@
 
 
 static generator_group_t * generator_group = NULL;
+static mpipe_common_t * global_mpipe = NULL;
 static pthread_mutex_t global_create_generator_lock = PTHREAD_MUTEX_INITIALIZER;
 void   destroy_generator(generator_group_t * generator_group)
 {
@@ -306,8 +307,14 @@ static void tilera_packet_collector(generator_t * generator)
             if (gxio_mpipe_iqueue_drop_if_bad(iqueue, idesc))
                 goto done;
 
+            /*
+            * 1. get packet from mpipe
+            * */
 			unsigned char * va =  gxio_mpipe_idesc_get_va(idesc);
             uint32_t l2_length =  gxio_mpipe_idesc_get_l2_length(idesc);
+            /*
+            * 2. get buffer from pool
+            * */
             while(unlikely(mwsr_pool_dequeue(generator->pool,(void **)&packet) !=  0))
             {
 			    continue;
@@ -317,18 +324,31 @@ static void tilera_packet_collector(generator_t * generator)
             memcpy(packet->data,va,l2_length);
             packet->length = l2_length;
 
+            /*
+            * 3. 数据放到下一步的队列里。
+            * */
             /* 数据包均匀 分部到 下一个工作的线程里。*/
-            parser_t * parser = &parser_group->parser[generator->next_thread_id++];
-            generator->next_thread_id = (generator->next_thread_id == parser_group->numbers)? 0 : generator->next_thread_id;
-        	bool ret = swsr_queue_enqueue(parser->queue,packet);
-            if(ret == false)
-            {
-                global_loss->drop_cause_parser_queue_full += packet->length;
-            }
-            else
-            {
-                generator->total_send_byte += config->pktlen;
-            }
+    		if(global_config -> pipe_depth  > 1)
+    		{
+            	parser_t * parser = &parser_group->parser[next_thread_id];
+    			next_thread_id = (next_thread_id + g_nums < p_nums) ?
+                                 (next_thread_id + g_nums) : 
+                                 generator->index;
+    			while(unlikely(swsr_queue_enqueue(parser->queue,packet) != 0))
+    			{
+    				continue;	
+    			}
+    		}
+    		else
+    		{
+        		while(unlikely(mwsr_pool_enqueue(packet->pool,packet) != 0))
+    			{
+    				continue;	
+    			}
+    		}
+            generator->total_send_byte += l2_length;
+    		generator->alive++;
+
 			gxio_mpipe_iqueue_drop(iqueue, idesc);
 done:
             gxio_mpipe_iqueue_consume(iqueue, idesc);
@@ -407,7 +427,7 @@ void * packet_generator_loop(void * arg)
     pthread_exit(NULL);
 }
 
-static inline void init_signle_generator(generator_group_t * generator_group,int i)
+static inline void init_signle_generator(generator_group_t * generator_group,int i,int dev_id)
 {
 	generator_group->generator[i].pool = memalign(64, sizeof(mwsr_pool_t));
 	assert(generator_group->generator[i].pool);
@@ -432,11 +452,14 @@ static inline void init_signle_generator(generator_group_t * generator_group,int
     generator_group->generator[i].next_thread_id = 0;
     generator_group->generator[i].total_send_byte = 0;
     generator_group->generator[i].rank = i;
+    generator_group->generator[i].dev_id = dev_id;
+    generator_group->generator[i].mpipe = global_mpipe;
 }
 
 generator_group_t * init_generator_group(sim_config_t * config)
 {
-    pthread_mutex_lock(&global_create_generator_lock);
+    int32_t result = -1;
+    int32_t dev_id = -1;
     if(generator_group != NULL)
     {
         printf("generator_group is alread");
@@ -459,19 +482,25 @@ generator_group_t * init_generator_group(sim_config_t * config)
     /*
     * 即使在tilera平台仍然可以采用产生包模式。
     * */
-    mpipe_common_t * mpipe = NULL;
-    mpipe = malloc(sizeof(mpipe_common_t));
-    exit_if_ptr_is_null(mpipe,"--------malloc mpipe error--------------");
+    global_mpipe = malloc(sizeof(mpipe_common_t));
+    exit_if_ptr_is_null(global_mpipe,"[%s-%d]--------malloc mpipe error--------------",__func__,__LINE__);
     if(config->packet_generator_mode == COLLECTOR_MODE)
     {
-        init_mpipe_config(mpipe,config);
-        init_mpipe_resource(mpipe);    
+        init_mpipe_config(global_mpipe,config);
+        init_mpipe_resource(global_mpipe);    
+    }
+#else
+    result = inac_open("inac0", &dev_id);
+    if(result != 0)
+    {
+        printf("result: %d, dev_id : %d\n",result, dev_id);
+        exit(-2);
     }
 #endif
 
     for(i = 0; i < numbers; ++i)
     {
-		init_signle_generator(generator_group,i);
+		init_signle_generator(generator_group,i,dev_id);
         if(pthread_create(&generator_group->generator[i].id,
                       NULL,
                       packet_generator_loop,
@@ -481,7 +510,6 @@ generator_group_t * init_generator_group(sim_config_t * config)
             exit(0);
         }
     }
-    pthread_mutex_unlock(&global_create_generator_lock);
     return generator_group;
 }
 

@@ -180,6 +180,8 @@ static inline uint64_t get_cycle_count_intel()
 #ifdef TILERA_PLATFORM
 extern cpu_set_t global_cpus;
 extern tmc_sync_barrier_t gbarrier; 
+#else
+#include "inac_impl.h"
 #endif
 extern int ghash_view[36];
 #define FULL_SPEED 	0
