@@ -19,6 +19,7 @@ struct option long_options[] =
     {"generator_nums",      1,  NULL,  'g'},
     {"parser_nums",         1,  NULL,  'p'},
     {"pktlen",              1,  NULL,  'o'},
+    {"config",              1,  NULL,  'o'},
     {"manager_nums",        1,  NULL,  'm'},
     {"gpool_size",          1,  NULL,  'o'},
     {"pqueue_length",       1,  NULL,  'q'},
@@ -36,9 +37,7 @@ void parse_args(int argc, char * const argv[],sim_config_t * config)
     int c;
     while(1)
     {
-        //int this_option_optind = optind ? optind : 1;
         int option_index = 0;
-
         c = getopt_long(argc, argv, 
                              "g:p:m:o:q:h:b:", 
                              long_options, 
@@ -82,6 +81,10 @@ void parse_args(int argc, char * const argv[],sim_config_t * config)
             else if(strcmp(long_options[option_index].name,"pktlen") == 0)
             {
                 config->pktlen = atoi(optarg);
+            }
+            else if(strcmp(long_options[option_index].name,"config") == 0)
+            {
+
             }
             else
             {
@@ -158,6 +161,14 @@ int main(int argc, char ** argv)
     bzero(global_config,sizeof(sim_config_t));
 
     init_config_s(global_config);
+    for(int i = 1; i < argc; i++)
+    {
+        char * arg = argv[i];
+        if(!strcmp(arg,"--config") && i + 1 < argc)
+        {
+            config_file = argv[++i];
+        }
+    }
 
     read_config_file(config_file,global_config);
 
