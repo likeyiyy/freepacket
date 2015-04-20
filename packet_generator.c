@@ -174,6 +174,25 @@ static inline void generator_tcp_packet(packet_t * packet,sim_config_t * config)
     pop_datalink(packet->data + PAY_LEN,config);
 }
 
+void make_clean_packet(generator_t * generator)
+{
+    packet_t * packet;
+    for(int i = 0; i < (1 << LG2_CAPACITY); i++)
+    {           
+            /*  
+ 			** 1. get buffer from pool
+ 			** */
+        	if(likely(mwsr_pool_dequeue(generator->pool,(void **)&packet) ==  0))
+        	{
+            	packet->data   = (unsigned char *)packet + sizeof(packet_t);
+    			while(unlikely(mwsr_pool_enqueue(generator->pool,packet) != 0))
+				{
+					continue;	
+				}
+        	}
+    }           
+
+}
 static inline void generator_udp_packet(packet_t * packet,sim_config_t * config)
 {
     pop_payload(packet->data+44,config->pkt_data,config);
@@ -284,7 +303,7 @@ static void packet_generator(generator_t * generator,int data_len,GenerHandler *
 }
 
 #ifdef TILERA_PLATFORM
-static void tilera_packet_collector(generator_t * generator)
+void tilera_packet_collector(generator_t * generator)
 {
     packet_t * packet;
     mpipe_common_t * mpipe = generator->mpipe;
@@ -293,13 +312,16 @@ static void tilera_packet_collector(generator_t * generator)
     sim_config_t * config = generator->config;
     gxio_mpipe_idesc_t * idesc;
 
+	int g_nums = config->generator_nums;
+	int p_nums = config->parser_nums;
+	int next_thread_id = generator->index;
     parser_group_t * parser_group = get_parser_group();
     if(parser_group == NULL)
     {
         printf("parser_group is null,exit now\n");
         exit(0);
     }
-
+    make_clean_packet(generator);
     while(1)
     {
 		if(gxio_mpipe_iqueue_try_peek(iqueue,&idesc) > 0)
@@ -320,8 +342,9 @@ static void tilera_packet_collector(generator_t * generator)
 			    continue;
             }
 
+            //printf("[rank:%d]packet:%p,packet->data:%p,va:%p,l2_length:%d\n",rank,packet,packet->data,va,l2_length);
             packet->pool   = generator->pool;
-            memcpy(packet->data,va,l2_length);
+            memcpy(packet->data + PAY_LEN,va,l2_length);
             packet->length = l2_length;
 
             /*
@@ -359,6 +382,79 @@ done:
         }
     }
     
+}
+#else
+void intel_packet_collector(generator_t * generator)
+{
+    int rank = generator->rank;
+    int dev_id = generator->dev_id;
+    char * va = NULL;
+    int32_t l2_length = 0;
+    packet_t * packet;
+    sim_config_t * config = generator->config;
+	int g_nums = config->generator_nums;
+	int p_nums = config->parser_nums;
+	int next_thread_id = generator->index;
+    parser_group_t * parser_group = get_parser_group();
+    if(parser_group == NULL)
+    {
+        printf("parser_group is null,exit now\n");
+        exit(0);
+    }
+    make_clean_packet(generator);
+    while(1)
+    {
+        /*
+        * 1. get packet from inac0
+        * */
+        va        = inac_get_l2_pkt(dev_id,rank);
+        l2_length = inac_get_l2_size(dev_id,rank);
+        if((va != NULL) && (l2_length > 40))
+        {
+            /*
+            * 2. get buffer from pool
+            * */
+            while(unlikely(mwsr_pool_dequeue(generator->pool,(void **)&packet) !=  0))
+            {
+			    continue;
+            }
+
+            //printf("[rank:%d]packet:%p,packet->data:%p,va:%p,l2_length:%d\n",rank,packet,packet->data,va,l2_length);
+            packet->pool   = generator->pool;
+            memcpy(packet->data + PAY_LEN,va,l2_length);
+            packet->length = l2_length;
+
+            /*
+            * 3. 数据放到下一步的队列里。
+            * */
+            /* 数据包均匀 分部到 下一个工作的线程里。*/
+    		if(global_config -> pipe_depth  > 1)
+    		{
+            	parser_t * parser = &parser_group->parser[next_thread_id];
+    			next_thread_id = (next_thread_id + g_nums < p_nums) ?
+                                 (next_thread_id + g_nums) : 
+                                 generator->index;
+    			while(unlikely(swsr_queue_enqueue(parser->queue,packet) != 0))
+    			{
+    				continue;	
+    			}
+    		}
+    		else
+    		{
+        		while(unlikely(mwsr_pool_enqueue(packet->pool,packet) != 0))
+    			{
+    				continue;	
+    			}
+    		}
+            generator->total_send_byte += l2_length;
+    		generator->alive++;
+        }
+        else
+        {
+            usleep(1);
+        }
+        generator->alive++;
+    }
 }
 #endif
 static void generator_mode(generator_t * generator,int data_len)
@@ -398,20 +494,10 @@ void * packet_generator_loop(void * arg)
     if(config->packet_generator_mode == COLLECTOR_MODE)
     {
 #ifdef TILERA_PLATFORM
-//////    	mpipe_common_t * mpipe = generator->mpipe;
-    	/**
-     	* Bind to a single cpu
-     	* */
-        int rank = generator->rank;
-        int cpu = tmc_cpus_find_nth_cpu(&global_cpus, rank);
-        int result = tmc_cpus_set_my_cpu(cpu);
-        VERIFY(result, "tmc_cpus_set_my_cpu()");
     	tmc_sync_barrier_wait(&gbarrier);
-
         tilera_packet_collector(generator);
 #else
-        printf("NOW just support tilera platform collector mode\n");
-        exit(0);
+        intel_packet_collector(generator);
 #endif
     }
     else if(config->packet_generator_mode == GENERATOR_MODE)
@@ -458,7 +544,6 @@ static inline void init_signle_generator(generator_group_t * generator_group,int
 
 generator_group_t * init_generator_group(sim_config_t * config)
 {
-    int32_t result = -1;
     int32_t dev_id = -1;
     if(generator_group != NULL)
     {
@@ -474,7 +559,8 @@ generator_group_t * init_generator_group(sim_config_t * config)
      * 这个缓冲区的头部是个结构体指针，下面是packet_length的长度的缓冲区。
      * */
     generator_group->generator = malloc(sizeof(generator_t) * numbers);
-    exit_if_ptr_is_null(generator_group->generator,"generator_group.generator error");
+    exit_if_ptr_is_null(generator_group->generator,
+                        "generator_group.generator error");
     generator_group->numbers   = numbers;
     generator_group->config    = config;
 
@@ -483,18 +569,27 @@ generator_group_t * init_generator_group(sim_config_t * config)
     * 即使在tilera平台仍然可以采用产生包模式。
     * */
     global_mpipe = malloc(sizeof(mpipe_common_t));
-    exit_if_ptr_is_null(global_mpipe,"[%s-%d]--------malloc mpipe error--------------",__func__,__LINE__);
+    exit_if_ptr_is_null(global_mpipe,
+                        "--------malloc mpipe error--------------"
+                        );
     if(config->packet_generator_mode == COLLECTOR_MODE)
     {
         init_mpipe_config(global_mpipe,config);
         init_mpipe_resource(global_mpipe);    
     }
 #else
-    result = inac_open("inac0", &dev_id);
-    if(result != 0)
+    if(config->packet_generator_mode == COLLECTOR_MODE)
     {
-        printf("result: %d, dev_id : %d\n",result, dev_id);
-        exit(-2);
+        int32_t result = -1;
+        result = inac_open("inac0", &dev_id);
+        if(result != 0)
+        {
+            printf("[%s-%d] result: %d, dev_id : %d\n",__func__,
+                                                       __LINE__,
+                                                       result, 
+                                                       dev_id);
+            exit(-2);
+        }
     }
 #endif
 

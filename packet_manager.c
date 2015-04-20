@@ -60,7 +60,7 @@ void delete_session(hash_table * ht,bucket_t * bucket)
     list_for_each_safe(p,next,list)
     {
         node = list_entry(p,struct blist,listhead); 
-        if((current_time - node->item.last_time > global_config->destory_time * 1000UL * global_config->mhz))
+        if((current_time - node->item.last_time) > (global_config->destory_time * 1000UL * global_config->mhz))
         {
             list_del(&node->listhead);
     		while(unlikely(mwsr_mpool_enqueue(node->item.pool,node) != 0))
@@ -111,11 +111,6 @@ void * packet_manager_loop(void * arg)
 {
     manager_t * manager = (manager_t *)arg;
     flow_item_t * flow;
-	if(global_config -> pipe_depth  > 4)
-	{
-    	//pthread_t clean_id;
-    	//pthread_create(&clean_id,NULL,process_session,arg);
-	}
     uint32_t v1,v2,h1,index;
 	//uint64_t interval = global_config->destory_time * 1000UL * global_config->mhz;
 	uint64_t start_cycle = 0;	

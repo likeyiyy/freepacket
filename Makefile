@@ -31,7 +31,7 @@ OBJS += mpipe.o display.o
 endif
 
 OPT = -Os
-CFLAGS += -std=gnu99 -Wall  -O1
+CFLAGS += -std=gnu99 -Wall 
 OBJS += checksum.o config.o 						\
 	 parse.o packet_generator.o packet_parser.o \
 	 packet_manager.o  hash.o lossratio.o
@@ -44,10 +44,10 @@ EXECS=simulation
 all:$(EXECS)
 
 simulation:simulation.c $(OBJS)
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^ -g 
 
 %.o:%.c
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) -c $< -o $@ -g
 
 
 clean:

@@ -326,9 +326,9 @@ int read_config_file(const char * file_name,sim_config_t * config)
         else if(strcmp(pname,"PKTLEN") == 0)
         {
             config->pktlen = atoi(p);
-            if(config->pktlen > 1514)
+            if(config->pktlen > 1600)
             {
-                printf("Read config file Error:pktlen too long\n");
+                printf("[%s-%d] Read config file Error:pktlen too long\n",__func__,__LINE__);
                 exit(0);
             }
         }

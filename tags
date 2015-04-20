@@ -4,116 +4,288 @@
 !_TAG_PROGRAM_NAME	Exuberant Ctags	//
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
 !_TAG_PROGRAM_VERSION	5.8	//
-ALIGN	includes.h	68;"	d
+ACTION_DROP	rule_defs.h	/^	ACTION_DROP,$/;"	e	enum:rule_action_e
+ACTION_MAX	rule_defs.h	/^	ACTION_MAX$/;"	e	enum:rule_action_e
+ACTION_PASS	rule_defs.h	/^	ACTION_PASS = 0,$/;"	e	enum:rule_action_e
+ACTION_SYNPASS	rule_defs.h	/^	ACTION_SYNPASS,$/;"	e	enum:rule_action_e
+AFFINITY_DISABLED	inac_opt.h	/^	AFFINITY_DISABLED = 0,$/;"	e	enum:__anon4
+AFFINITY_ENABLED	inac_opt.h	/^	AFFINITY_ENABLED,$/;"	e	enum:__anon4
+ALIGN	includes.h	69;"	d
+BLOCK_ACTION_FIN	rule_defs.h	/^	BLOCK_ACTION_FIN,$/;"	e	enum:rule_block_action_e
+BLOCK_ACTION_FIN_ACK	rule_defs.h	/^	BLOCK_ACTION_FIN_ACK,$/;"	e	enum:rule_block_action_e
+BLOCK_ACTION_MAX	rule_defs.h	/^	BLOCK_ACTION_MAX$/;"	e	enum:rule_block_action_e
+BLOCK_ACTION_NONE	rule_defs.h	/^	BLOCK_ACTION_NONE = 0,$/;"	e	enum:rule_block_action_e
+BLOCK_ACTION_RST	rule_defs.h	/^	BLOCK_ACTION_RST,$/;"	e	enum:rule_block_action_e
+BLOCK_ACTION_RST_ACK	rule_defs.h	/^	BLOCK_ACTION_RST_ACK,$/;"	e	enum:rule_block_action_e
+BLOCK_ACTION_SYN_FIN	rule_defs.h	/^	BLOCK_ACTION_SYN_FIN,$/;"	e	enum:rule_block_action_e
+BLOCK_ACTION_SYN_FIN_ACK	rule_defs.h	/^	BLOCK_ACTION_SYN_FIN_ACK,$/;"	e	enum:rule_block_action_e
+BLOCK_ACTION_SYN_RST	rule_defs.h	/^	BLOCK_ACTION_SYN_RST,$/;"	e	enum:rule_block_action_e
+BLOCK_ACTION_SYN_RST_ACK	rule_defs.h	/^	BLOCK_ACTION_SYN_RST_ACK,$/;"	e	enum:rule_block_action_e
 CC	Makefile	/^CC = $(TILERA_ROOT)\/bin\/tile-gcc$/;"	m
 CC	Makefile	/^CC = gcc$/;"	m
 CHECK_SUM_H	checksum.h	9;"	d
-COLLECTOR_MODE	includes.h	63;"	d
+COLLECTOR_MODE	includes.h	64;"	d
 CONFIG_FILE	config.h	27;"	d
 CONFIG_H_H	config.h	12;"	d
-COUNT	packet_manager.c	116;"	d	file:
-COUNT	packet_parser.c	232;"	d	file:
-DEBUG	includes.h	59;"	d
-DEBUG	includes.h	61;"	d
+COUNT	packet_manager.c	109;"	d	file:
+COUNT	packet_parser.c	169;"	d	file:
+CRC32_table	checksum.c	/^uint32_t CRC32_table[256] =$/;"	v
+DEBUG	includes.h	60;"	d
+DEBUG	includes.h	62;"	d
 DESTORY_TIME	config.h	42;"	d
 DISPLAY_H	display.h	9;"	d
+DIST_POLICY_DIP	rule_defs.h	/^	DIST_POLICY_DIP,$/;"	e	enum:dist_policy_e
+DIST_POLICY_MAX	rule_defs.h	/^	DIST_POLICY_MAX$/;"	e	enum:dist_policy_e
+DIST_POLICY_NONE	rule_defs.h	/^	DIST_POLICY_NONE = 0,$/;"	e	enum:dist_policy_e
+DIST_POLICY_SDIP	rule_defs.h	/^	DIST_POLICY_SDIP,$/;"	e	enum:dist_policy_e
+DIST_POLICY_SDIP_SDPORT	rule_defs.h	/^	DIST_POLICY_SDIP_SDPORT,$/;"	e	enum:dist_policy_e
+DIST_POLICY_SIP	rule_defs.h	/^	DIST_POLICY_SIP,$/;"	e	enum:dist_policy_e
 EXECS	Makefile	/^EXECS=simulation $/;"	m
-FULL_SPEED	includes.h	182;"	d
-GENERATOR_MODE	includes.h	64;"	d
-GENERATOR_POOL	pool_manager.h	/^    GENERATOR_POOL,$/;"	e	enum:_pool_type
+E_MPIPE_GBE_1024_TO_1518_BYTE_FRAMES_RX	if_stat.h	/^  E_MPIPE_GBE_1024_TO_1518_BYTE_FRAMES_RX,$/;"	e	enum:_e_mac_reg
+E_MPIPE_GBE_1024_TO_1518_BYTE_FRAMES_TX	if_stat.h	/^  E_MPIPE_GBE_1024_TO_1518_BYTE_FRAMES_TX,$/;"	e	enum:_e_mac_reg
+E_MPIPE_GBE_128_TO_255_BYTE_FRAMES_RX	if_stat.h	/^  E_MPIPE_GBE_128_TO_255_BYTE_FRAMES_RX,$/;"	e	enum:_e_mac_reg
+E_MPIPE_GBE_128_TO_255_BYTE_FRAMES_TX	if_stat.h	/^  E_MPIPE_GBE_128_TO_255_BYTE_FRAMES_TX,$/;"	e	enum:_e_mac_reg
+E_MPIPE_GBE_256_TO_511_BYTE_FRAMES_RX	if_stat.h	/^  E_MPIPE_GBE_256_TO_511_BYTE_FRAMES_RX,$/;"	e	enum:_e_mac_reg
+E_MPIPE_GBE_256_TO_511_BYTE_FRAMES_TX	if_stat.h	/^  E_MPIPE_GBE_256_TO_511_BYTE_FRAMES_TX,$/;"	e	enum:_e_mac_reg
+E_MPIPE_GBE_512_TO_1023_BYTE_FRAMES_RX	if_stat.h	/^  E_MPIPE_GBE_512_TO_1023_BYTE_FRAMES_RX,$/;"	e	enum:_e_mac_reg
+E_MPIPE_GBE_512_TO_1023_BYTE_FRAMES_TX	if_stat.h	/^  E_MPIPE_GBE_512_TO_1023_BYTE_FRAMES_TX,$/;"	e	enum:_e_mac_reg
+E_MPIPE_GBE_64_BYTE_FRAMES_RX	if_stat.h	/^  E_MPIPE_GBE_64_BYTE_FRAMES_RX,$/;"	e	enum:_e_mac_reg
+E_MPIPE_GBE_64_BYTE_FRAMES_TX	if_stat.h	/^  E_MPIPE_GBE_64_BYTE_FRAMES_TX,$/;"	e	enum:_e_mac_reg
+E_MPIPE_GBE_65_TO_127_BYTE_FRAMES_RX	if_stat.h	/^  E_MPIPE_GBE_65_TO_127_BYTE_FRAMES_RX,$/;"	e	enum:_e_mac_reg
+E_MPIPE_GBE_65_TO_127_BYTE_FRAMES_TX	if_stat.h	/^  E_MPIPE_GBE_65_TO_127_BYTE_FRAMES_TX,$/;"	e	enum:_e_mac_reg
+E_MPIPE_GBE_ALIGNMENT_ERRORS	if_stat.h	/^  E_MPIPE_GBE_ALIGNMENT_ERRORS,$/;"	e	enum:_e_mac_reg
+E_MPIPE_GBE_BCST_FRAMES_RX	if_stat.h	/^  E_MPIPE_GBE_BCST_FRAMES_RX,$/;"	e	enum:_e_mac_reg
+E_MPIPE_GBE_BCST_FRAMES_TX	if_stat.h	/^  E_MPIPE_GBE_BCST_FRAMES_TX,$/;"	e	enum:_e_mac_reg
+E_MPIPE_GBE_BEGIN	if_stat.h	/^  E_MPIPE_GBE_BEGIN        = 0,$/;"	e	enum:_e_mac_reg
+E_MPIPE_GBE_CARRIER_SENSE_ERRORS	if_stat.h	/^  E_MPIPE_GBE_CARRIER_SENSE_ERRORS,$/;"	e	enum:_e_mac_reg
+E_MPIPE_GBE_DEFERRED_TRANSMISSION_FRAMES	if_stat.h	/^  E_MPIPE_GBE_DEFERRED_TRANSMISSION_FRAMES,$/;"	e	enum:_e_mac_reg
+E_MPIPE_GBE_END	if_stat.h	/^  E_MPIPE_GBE_END,$/;"	e	enum:_e_mac_reg
+E_MPIPE_GBE_EXCESSIVE_COLLISIONS	if_stat.h	/^  E_MPIPE_GBE_EXCESSIVE_COLLISIONS,$/;"	e	enum:_e_mac_reg
+E_MPIPE_GBE_FRAMES_RX	if_stat.h	/^  E_MPIPE_GBE_FRAMES_RX,$/;"	e	enum:_e_mac_reg
+E_MPIPE_GBE_FRAMES_TX	if_stat.h	/^  E_MPIPE_GBE_FRAMES_TX,$/;"	e	enum:_e_mac_reg
+E_MPIPE_GBE_FRAME_CHECK_SEQUENCE_ERRORS	if_stat.h	/^  E_MPIPE_GBE_FRAME_CHECK_SEQUENCE_ERRORS,$/;"	e	enum:_e_mac_reg
+E_MPIPE_GBE_GREATER_THAN_1518_BYTE_FRAMES_RX	if_stat.h	/^  E_MPIPE_GBE_GREATER_THAN_1518_BYTE_FRAMES_RX,$/;"	e	enum:_e_mac_reg
+E_MPIPE_GBE_GREATER_THAN_1518_BYTE_FRAMES_TX	if_stat.h	/^  E_MPIPE_GBE_GREATER_THAN_1518_BYTE_FRAMES_TX,$/;"	e	enum:_e_mac_reg
+E_MPIPE_GBE_IP_HEADER_CHECKSUM_ERRORS	if_stat.h	/^  E_MPIPE_GBE_IP_HEADER_CHECKSUM_ERRORS,$/;"	e	enum:_e_mac_reg
+E_MPIPE_GBE_JABBERS_RX	if_stat.h	/^  E_MPIPE_GBE_JABBERS_RX,$/;"	e	enum:_e_mac_reg
+E_MPIPE_GBE_LATE_COLLISIONS	if_stat.h	/^  E_MPIPE_GBE_LATE_COLLISIONS,$/;"	e	enum:_e_mac_reg
+E_MPIPE_GBE_LENGTH_FRAME_ERRORS	if_stat.h	/^  E_MPIPE_GBE_LENGTH_FRAME_ERRORS,$/;"	e	enum:_e_mac_reg
+E_MPIPE_GBE_MCST_FRAMES_RX	if_stat.h	/^  E_MPIPE_GBE_MCST_FRAMES_RX,$/;"	e	enum:_e_mac_reg
+E_MPIPE_GBE_MCST_FRAMES_TX	if_stat.h	/^  E_MPIPE_GBE_MCST_FRAMES_TX,$/;"	e	enum:_e_mac_reg
+E_MPIPE_GBE_MULTIPLE_COLLISION_FRAMES	if_stat.h	/^  E_MPIPE_GBE_MULTIPLE_COLLISION_FRAMES,$/;"	e	enum:_e_mac_reg
+E_MPIPE_GBE_OCTETS_RX_HI	if_stat.h	/^  E_MPIPE_GBE_OCTETS_RX_HI,$/;"	e	enum:_e_mac_reg
+E_MPIPE_GBE_OCTETS_RX_LO	if_stat.h	/^  E_MPIPE_GBE_OCTETS_RX_LO = E_MPIPE_GBE_RX_BEGIN,$/;"	e	enum:_e_mac_reg
+E_MPIPE_GBE_OCTETS_TX_HI	if_stat.h	/^  E_MPIPE_GBE_OCTETS_TX_HI,$/;"	e	enum:_e_mac_reg
+E_MPIPE_GBE_OCTETS_TX_LO	if_stat.h	/^  E_MPIPE_GBE_OCTETS_TX_LO = E_MPIPE_GBE_TX_BEGIN,$/;"	e	enum:_e_mac_reg
+E_MPIPE_GBE_OVERSIZE_FRAMES_RX	if_stat.h	/^  E_MPIPE_GBE_OVERSIZE_FRAMES_RX,$/;"	e	enum:_e_mac_reg
+E_MPIPE_GBE_PAUSE_FRAMES_RX	if_stat.h	/^  E_MPIPE_GBE_PAUSE_FRAMES_RX,$/;"	e	enum:_e_mac_reg
+E_MPIPE_GBE_PAUSE_FRAMES_TX	if_stat.h	/^  E_MPIPE_GBE_PAUSE_FRAMES_TX,$/;"	e	enum:_e_mac_reg
+E_MPIPE_GBE_RECEIVE_OVERRUNS	if_stat.h	/^  E_MPIPE_GBE_RECEIVE_OVERRUNS,$/;"	e	enum:_e_mac_reg
+E_MPIPE_GBE_RECEIVE_SYMBOL_ERRORS	if_stat.h	/^  E_MPIPE_GBE_RECEIVE_SYMBOL_ERRORS,$/;"	e	enum:_e_mac_reg
+E_MPIPE_GBE_RX_BEGIN	if_stat.h	/^  E_MPIPE_GBE_RX_BEGIN,$/;"	e	enum:_e_mac_reg
+E_MPIPE_GBE_SINGLE_COLLISION_FRAMES	if_stat.h	/^  E_MPIPE_GBE_SINGLE_COLLISION_FRAMES,$/;"	e	enum:_e_mac_reg
+E_MPIPE_GBE_TCP_CHECKSUM_ERRORS	if_stat.h	/^  E_MPIPE_GBE_TCP_CHECKSUM_ERRORS,$/;"	e	enum:_e_mac_reg
+E_MPIPE_GBE_TX_BEGIN	if_stat.h	/^  E_MPIPE_GBE_TX_BEGIN     = E_MPIPE_GBE_BEGIN,$/;"	e	enum:_e_mac_reg
+E_MPIPE_GBE_TX_UNDER_RUNS	if_stat.h	/^  E_MPIPE_GBE_TX_UNDER_RUNS,$/;"	e	enum:_e_mac_reg
+E_MPIPE_GBE_UDP_CHECKSUM_ERRORS	if_stat.h	/^  E_MPIPE_GBE_UDP_CHECKSUM_ERRORS,$/;"	e	enum:_e_mac_reg
+E_MPIPE_GBE_UNDERSIZE_FRAMES_RX	if_stat.h	/^  E_MPIPE_GBE_UNDERSIZE_FRAMES_RX,$/;"	e	enum:_e_mac_reg
+E_MPIPE_XAUI_1024_TO_1518_BYTE_FRAMES_RX	if_stat.h	/^  E_MPIPE_XAUI_1024_TO_1518_BYTE_FRAMES_RX,$/;"	e	enum:_e_mac_reg
+E_MPIPE_XAUI_1024_TO_1518_BYTE_FRAMES_TX	if_stat.h	/^  E_MPIPE_XAUI_1024_TO_1518_BYTE_FRAMES_TX,$/;"	e	enum:_e_mac_reg
+E_MPIPE_XAUI_128_TO_255_BYTE_FRAMES_RX	if_stat.h	/^  E_MPIPE_XAUI_128_TO_255_BYTE_FRAMES_RX,$/;"	e	enum:_e_mac_reg
+E_MPIPE_XAUI_128_TO_255_BYTE_FRAMES_TX	if_stat.h	/^  E_MPIPE_XAUI_128_TO_255_BYTE_FRAMES_TX,$/;"	e	enum:_e_mac_reg
+E_MPIPE_XAUI_256_TO_511_BYTE_FRAMES_RX	if_stat.h	/^  E_MPIPE_XAUI_256_TO_511_BYTE_FRAMES_RX,$/;"	e	enum:_e_mac_reg
+E_MPIPE_XAUI_256_TO_511_BYTE_FRAMES_TX	if_stat.h	/^  E_MPIPE_XAUI_256_TO_511_BYTE_FRAMES_TX,$/;"	e	enum:_e_mac_reg
+E_MPIPE_XAUI_512_TO_1023_BYTE_FRAMES_RX	if_stat.h	/^  E_MPIPE_XAUI_512_TO_1023_BYTE_FRAMES_RX,$/;"	e	enum:_e_mac_reg
+E_MPIPE_XAUI_512_TO_1023_BYTE_FRAMES_TX	if_stat.h	/^  E_MPIPE_XAUI_512_TO_1023_BYTE_FRAMES_TX,$/;"	e	enum:_e_mac_reg
+E_MPIPE_XAUI_64_BYTE_FRAMES_RX	if_stat.h	/^  E_MPIPE_XAUI_64_BYTE_FRAMES_RX,$/;"	e	enum:_e_mac_reg
+E_MPIPE_XAUI_64_BYTE_FRAMES_TX	if_stat.h	/^  E_MPIPE_XAUI_64_BYTE_FRAMES_TX,$/;"	e	enum:_e_mac_reg
+E_MPIPE_XAUI_65_TO_127_BYTE_FRAMES_RX	if_stat.h	/^  E_MPIPE_XAUI_65_TO_127_BYTE_FRAMES_RX,$/;"	e	enum:_e_mac_reg
+E_MPIPE_XAUI_65_TO_127_BYTE_FRAMES_TX	if_stat.h	/^  E_MPIPE_XAUI_65_TO_127_BYTE_FRAMES_TX,$/;"	e	enum:_e_mac_reg
+E_MPIPE_XAUI_BCST_FRAMES_RX	if_stat.h	/^  E_MPIPE_XAUI_BCST_FRAMES_RX,$/;"	e	enum:_e_mac_reg
+E_MPIPE_XAUI_BCST_FRAMES_TX	if_stat.h	/^  E_MPIPE_XAUI_BCST_FRAMES_TX,$/;"	e	enum:_e_mac_reg
+E_MPIPE_XAUI_BEGIN	if_stat.h	/^  E_MPIPE_XAUI_BEGIN = E_MPIPE_GBE_END,$/;"	e	enum:_e_mac_reg
+E_MPIPE_XAUI_END	if_stat.h	/^  E_MPIPE_XAUI_END$/;"	e	enum:_e_mac_reg
+E_MPIPE_XAUI_FRAMES_RX_HI	if_stat.h	/^  E_MPIPE_XAUI_FRAMES_RX_HI,$/;"	e	enum:_e_mac_reg
+E_MPIPE_XAUI_FRAMES_RX_LO	if_stat.h	/^  E_MPIPE_XAUI_FRAMES_RX_LO,$/;"	e	enum:_e_mac_reg
+E_MPIPE_XAUI_FRAMES_TX_HI	if_stat.h	/^  E_MPIPE_XAUI_FRAMES_TX_HI,$/;"	e	enum:_e_mac_reg
+E_MPIPE_XAUI_FRAMES_TX_LO	if_stat.h	/^  E_MPIPE_XAUI_FRAMES_TX_LO,$/;"	e	enum:_e_mac_reg
+E_MPIPE_XAUI_FRAME_CRC_ERRORS_RX	if_stat.h	/^  E_MPIPE_XAUI_FRAME_CRC_ERRORS_RX,$/;"	e	enum:_e_mac_reg
+E_MPIPE_XAUI_GREATER_THAN_1518_BYTE_FRAMES_RX	if_stat.h	/^  E_MPIPE_XAUI_GREATER_THAN_1518_BYTE_FRAMES_RX,$/;"	e	enum:_e_mac_reg
+E_MPIPE_XAUI_GREATER_THAN_1518_BYTE_FRAMES_TX	if_stat.h	/^  E_MPIPE_XAUI_GREATER_THAN_1518_BYTE_FRAMES_TX,$/;"	e	enum:_e_mac_reg
+E_MPIPE_XAUI_JABBERS_RX	if_stat.h	/^  E_MPIPE_XAUI_JABBERS_RX,$/;"	e	enum:_e_mac_reg
+E_MPIPE_XAUI_LENGTH_FIELD_ERRORS_RX	if_stat.h	/^  E_MPIPE_XAUI_LENGTH_FIELD_ERRORS_RX,$/;"	e	enum:_e_mac_reg
+E_MPIPE_XAUI_MCST_FRAMES_RX	if_stat.h	/^  E_MPIPE_XAUI_MCST_FRAMES_RX,$/;"	e	enum:_e_mac_reg
+E_MPIPE_XAUI_MCST_FRAMES_TX	if_stat.h	/^  E_MPIPE_XAUI_MCST_FRAMES_TX,$/;"	e	enum:_e_mac_reg
+E_MPIPE_XAUI_OCTETS_RX_HI	if_stat.h	/^  E_MPIPE_XAUI_OCTETS_RX_HI,$/;"	e	enum:_e_mac_reg
+E_MPIPE_XAUI_OCTETS_RX_LO	if_stat.h	/^  E_MPIPE_XAUI_OCTETS_RX_LO,$/;"	e	enum:_e_mac_reg
+E_MPIPE_XAUI_OCTETS_TX_HI	if_stat.h	/^  E_MPIPE_XAUI_OCTETS_TX_HI,$/;"	e	enum:_e_mac_reg
+E_MPIPE_XAUI_OCTETS_TX_LO	if_stat.h	/^  E_MPIPE_XAUI_OCTETS_TX_LO = E_MPIPE_XAUI_BEGIN,$/;"	e	enum:_e_mac_reg
+E_MPIPE_XAUI_OVERSIZE_FRAMES_RX	if_stat.h	/^  E_MPIPE_XAUI_OVERSIZE_FRAMES_RX,$/;"	e	enum:_e_mac_reg
+E_MPIPE_XAUI_PAUSE_FRAMES_RX	if_stat.h	/^  E_MPIPE_XAUI_PAUSE_FRAMES_RX,$/;"	e	enum:_e_mac_reg
+E_MPIPE_XAUI_PAUSE_FRAMES_TX	if_stat.h	/^  E_MPIPE_XAUI_PAUSE_FRAMES_TX,$/;"	e	enum:_e_mac_reg
+E_MPIPE_XAUI_RECEIVE_SYMBOL_ERRORS_RX	if_stat.h	/^  E_MPIPE_XAUI_RECEIVE_SYMBOL_ERRORS_RX,$/;"	e	enum:_e_mac_reg
+E_MPIPE_XAUI_SHORT_FRAMES_RX	if_stat.h	/^  E_MPIPE_XAUI_SHORT_FRAMES_RX,$/;"	e	enum:_e_mac_reg
+E_MPIPE_XAUI_TRANSMITTED_ERROR_FRAMES	if_stat.h	/^  E_MPIPE_XAUI_TRANSMITTED_ERROR_FRAMES,$/;"	e	enum:_e_mac_reg
+FULL_SPEED	includes.h	187;"	d
+GBE_MAC	if_stat.h	103;"	d
+GENERATOR_MODE	includes.h	65;"	d
 GENERATOR_POOL_SIZE	config.h	29;"	d
-GET_CYCLE_COUNT	includes.h	151;"	d
-GET_CYCLE_COUNT	includes.h	156;"	d
-GET_NEXT_DSTIP	packet_generator.c	74;"	d	file:
-GET_NEXT_DSTPORT	packet_generator.c	94;"	d	file:
-GET_NEXT_SRCIP	packet_generator.c	64;"	d	file:
-GET_NEXT_SRCPORT	packet_generator.c	84;"	d	file:
+GET_CYCLE_COUNT	includes.h	155;"	d
+GET_CYCLE_COUNT	includes.h	160;"	d
+GET_NEXT_DSTIP	packet_generator.c	75;"	d	file:
+GET_NEXT_DSTPORT	packet_generator.c	95;"	d	file:
+GET_NEXT_SRCIP	packet_generator.c	65;"	d	file:
+GET_NEXT_SRCPORT	packet_generator.c	85;"	d	file:
 GenerHandler	packet_generator.c	/^typedef void (GenerHandler) (packet_t * packet,sim_config_t * config);$/;"	t	file:
+GetCRC32	checksum.c	/^uint32_t GetCRC32(uint8_t* buf, uint32_t len)$/;"	f
 H_SESSION_H	packet_manager.h	8;"	d
+INAC_E_EXEC_FAILED	inac_err.h	/^	INAC_E_EXEC_FAILED,$/;"	e	enum:__anon2
+INAC_E_FAILED	inac_err.h	/^	INAC_E_FAILED,$/;"	e	enum:__anon2
+INAC_E_INTERNAL_ERROR	inac_err.h	/^	INAC_E_INTERNAL_ERROR,$/;"	e	enum:__anon2
+INAC_E_INVALID_BLOCK	inac_err.h	/^	INAC_E_INVALID_BLOCK,$/;"	e	enum:__anon2
+INAC_E_INVALID_CONFIG	inac_err.h	/^	INAC_E_INVALID_CONFIG,	$/;"	e	enum:__anon2
+INAC_E_INVALID_FORMAT	inac_err.h	/^	INAC_E_INVALID_FORMAT,$/;"	e	enum:__anon2
+INAC_E_INVALID_PARA	inac_err.h	/^	INAC_E_INVALID_PARA,$/;"	e	enum:__anon2
+INAC_E_INVALID_STREAM	inac_err.h	/^	INAC_E_INVALID_STREAM,$/;"	e	enum:__anon2
+INAC_E_IOCTL_FAILED	inac_err.h	/^	INAC_E_IOCTL_FAILED,$/;"	e	enum:__anon2
+INAC_E_IOCTL_UNDEFINED	inac_err.h	/^	INAC_E_IOCTL_UNDEFINED,$/;"	e	enum:__anon2
+INAC_E_MAX	inac_err.h	/^	INAC_E_MAX$/;"	e	enum:__anon2
+INAC_E_MMAP_FAILED	inac_err.h	/^	INAC_E_MMAP_FAILED,$/;"	e	enum:__anon2
+INAC_E_NO_DEV	inac_err.h	/^	INAC_E_NO_DEV,$/;"	e	enum:__anon2
+INAC_E_NO_MEM	inac_err.h	/^	INAC_E_NO_MEM,$/;"	e	enum:__anon2
+INAC_E_NO_TX_BUFF	inac_err.h	/^	INAC_E_NO_TX_BUFF,$/;"	e	enum:__anon2
+INAC_E_OK	inac_err.h	/^	INAC_E_OK = 0,$/;"	e	enum:__anon2
+INAC_E_OPEN_FAILED	inac_err.h	/^	INAC_E_OPEN_FAILED,$/;"	e	enum:__anon2
+INAC_E_READ_FAILED	inac_err.h	/^	INAC_E_READ_FAILED,$/;"	e	enum:__anon2
+INAC_E_RULE_EXIST	inac_err.h	/^	INAC_E_RULE_EXIST,$/;"	e	enum:__anon2
+INAC_E_RULE_FULL	inac_err.h	/^	INAC_E_RULE_FULL,	$/;"	e	enum:__anon2
+INAC_E_RULE_ID_EXIST	inac_err.h	/^	INAC_E_RULE_ID_EXIST,$/;"	e	enum:__anon2
+INAC_E_RULE_NOT_EXIST	inac_err.h	/^	INAC_E_RULE_NOT_EXIST,$/;"	e	enum:__anon2
 INCLUDES_H	includes.h	8;"	d
 INIT_LIST_HEAD	list.h	/^static inline void INIT_LIST_HEAD(struct list_head *list)$/;"	f
+INTEL_QUEUE	queue_intel.h	8;"	d
 IP_CE	parse.c	25;"	d	file:
 IP_DF	parse.c	26;"	d	file:
-IP_IDX	includes.h	184;"	d
+IP_IDX	includes.h	189;"	d
 IP_MF	parse.c	27;"	d	file:
 IP_OFFSET	parse.c	28;"	d	file:
-LDFLAGS	Makefile	/^LDFLAGS= -lncurses -lpthread -lrt $/;"	m
+LDFLAGS	Makefile	/^LDFLAGS= -lncurses -lpthread -lrt  -linac$/;"	m
 LDFLAGS	Makefile	/^LDFLAGS= -lpthread -lgxio -ltmc -lncurses$/;"	m
 LG2_CAPACITY	includes.h	84;"	d
+LOG_ACTION_COMPLEX	rule_defs.h	/^	LOG_ACTION_COMPLEX,$/;"	e	enum:rule_log_acion_e
+LOG_ACTION_MAX	rule_defs.h	/^	LOG_ACTION_MAX$/;"	e	enum:rule_log_acion_e
+LOG_ACTION_NONE	rule_defs.h	/^	LOG_ACTION_NONE = 0,$/;"	e	enum:rule_log_acion_e
+LOG_ACTION_SIMPLE	rule_defs.h	/^	LOG_ACTION_SIMPLE,$/;"	e	enum:rule_log_acion_e
 LOSSRATIO_H	lossratio.h	9;"	d
 L_HASH_H	hash.h	9;"	d
 L_MPIPE_H	mpipe.h	9;"	d
-MAKE_HASH	packet_manager.c	12;"	d	file:
-MAKE_HASH	packet_parser.c	12;"	d	file:
+MAKE_HASH	packet_manager.c	11;"	d	file:
+MAKE_HASH	packet_parser.c	11;"	d	file:
 MANAGER_BUFFER_SIZE	config.h	38;"	d
 MANAGER_HASH_LENGTH	config.h	37;"	d
-MANAGER_POOL	includes.h	102;"	d
-MANAGER_POOL	pool_manager.h	/^    MANAGER_POOL$/;"	e	enum:_pool_type
+MANAGER_POOL	includes.h	85;"	d
 MANAGER_POOL_SIZE	config.h	35;"	d
 MANAGER_QUEUE_LENGTH	config.h	34;"	d
 MAX_FACTOR	config.h	40;"	d
+MAX_IPV6_RULE_CAPACITY	rule_defs.h	30;"	d
+MAX_LOG_SERVER	rule_defs.h	173;"	d
+MAX_RULE_CAPACITY	rule_defs.h	29;"	d
+MAX_RULE_CLASS	rule_defs.h	32;"	d
+MAX_RULE_PRIORITY	rule_defs.h	33;"	d
 MPIPE_CC	Makefile	/^MPIPE_CC = $(TILERA_ROOT)\/bin\/tile-mpipe-cc$/;"	m
 MPIPE_CC	Makefile	/^MPIPE_CC=mpipe-cc$/;"	m
-NO_WAIT_MODE	includes.h	80;"	d
+NO_WAIT_MODE	includes.h	81;"	d
 NS	config.c	461;"	d	file:
 OBJS	Makefile	/^OBJS = display.o$/;"	m
 OPT	Makefile	/^OPT = -Os$/;"	m
 PACKET_GENERATOR_H	packet_generator.h	8;"	d
-PAGE_SHIFT	includes.h	52;"	d
-PARSER_POOL	pool_manager.h	/^    PARSER_POOL,$/;"	e	enum:_pool_type
+PAGE_SHIFT	includes.h	53;"	d
 PARSER_POOL_SIZE	config.h	32;"	d
 PARSER_QUEUE_LENGTH	config.h	31;"	d
 PARSE_PACKET_H	parse.h	9;"	d
-PAY_LEN	includes.h	187;"	d
-POOL_MANAGER_H	pool_manager.h	9;"	d
-PROCBLOCK_SIZE	includes.h	51;"	d
-TCP_IDX	includes.h	185;"	d
-TMC_QUEUE	cacheline_queue.h	31;"	d
-TMC_QUEUE	queue.h	63;"	d
-TMC_QUEUE_CREDIT_MASK	cacheline_queue.h	25;"	d
-TMC_QUEUE_CREDIT_SHIFT	cacheline_queue.h	22;"	d
-TMC_QUEUE_SINGLE_MODIFIER	cacheline_queue.h	29;"	d
-TranHandler	packet_parser.c	/^typedef void (TranHandler)(flow_item_t * flow,packet_t * packet,int header_len);$/;"	t	file:
-UDP_IDX	includes.h	186;"	d
+PAY_LEN	includes.h	192;"	d
+PROCBLOCK_SIZE	includes.h	52;"	d
+RULE_DEFAULT_PRIORITY	rule_defs.h	35;"	d
+RULE_DEFAULT_TTL	rule_defs.h	34;"	d
+RULE_EXIST	rule_defs.h	/^	RULE_EXIST,$/;"	e	enum:rule_error_e
+RULE_FULL	rule_defs.h	/^	RULE_FULL,$/;"	e	enum:rule_error_e
+RULE_ID_EXIST	rule_defs.h	/^	RULE_ID_EXIST,$/;"	e	enum:rule_error_e
+RULE_INTERNAL_ERROR	rule_defs.h	/^	RULE_INTERNAL_ERROR,$/;"	e	enum:rule_error_e
+RULE_INVALID_ID	rule_defs.h	37;"	d
+RULE_NOT_EXIST	rule_defs.h	/^	RULE_NOT_EXIST,$/;"	e	enum:rule_error_e
+RULE_OK	rule_defs.h	/^	RULE_OK = 0,$/;"	e	enum:rule_error_e
+RULE_TYPE_DYNAMIC	rule_defs.h	/^	RULE_TYPE_DYNAMIC = 0,$/;"	e	enum:rule_type_s
+RULE_TYPE_MAX	rule_defs.h	/^	RULE_TYPE_MAX$/;"	e	enum:rule_type_s
+RULE_TYPE_STATIC	rule_defs.h	/^	RULE_TYPE_STATIC,$/;"	e	enum:rule_type_s
+RULE_VERSION_MAX	rule_defs.h	/^	RULE_VERSION_MAX$/;"	e	enum:rule_version_s
+RULE_VERSION_V4	rule_defs.h	/^	RULE_VERSION_V4 = 0,$/;"	e	enum:rule_version_s
+RULE_VERSION_V6	rule_defs.h	/^	RULE_VERSION_V6,$/;"	e	enum:rule_version_s
+TCP_IDX	includes.h	190;"	d
+TMC_QUEUE	queue_tilegx.h	65;"	d
+TMC_QUEUE_NO_FLAGS	queue_intel.h	4;"	d
+TMC_QUEUE_SINGLE_RECEIVER	queue_intel.h	6;"	d
+TMC_QUEUE_SINGLE_SENDER	queue_intel.h	5;"	d
+UDP_IDX	includes.h	191;"	d
 UNIX_DOMAIN	lossratio.c	14;"	d	file:
-USER_SPEED	includes.h	183;"	d
-USE_BASIC_QUEUE	includes.h	86;"	d
-VERIFY	includes.h	70;"	d
-WAIT_MODE	includes.h	79;"	d
+USER_SPEED	includes.h	188;"	d
+VERIFY	includes.h	71;"	d
+WAIT_MODE	includes.h	80;"	d
 WORKER_SET_SIZE	display.c	9;"	d	file:
+XGBE_MAC	if_stat.h	104;"	d
+_CRC32_H	crc32.h	9;"	d
+_IF_STAT_H_	if_stat.h	3;"	d
+_INAC_ERR_H_	inac_err.h	3;"	d
+_INAC_IMPL_H_	inac_impl.h	3;"	d
+_INAC_OPT_H_	inac_opt.h	3;"	d
+_RULE_DEFS_H_	rule_defs.h	3;"	d
+_RULE_STAT_H_	rule_stat.h	3;"	d
+_STREAM_STAT_H_	stream_stat.h	3;"	d
 __LIST_H_	list.h	10;"	d
-__TMC_CACHELINE_QUEUE_H__	cacheline_queue.h	14;"	d
-__TMC_QUEUE_H__	queue.h	32;"	d
+__QUEUE_INTEL_H__	queue_intel.h	2;"	d
+__TMC_QUEUE_H__	queue_tilegx.h	32;"	d
 __config	config.h	/^typedef struct __config$/;"	s
 __list_add	list.h	/^static inline void __list_add(struct list_head *new,$/;"	f
 __list_del	list.h	/^static inline void __list_del(struct list_head * prev, struct list_head * next)$/;"	f
 __mpipe_t	mpipe.h	/^typedef struct __mpipe_t$/;"	s
-_common_queue	queue_manager.h	/^typedef struct _common_queue$/;"	s
+_e_mac_reg	if_stat.h	/^enum _e_mac_reg {$/;"	g
 _group	packet_manager.h	/^typedef struct _group$/;"	s
 _parser	packet_parser.h	/^typedef struct _parser$/;"	s
-_pool	pool_manager.h	/^typedef struct _pool$/;"	s
-_pool_type	pool_manager.h	/^typedef enum _pool_type$/;"	g
 _session_item	includes.h	/^typedef struct _session_item$/;"	s
 _session_manager	packet_manager.h	/^typedef struct _session_manager$/;"	s
+ack_drop	if_stat.h	/^	uint64_t	ack_drop;$/;"	m	struct:anti_attack_stat_s
+action	rule_defs.h	/^	uint8_t  	action;$/;"	m	struct:l4_rule_s
+addr	rule_defs.h	/^	uint32_t addr[4];$/;"	m	struct:__anon5
 alive	packet_generator.h	/^	int alive;$/;"	m	struct:generator
 alive	packet_manager.h	/^	int alive;$/;"	m	struct:_session_manager
 alive	packet_parser.h	/^	int alive;$/;"	m	struct:_parser
+anti_attack_stat_s	if_stat.h	/^typedef struct anti_attack_stat_s$/;"	s
+anti_attack_stat_t	if_stat.h	/^}anti_attack_stat_t;$/;"	t	typeref:struct:anti_attack_stat_s
+app	rule_defs.h	/^    uint32_t app;      \/\/”¶”√±‡∫≈$/;"	m	struct:__anon7
+app	rule_defs.h	/^    uint32_t app;      \/\/”¶”√±‡∫≈$/;"	m	struct:__anon9
+app_id_alloc	rule_defs.h	/^	uint32_t app_id_alloc; \/\/¡˜∑÷≈‰±Ì÷–µƒapp id$/;"	m	struct:__anon7
+app_id_alloc	rule_defs.h	/^	uint32_t app_id_alloc; \/\/¡˜∑÷≈‰±Ì÷–µƒapp id$/;"	m	struct:__anon9
 averages	simulation_test.py	/^def averages(listn):$/;"	f
 barrier	mpipe.h	/^    tmc_sync_barrier_t barrier; $/;"	m	struct:__mpipe_t
 blist	list.h	/^struct blist$/;"	s
-bool	includes.h	54;"	d
+block_action	rule_defs.h	/^	uint8_t  	block_action;$/;"	m	struct:l4_rule_s
+block_para_hton	rule_defs.h	/^static inline void block_para_hton(block_para_t *para)$/;"	f
+block_para_ntoh	rule_defs.h	/^static inline void block_para_ntoh(block_para_t *para)$/;"	f
+block_para_s	rule_defs.h	/^typedef struct block_para_s$/;"	s
+block_para_t	rule_defs.h	/^} block_para_t;$/;"	t	typeref:struct:block_para_s
+blocks	rule_stat.h	/^	uint64_t	blocks[BLOCK_ACTION_MAX];$/;"	m	struct:rule_stat_s
+bool	includes.h	55;"	d
 bucket	hash.h	/^typedef struct bucket { $/;"	s
 bucket	mpipe.h	/^    int                     bucket;$/;"	m	struct:__mpipe_t
 bucket_t	hash.h	/^} bucket_t; $/;"	t	typeref:struct:bucket
 buckets	hash.h	/^        bucket_t *buckets;$/;"	m	struct:hash_table
 buffer	includes.h	/^    uint8_t  * buffer;$/;"	m	struct:_session_item
-buffer	pool_manager.h	/^    void          * buffer;$/;"	m	struct:_pool
+bytes	stream_stat.h	/^	uint64_t	bytes;$/;"	m	struct:stream_stat_s
 calc_period	config.c	/^uint32_t calc_period(double length,double rate,uint32_t thread_num)$/;"	f
 channel	mpipe.h	/^    int channel;$/;"	m	struct:__mpipe_t
 checksum_ip	checksum.c	/^void checksum_ip(struct iphdr * iph)$/;"	f
+class_id	rule_defs.h	/^	int16_t		class_id;$/;"	m	struct:rule_class_para_s
+collisions	if_stat.h	/^	uint64_t	collisions;$/;"	m	struct:if_stats_s
 commands	simulation_test.py	/^import commands $/;"	i
-common_queue_MANAGER_H	queue_manager.h	8;"	d
-common_queue_t	queue_manager.h	/^}common_queue_t;$/;"	t	typeref:struct:_common_queue
 compare_session	packet_manager.c	/^static inline int compare_session(session_item_t * item , flow_item_t * flow)$/;"	f	file:
 config	packet_generator.h	/^    sim_config_t  * config;$/;"	m	struct:generator
 config	packet_generator.h	/^    sim_config_t  * config;$/;"	m	struct:generator_group
@@ -121,59 +293,76 @@ config_file	simulation.c	/^static   const char * config_file = CONFIG_FILE;$/;"	
 configed	mpipe.h	/^    int         configed;$/;"	m	struct:__mpipe_t
 context	mpipe.h	/^    gxio_mpipe_context_t   context;$/;"	m	struct:__mpipe_t
 count	hash.h	/^    uint32_t count;$/;"	m	struct:bucket
+count	rule_stat.h	/^	int32_t		count;$/;"	m	struct:rule_stat_s
 counter	simulation_test.py	/^counter = 0$/;"	v
 cpus	mpipe.h	/^    cpu_set_t cpus;$/;"	m	struct:__mpipe_t
+crc32	crc32.c	/^uint32_t crc32(uint32_t crc, const void *buf, size_t size)$/;"	f
+crc32_32	checksum.c	/^uint32_t crc32_32(uint32_t * buf, uint32_t len)$/;"	f
+crc32_tab	crc32.c	/^static uint32_t crc32_tab[] = {$/;"	v	file:
 create_ipc_client	lossratio.c	/^int create_ipc_client()$/;"	f
 create_ipc_server	lossratio.c	/^int create_ipc_server()$/;"	f
 create_stack	mpipe.c	/^static void create_stack(gxio_mpipe_context_t* context, int stack_idx,$/;"	f	file:
 cur_len	includes.h	/^    uint32_t cur_len;$/;"	m	struct:_session_item
+cust_id	rule_defs.h	/^	uint32_t 	cust_id;$/;"	m	struct:l4_rule_s
 daddr_cur	config.h	/^    uint32_t daddr_cur;$/;"	m	struct:__config
 daddr_max	config.h	/^    uint32_t daddr_max;$/;"	m	struct:__config
 daddr_min	config.h	/^    uint32_t daddr_min;$/;"	m	struct:__config
 data	includes.h	/^    unsigned char * data;   \/* ‰∏Ä‰∏™ÂåÖÁöÑÊï∞ÊçÆÈÉ®ÂàÜ*\/$/;"	m	struct:packet
 delete_session	packet_manager.c	/^void delete_session(hash_table * ht,bucket_t * bucket)$/;"	f
-destroy_common_queue	queue_manager.c	/^void destroy_common_queue(common_queue_t * common_queue)$/;"	f
+destory_time	config.h	/^	int destory_time;$/;"	m	struct:__config
 destroy_generator	packet_generator.c	/^void   destroy_generator(generator_group_t * generator_group)$/;"	f
 destroy_parser_group	packet_parser.c	/^void destroy_parser_group(parser_group_t * parser_group)$/;"	f
-destroy_pool	pool_manager.c	/^void destroy_pool(pool_t * pool)$/;"	f
+dev_id	packet_generator.h	/^    int dev_id;$/;"	m	struct:generator
+dev_id	rule_defs.h	/^	uint32_t	dev_id;$/;"	m	struct:block_para_s
+dev_id	rule_defs.h	/^	uint32_t	dev_id;$/;"	m	struct:log_para_s
 dicta	simulation_test.py	/^dicta = { $/;"	v
 display_gen	display.c	/^static void display_gen(generator_group_t * generator_group)$/;"	f	file:
-display_generator	display.c	/^static void display_generator(window_t * win,generator_group_t * generator_group)$/;"	f	file:
 display_gpm	display.c	/^void display_gpm(generator_group_t * generator_group,$/;"	f
-display_manager	display.c	/^static void display_manager(window_t * win,manager_group_t * manager_group)$/;"	f	file:
-display_parser	display.c	/^static void display_parser(window_t * win, parser_group_t *  parser_group)$/;"	f	file:
+dist_policy_e	rule_defs.h	/^typedef enum dist_policy_e$/;"	g
+dist_policy_t	rule_defs.h	/^} dist_policy_t;$/;"	t	typeref:enum:dist_policy_e
+dma_rx_bytes	if_stat.h	/^	uint64_t	dma_rx_bytes;		$/;"	m	struct:if_stats_s
+dma_rx_drops	if_stat.h	/^	uint64_t	dma_rx_drops;	$/;"	m	struct:if_stats_s
+dma_rx_errors	if_stat.h	/^	uint64_t	dma_rx_errors;		$/;"	m	struct:if_stats_s
+dma_rx_packets	if_stat.h	/^	uint64_t	dma_rx_packets;		\/* card -> host *\/$/;"	m	struct:if_stats_s
 dmac	mpipe.h	/^    gxio_mpipe_rules_dmac_t dmac;$/;"	m	struct:__mpipe_t
+dns_drop	if_stat.h	/^	uint64_t	dns_drop;$/;"	m	struct:anti_attack_stat_s
 dport_cur	config.h	/^    uint32_t dport_cur;$/;"	m	struct:__config
 dport_max	config.h	/^    uint32_t dport_max;$/;"	m	struct:__config
 dport_min	config.h	/^    uint32_t dport_min;$/;"	m	struct:__config
-drop_cause_empty_payload	lossratio.h	/^    uint64_t drop_cause_empty_payload;$/;"	m	struct:__anon2
-drop_cause_generator_pool_empty	lossratio.h	/^    uint64_t drop_cause_generator_pool_empty;$/;"	m	struct:__anon2
-drop_cause_manager_pool_empty	lossratio.h	/^    uint64_t drop_cause_manager_pool_empty;$/;"	m	struct:__anon2
+drop_cause_empty_payload	lossratio.h	/^    uint64_t drop_cause_empty_payload;$/;"	m	struct:__anon1
+drop_cause_generator_pool_empty	lossratio.h	/^    uint64_t drop_cause_generator_pool_empty;$/;"	m	struct:__anon1
+drop_cause_manager_pool_empty	lossratio.h	/^    uint64_t drop_cause_manager_pool_empty;$/;"	m	struct:__anon1
 drop_cause_no_payload	packet_parser.h	/^    uint64_t drop_cause_no_payload;$/;"	m	struct:_parser
-drop_cause_parser_pool_empty	lossratio.h	/^    uint64_t drop_cause_parser_pool_empty;$/;"	m	struct:__anon2
-drop_cause_parser_queue_full	lossratio.h	/^    uint64_t drop_cause_parser_queue_full;$/;"	m	struct:__anon2
+drop_cause_parser_pool_empty	lossratio.h	/^    uint64_t drop_cause_parser_pool_empty;$/;"	m	struct:__anon1
+drop_cause_parser_queue_full	lossratio.h	/^    uint64_t drop_cause_parser_queue_full;$/;"	m	struct:__anon1
 drop_cause_pool_empty	packet_manager.h	/^    uint64_t drop_cause_pool_empty;$/;"	m	struct:_session_manager
 drop_cause_pool_empty	packet_parser.h	/^    uint64_t drop_cause_pool_empty;$/;"	m	struct:_parser
-drop_cause_unsupport_protocol	lossratio.h	/^    uint64_t drop_cause_unsupport_protocol;$/;"	m	struct:__anon2
+drop_cause_unsupport_protocol	lossratio.h	/^    uint64_t drop_cause_unsupport_protocol;$/;"	m	struct:__anon1
 drop_cause_unsupport_protocol	packet_parser.h	/^    uint64_t drop_cause_unsupport_protocol;$/;"	m	struct:_parser
 drop_pempty_total	packet_generator.h	/^    uint64_t    drop_pempty_total;$/;"	m	struct:generator
 drop_qfull_total	packet_generator.h	/^    uint64_t    drop_qfull_total;$/;"	m	struct:generator
 drop_ratio	lossratio.c	/^double drop_ratio(drop_t * new, drop_t * old)$/;"	f
-drop_t	lossratio.h	/^}drop_t;$/;"	t	typeref:struct:__anon2
+drop_t	lossratio.h	/^}drop_t;$/;"	t	typeref:struct:__anon1
 drop_total	packet_generator.h	/^    uint64_t    drop_total;$/;"	m	struct:generator
+dropped	stream_stat.h	/^	uint64_t	dropped;$/;"	m	struct:stream_stat_s
+dropped_bytes	stream_stat.h	/^	uint64_t	dropped_bytes;$/;"	m	struct:stream_stat_s
+dst_addr	rule_defs.h	/^	gen_ip_addr_t 	dst_addr;$/;"	m	struct:l4_rule_s
+dst_mac	rule_defs.h	/^	uint8_t		dst_mac[8]; 	\/* log∑˛ŒÒ∆˜µƒMACµÿ÷∑*\/$/;"	m	struct:log_para_s
+dst_mac	rule_defs.h	/^	uint8_t		dst_mac[8];$/;"	m	struct:block_para_s
+dst_port	rule_defs.h	/^	uint16_t 	dst_port;$/;"	m	struct:l4_rule_s
 dstmac	config.h	/^    unsigned char dstmac[6];$/;"	m	struct:__config
 edma	mpipe.h	/^    unsigned int edma;$/;"	m	struct:__mpipe_t
-empty	pool_manager.h	/^    pthread_cond_t  empty;$/;"	m	struct:_pool
-empty	queue_manager.h	/^    pthread_cond_t empty;$/;"	m	struct:_common_queue
+egress_bytes	if_stat.h	/^  uint64_t egress_bytes;$/;"	m	struct:__anon3
+egress_packets	if_stat.h	/^  uint64_t egress_packets;$/;"	m	struct:__anon3
 equeue	mpipe.h	/^    gxio_mpipe_equeue_t *  equeue;$/;"	m	struct:__mpipe_t
 equeue_entries	config.h	/^    uint32_t equeue_entries;$/;"	m	struct:__config
 equeue_entries	mpipe.h	/^    uint32_t    equeue_entries;$/;"	m	struct:__mpipe_t
 ether_atoe	config.c	/^int ether_atoe(const char *a, unsigned char *e)$/;"	f
 ether_etoa	config.c	/^char * ether_etoa(const unsigned char *e, char *a)$/;"	f
-exe	simulation_test.py	/^                        exe = '%s --pktlen %d -g %d -p %d -m %d --gpool_size %d --pqueue_length %d' % (exename,(p),(g),(pa),(m),(gp),(pq))$/;"	v
+exe	simulation_test.py	/^                        exe = '%s --pktlen %d -g %d -p %d -m %d' % (exename,(p),(g),(g),(m))$/;"	v
 exename	simulation_test.py	/^exename = '.\/simulation'$/;"	v
-exit_if_ptr_is_null	config.c	/^void exit_if_ptr_is_null(void * ptr,const char * message) $/;"	f
-false	includes.h	56;"	d
+exit_if_ptr_is_null	includes.h	/^static inline void exit_if_ptr_is_null(void * ptr,const char * message)   $/;"	f
+false	includes.h	57;"	d
 ffile	simulation_test.py	/^ffile = open('.ffile','a')$/;"	v
 find_list	packet_manager.c	/^struct blist * find_list(struct list_head * head, flow_item_t * flow)$/;"	f
 finish_generator	packet_generator.c	/^void   finish_generator(generator_group_t * generator_group)$/;"	f
@@ -182,17 +371,14 @@ flist	simulation_test.py	/^flist = []$/;"	v
 flow_display	display.c	/^void flow_display(flow_item_t * flow)$/;"	f
 flow_item	includes.h	/^typedef struct flow_item$/;"	s
 flow_item_t	includes.h	/^}flow_item_t;$/;"	t	typeref:struct:flow_item
-free_buf	pool_manager.c	/^void free_buf(pool_t * pool,void * data)$/;"	f
-free_flow	hash.c	/^static inline void free_flow(flow_item_t * flow)$/;"	f	file:
-free_flow	packet_manager.c	/^static inline void free_flow(flow_item_t * flow)$/;"	f	file:
-free_flow	packet_parser.c	/^static inline void free_flow(flow_item_t * flow)$/;"	f	file:
-free_num	pool_manager.h	/^    unsigned int    free_num;$/;"	m	struct:_pool
-free_packet	packet_parser.c	/^static inline void free_packet(packet_t * packet)$/;"	f	file:
-full	queue_manager.h	/^    pthread_cond_t full;$/;"	m	struct:_common_queue
+free	stream_stat.h	/^	uint64_t	free;$/;"	m	struct:stream_stat_s
 gbarrier	simulation.c	/^tmc_sync_barrier_t gbarrier; $/;"	v
+gclean_id	packet_manager.c	/^static pthread_t gclean_id;$/;"	v	file:
+gen_ip_addr_t	rule_defs.h	/^typedef __uint128_t   gen_ip_addr_t;$/;"	t
+gen_ip_addr_t	rule_defs.h	/^} gen_ip_addr_t;$/;"	t	typeref:struct:__anon5
 generator	packet_generator.h	/^    generator_t * generator;$/;"	m	struct:generator_group
 generator	packet_generator.h	/^typedef struct generator$/;"	s
-generator	simulation_test.py	/^generator = [5,10] $/;"	v
+generator	simulation_test.py	/^generator = [1,2,3,4,5,6,7,8,9,10] $/;"	v
 generator_group	packet_generator.c	/^static generator_group_t * generator_group = NULL;$/;"	v	file:
 generator_group	packet_generator.h	/^typedef struct generator_group$/;"	s
 generator_group_t	packet_generator.h	/^}generator_group_t;$/;"	t	typeref:struct:generator_group
@@ -202,7 +388,6 @@ generator_pool_size	config.h	/^    int generator_pool_size;   $/;"	m	struct:__co
 generator_t	packet_generator.h	/^}generator_t;$/;"	t	typeref:struct:generator
 generator_tcp_packet	packet_generator.c	/^static inline void generator_tcp_packet(packet_t * packet,sim_config_t * config)$/;"	f	file:
 generator_udp_packet	packet_generator.c	/^static inline void generator_udp_packet(packet_t * packet,sim_config_t * config)$/;"	f	file:
-get_buf	pool_manager.c	/^int get_buf(pool_t * pool,int flag, void ** data)$/;"	f
 get_cpu_mhz	config.c	/^static uint32_t get_cpu_mhz()$/;"	f	file:
 get_cycle_count_intel	includes.h	/^static inline uint64_t get_cycle_count_intel()$/;"	f
 get_generator_group	packet_generator.c	/^generator_group_t * get_generator_group()$/;"	f
@@ -211,17 +396,18 @@ get_next_dstip	packet_generator.c	/^static inline uint32_t get_next_dstip(sim_co
 get_next_dstport	packet_generator.c	/^static inline uint16_t get_next_dstport(sim_config_t * config)$/;"	f	file:
 get_next_srcip	packet_generator.c	/^static inline uint32_t get_next_srcip(sim_config_t * config)$/;"	f	file:
 get_next_srcport	packet_generator.c	/^static inline uint16_t get_next_srcport(sim_config_t * config)$/;"	f	file:
+get_para_ip_version	rule_defs.h	40;"	d
+get_para_value	rule_defs.h	41;"	d
 get_parser_group	packet_parser.c	/^parser_group_t * get_parser_group()$/;"	f
 get_update_speed	lossratio.c	/^static int get_update_speed(const char * buf)$/;"	f	file:
 ghash_view	simulation.c	/^int ghash_view[36] = {0};$/;"	v
 global_config	config.c	/^sim_config_t * global_config;$/;"	v
 global_cpus	simulation.c	/^cpu_set_t global_cpus;$/;"	v
 global_create_generator_lock	packet_generator.c	/^static pthread_mutex_t global_create_generator_lock = PTHREAD_MUTEX_INITIALIZER;$/;"	v	file:
-global_create_manager_lock	packet_manager.c	/^static pthread_mutex_t global_create_manager_lock = PTHREAD_MUTEX_INITIALIZER;$/;"	v	file:
-global_create_parser_lock	packet_parser.c	/^static pthread_mutex_t global_create_parser_lock = PTHREAD_MUTEX_INITIALIZER;$/;"	v	file:
 global_loss	lossratio.c	/^drop_t * global_loss = &global_loss_body;$/;"	v
 global_loss_body	lossratio.c	/^drop_t global_loss_body;$/;"	v
 global_manager_group	packet_manager.c	/^static manager_group_t * global_manager_group = NULL;$/;"	v	file:
+global_mpipe	packet_generator.c	/^static mpipe_common_t * global_mpipe = NULL;$/;"	v	file:
 global_parser_group	packet_parser.c	/^static parser_group_t * global_parser_group = NULL;$/;"	v	file:
 gpool_size	simulation_test.py	/^gpool_size = [500000,800000] $/;"	v
 group	mpipe.h	/^    int                     group;$/;"	m	struct:__mpipe_t
@@ -231,17 +417,29 @@ hash_create	hash.c	/^hash_table * hash_create(int num)$/;"	f
 hash_index	packet_parser.c	/^static inline unsigned int hash_index(flow_item_t * flow,manager_group_t * manager_group)$/;"	f	file:
 hash_item_t	hash.c	/^typedef session_item_t hash_item_t ;$/;"	t	file:
 hash_lookup_item	hash.c	/^void * hash_lookup_item(hash_table * ht, uint32_t key, void * value)$/;"	f
+hash_next	rule_defs.h	/^    uint32_t hash_next;    \/\/hash≥ÂÕª$/;"	m	struct:__anon9
 hash_table	hash.h	/^typedef struct hash_table {$/;"	s
 hash_table	hash.h	/^} hash_table;$/;"	t	typeref:struct:hash_table
 hash_travel_delete	hash.c	/^void  hash_travel_delete(hash_table * ht)$/;"	f
-height	display.c	/^    int height;$/;"	m	struct:__anon1	file:
+hits	rule_stat.h	/^	uint64_t	hits;$/;"	m	struct:rule_stat_s
+host_mpipe_stats_t	if_stat.h	/^host_mpipe_stats_t;$/;"	t	typeref:struct:__anon3
 ht	packet_manager.h	/^    struct hash_table * ht;$/;"	m	struct:_session_manager	typeref:struct:_session_manager::hash_table
 id	packet_generator.h	/^    pthread_t   id;$/;"	m	struct:generator
 id	packet_manager.h	/^    pthread_t          id;$/;"	m	struct:_session_manager
 id	packet_parser.h	/^    pthread_t id;$/;"	m	struct:_parser
+if_stats_ntoh	if_stat.h	/^static inline void if_stats_ntoh(if_stats_t *if_stat)$/;"	f
+if_stats_s	if_stat.h	/^typedef struct if_stats_s$/;"	s
+if_stats_t	if_stat.h	/^} if_stats_t;$/;"	t	typeref:struct:if_stats_s
 index	packet_generator.h	/^    int         index;$/;"	m	struct:generator
 index	packet_manager.h	/^    int                index;$/;"	m	struct:_session_manager
-init_common_queue	queue_manager.c	/^common_queue_t * init_common_queue(int numbers,int item_size)$/;"	f
+inet	rule_defs.h	/^    uint32_t inet;     \/\/1:∆’Õ®Õ¯ø®mac   0:”¶”√mac$/;"	m	struct:__anon7
+inet	rule_defs.h	/^    uint32_t inet;     \/\/1:∆’Õ®Õ¯ø®mac   0:”¶”√mac$/;"	m	struct:__anon9
+ingress_bytes	if_stat.h	/^  uint64_t ingress_bytes;$/;"	m	struct:__anon3
+ingress_drops	if_stat.h	/^  uint64_t ingress_drops;$/;"	m	struct:__anon3
+ingress_drops_cls_lb	if_stat.h	/^  uint64_t ingress_drops_cls_lb;$/;"	m	struct:__anon3
+ingress_drops_ipkt	if_stat.h	/^  uint64_t ingress_drops_ipkt;$/;"	m	struct:__anon3
+ingress_drops_no_buf	if_stat.h	/^  uint64_t ingress_drops_no_buf;$/;"	m	struct:__anon3
+ingress_packets	if_stat.h	/^  uint64_t ingress_packets;$/;"	m	struct:__anon3
 init_config_s	config.c	/^int init_config_s(sim_config_t * config)$/;"	f
 init_generator_group	packet_generator.c	/^generator_group_t * init_generator_group(sim_config_t * config)$/;"	f
 init_manager_group	packet_manager.c	/^manager_group_t * init_manager_group(sim_config_t * config)$/;"	f
@@ -252,28 +450,30 @@ init_mpipe_iqueue	mpipe.c	/^static int init_mpipe_iqueue(mpipe_common_t * mpipe)
 init_mpipe_resource	mpipe.c	/^void init_mpipe_resource(mpipe_common_t * mpipe)$/;"	f
 init_mpipe_rules	mpipe.c	/^static int init_mpipe_rules(mpipe_common_t * mpipe)$/;"	f	file:
 init_parser_group	packet_parser.c	/^parser_group_t * init_parser_group(sim_config_t * config)$/;"	f
-init_pool	pool_manager.c	/^pool_t * init_pool(pool_type_t type,int numbers,int item_size)$/;"	f
-init_signle_generator	packet_generator.c	/^static inline void init_signle_generator(generator_group_t * generator_group,int i)$/;"	f	file:
+init_signle_generator	packet_generator.c	/^static inline void init_signle_generator(generator_group_t * generator_group,int i,int dev_id)$/;"	f	file:
 init_signle_manager	packet_manager.c	/^static inline void init_signle_manager(manager_group_t * manager_group,int i)$/;"	f	file:
 init_single_parser	packet_parser.c	/^static inline void init_single_parser(parser_t * parser)$/;"	f	file:
 instance	mpipe.h	/^    int instance;$/;"	m	struct:__mpipe_t
+intel_packet_collector	packet_generator.c	/^void intel_packet_collector(generator_t * generator)$/;"	f
 ip_xsum	checksum.c	/^uint16_t ip_xsum (uint16_t *buff, int len, uint32_t xsum)$/;"	f
 iqueues	mpipe.h	/^    gxio_mpipe_iqueue_t **  iqueues;$/;"	m	struct:__mpipe_t
-is_empty_common_queue	queue_manager.c	/^bool is_empty_common_queue(common_queue_t * common_queue)$/;"	f
-is_empty_pool	pool_manager.c	/^bool is_empty_pool(pool_t * pool)$/;"	f
-is_full_common_queue	queue_manager.c	/^bool is_full_common_queue(common_queue_t * common_queue)$/;"	f
-is_full_pool	pool_manager.c	/^bool is_full_pool(pool_t * pool)$/;"	f
 item	list.h	/^	session_item_t  item;$/;"	m	struct:blist
-item_size	pool_manager.h	/^    int             item_size;$/;"	m	struct:_pool
-item_size	queue_manager.h	/^    int item_size;$/;"	m	struct:_common_queue
+key	rule_defs.h	/^    vm_l2rule_key_t key;$/;"	m	struct:__anon10
+l2list_info_t	rule_defs.h	/^}l2list_info_t;$/;"	t	typeref:struct:__anon6
+l4_rule_hton	rule_defs.h	312;"	d
+l4_rule_hton_ex	rule_defs.h	300;"	d
+l4_rule_ntoh	rule_defs.h	322;"	d
+l4_rule_s	rule_defs.h	/^typedef struct l4_rule_s$/;"	s
+l4_rule_t	rule_defs.h	/^} l4_rule_t;$/;"	t	typeref:struct:l4_rule_s
 last_time	includes.h	/^    uint64_t last_time;$/;"	m	struct:_session_item
 length	includes.h	/^    uint32_t length;$/;"	m	struct:_session_item
 length	includes.h	/^    unsigned int    length; \/* ‰∏Ä‰∏™ÂåÖÁöÑÈïøÂ∫¶*\/$/;"	m	struct:packet
-length	queue_manager.h	/^    unsigned int length;$/;"	m	struct:_common_queue
 likely	includes.h	96;"	d
 link	mpipe.h	/^    gxio_mpipe_link_t link;$/;"	m	struct:__mpipe_t
 link_name	config.h	/^    char * link_name;$/;"	m	struct:__config
 link_name	mpipe.h	/^    char *      link_name;$/;"	m	struct:__mpipe_t
+link_speed	if_stat.h	/^	uint32_t	link_speed;$/;"	m	struct:if_stats_s
+link_status	if_stat.h	/^	uint32_t	link_status;$/;"	m	struct:if_stats_s
 list	hash.h	/^    struct list_head list;$/;"	m	struct:bucket	typeref:struct:bucket::list_head
 list1024	simulation_test.py	/^list1024 = [] $/;"	v
 list128	simulation_test.py	/^list128  = [] $/;"	v
@@ -289,24 +489,37 @@ list_empty	list.h	/^static inline int list_empty(const struct list_head *head)$/
 list_entry	list.h	75;"	d
 list_for_each	list.h	78;"	d
 list_for_each_safe	list.h	82;"	d
+list_free_head	rule_defs.h	/^    uint32_t list_free_head;$/;"	m	struct:__anon6
+list_free_tail	rule_defs.h	/^    uint32_t list_free_tail;$/;"	m	struct:__anon6
 list_head	list.h	/^struct list_head {$/;"	s
 list_move_tail	list.h	/^static inline void list_move_tail(struct list_head *list,$/;"	f
+list_used_head	rule_defs.h	/^    uint32_t list_used_head;$/;"	m	struct:__anon6
+list_used_tail	rule_defs.h	/^    uint32_t list_used_tail;$/;"	m	struct:__anon6
 listhead	list.h	/^	struct list_head listhead;$/;"	m	struct:blist	typeref:struct:blist::list_head
 listn	simulation_test.py	/^                            listn = result.split("\\n")$/;"	v
 lock	hash.h	/^    pthread_mutex_t  lock;$/;"	m	struct:bucket
+log_action	rule_defs.h	/^	uint8_t  	log_action;$/;"	m	struct:l4_rule_s
+log_para_hton	rule_defs.h	/^static inline void log_para_hton(log_para_t *para)$/;"	f
+log_para_ntoh	rule_defs.h	/^static inline void log_para_ntoh(log_para_t *para)$/;"	f
+log_para_s	rule_defs.h	/^typedef struct log_para_s$/;"	s
+log_para_t	rule_defs.h	/^} log_para_t;$/;"	t	typeref:struct:log_para_s
+logs	rule_stat.h	/^	uint64_t	logs[LOG_ACTION_MAX];$/;"	m	struct:rule_stat_s
 long_options	simulation.c	/^struct option long_options[] =$/;"	v	typeref:struct:option
 lower_ip	includes.h	/^    uint32_t lower_ip;$/;"	m	struct:_session_item
 lower_ip	includes.h	/^    uint32_t lower_ip;$/;"	m	struct:flow_item
 lower_port	includes.h	/^    uint32_t lower_port;$/;"	m	struct:_session_item
 lower_port	includes.h	/^    uint32_t lower_port;$/;"	m	struct:flow_item
+mac	rule_defs.h	/^    uint64_t mac;$/;"	m	struct:__anon7
+mac	rule_defs.h	/^    uint64_t mac;$/;"	m	struct:__anon8
 main	simulation.c	/^int main(int argc, char ** argv)$/;"	f
 make_all_packet	packet_generator.c	/^static void make_all_packet(generator_t * generator,GenerHandler * Handler)$/;"	f	file:
+make_clean_packet	packet_generator.c	/^void make_clean_packet(generator_t * generator)$/;"	f
 make_flow_item_tcp	packet_parser.c	/^static inline void make_flow_item_tcp(flow_item_t * flow,packet_t * packet,int len)$/;"	f	file:
 make_flow_item_udp	packet_parser.c	/^static inline void make_flow_item_udp(flow_item_t * flow,packet_t * packet,int header_len)$/;"	f	file:
 make_hash	packet_parser.c	/^static inline uint32_t make_hash(uint32_t f1,uint32_t f2,uint32_t f3,uint32_t f4,uint32_t SIZE) $/;"	f	file:
 make_new_session	hash.c	/^static inline void make_new_session(struct blist * blist,$/;"	f	file:
 manager	packet_manager.h	/^    manager_t * manager;$/;"	m	struct:_group
-manager	simulation_test.py	/^manager = [5,11]$/;"	v
+manager	simulation_test.py	/^manager = [3,5,7,9,11]$/;"	v
 manager_buffer_size	config.h	/^    int manager_buffer_size;$/;"	m	struct:__config
 manager_group_t	packet_manager.h	/^}manager_group_t;$/;"	t	typeref:struct:_group
 manager_hash_length	config.h	/^    int manager_hash_length;$/;"	m	struct:__config
@@ -315,18 +528,15 @@ manager_pool_size	config.h	/^    int manager_pool_size;$/;"	m	struct:__config
 manager_queue_length	config.h	/^    int manager_queue_length;$/;"	m	struct:__config
 manager_t	packet_manager.h	/^}manager_t;$/;"	t	typeref:struct:_session_manager
 max	simulation_test.py	/^                            max = averages(listn)$/;"	v
-maxargs	simulation_test.py	/^                            maxargs = [p,g,pa,m,gp,pq]$/;"	v
+maxargs	simulation_test.py	/^                            maxargs = [p,g,g,m]$/;"	v
+mhz	config.h	/^    int mhz;$/;"	m	struct:__config
 mpipe	packet_generator.h	/^    mpipe_common_t * mpipe;$/;"	m	struct:generator
 mpipe_common_t	mpipe.h	/^typedef int mpipe_common_t;$/;"	t
 mpipe_common_t	mpipe.h	/^}mpipe_common_t;$/;"	t	typeref:struct:__mpipe_t
 mpipe_send_packet	mpipe.c	/^void mpipe_send_packet(mpipe_common_t * mpipe,$/;"	f
-mutex	pool_manager.h	/^    pthread_mutex_t mutex;$/;"	m	struct:_pool
-mutex	queue_manager.h	/^    pthread_mutex_t mutex;$/;"	m	struct:_common_queue
 next	list.h	/^	struct list_head* next; $/;"	m	struct:list_head	typeref:struct:list_head::list_head
 next_prime	hash.c	/^static int next_prime(int x)$/;"	f	file:
 next_thread_id	packet_generator.h	/^    int         next_thread_id;$/;"	m	struct:generator
-node	pool_manager.h	/^    void         ** node;$/;"	m	struct:_pool
-node	queue_manager.h	/^    void ** node;$/;"	m	struct:_common_queue
 notif_ring_entries	config.h	/^    int32_t  notif_ring_entries;$/;"	m	struct:__config
 notif_ring_entries	mpipe.h	/^    int         notif_ring_entries;$/;"	m	struct:__mpipe_t
 now	packet_generator.h	/^    struct timeval old,now;$/;"	m	struct:generator	typeref:struct:generator::
@@ -347,6 +557,7 @@ packet_generator_mode	config.h	/^    int     packet_generator_mode;$/;"	m	struct
 packet_manager_loop	packet_manager.c	/^void * packet_manager_loop(void * arg)$/;"	f
 packet_parser_loop	packet_parser.c	/^void * packet_parser_loop(void * arg)$/;"	f
 packet_t	includes.h	/^}packet_t;$/;"	t	typeref:struct:packet
+packets	stream_stat.h	/^	uint64_t	packets;$/;"	m	struct:stream_stat_s
 parse_args	simulation.c	/^void parse_args(int argc, char * const argv[],sim_config_t * config)$/;"	f
 parse_frag_off	parse.c	/^static inline void parse_frag_off(__be16 frag_off)$/;"	f	file:
 parse_full_packet	parse.c	/^void parse_full_packet(void * buffer)$/;"	f
@@ -356,13 +567,11 @@ parse_mac_type	parse.c	/^static void parse_mac_type(__be16 h_proto)$/;"	f	file:
 parse_tcphdr	parse.c	/^void parse_tcphdr(struct tcphdr * tcph)$/;"	f
 parse_tos	parse.c	/^static inline void parse_tos(unsigned char tos)$/;"	f	file:
 parser	packet_parser.h	/^    parser_t * parser;$/;"	m	struct:parser_m
-parser	simulation_test.py	/^parser = [5,10]$/;"	v
 parser_group_H	packet_parser.h	8;"	d
 parser_group_t	packet_parser.h	/^}parser_group_t;$/;"	t	typeref:struct:parser_m
 parser_m	packet_parser.h	/^typedef struct parser_m$/;"	s
 parser_nums	config.h	/^    int     parser_nums;$/;"	m	struct:__config
 parser_pool_size	config.h	/^    int parser_pool_size;$/;"	m	struct:__config
-parser_process	packet_parser.c	/^static int parser_process(manager_group_t * manager_group,$/;"	f	file:
 parser_queue_length	config.h	/^    int parser_queue_length;$/;"	m	struct:__config
 parser_t	packet_parser.h	/^}parser_t;$/;"	t	typeref:struct:_parser
 payload	includes.h	/^    unsigned char * payload;$/;"	m	struct:flow_item
@@ -373,45 +582,47 @@ period	config.h	/^    uint32_t period;$/;"	m	struct:__config
 pipe_depth	config.h	/^	int pipe_depth;$/;"	m	struct:__config
 pkt_data	config.h	/^    char * pkt_data;$/;"	m	struct:__config
 pktlen	config.h	/^    int pktlen;$/;"	m	struct:__config
-pktlen	simulation_test.py	/^pktlen = [64,128,256,512,1024,1280,1518]$/;"	v
+pktlen	simulation_test.py	/^pktlen = [256]$/;"	v
+pool	includes.h	/^    mwsr_mpool_t * pool;$/;"	m	struct:_session_item
 pool	includes.h	/^    mwsr_pool_t * pool;          \/* Ëøô‰∏™ÂåÖÊù•Ëá™Âì™‰∏™Ê±†Â≠ê*\/$/;"	m	struct:flow_item
 pool	includes.h	/^    mwsr_pool_t * pool;          \/* Ëøô‰∏™ÂåÖÊù•Ëá™Âì™‰∏™Ê±†Â≠ê*\/$/;"	m	struct:packet
-pool	includes.h	/^    swsr_pool_t * pool;$/;"	m	struct:_session_item
 pool	packet_generator.h	/^    mwsr_pool_t   * pool;$/;"	m	struct:generator
 pool	packet_parser.h	/^    mwsr_pool_t  * pool;$/;"	m	struct:_parser
-pool_t	pool_manager.h	/^}pool_t;$/;"	t	typeref:struct:_pool
-pool_type	pool_manager.h	/^    pool_type_t pool_type;$/;"	m	struct:_pool
-pool_type_t	pool_manager.h	/^}pool_type_t;$/;"	t	typeref:enum:_pool_type
-pop_common_buf	queue_manager.c	/^bool pop_common_buf(common_queue_t * common_queue,void ** data)$/;"	f
 pop_datalink	packet_generator.c	/^static inline void pop_datalink(void * packet,sim_config_t * config)$/;"	f	file:
 pop_iplayer_tcp	packet_generator.c	/^static inline void pop_iplayer_tcp(void * iph,sim_config_t * config)$/;"	f	file:
 pop_iplayer_udp	packet_generator.c	/^static inline void pop_iplayer_udp(void * iph,sim_config_t * config)$/;"	f	file:
 pop_payload	packet_generator.c	/^int pop_payload(void * payload, char * data,sim_config_t * config)$/;"	f
-pop_pos	pool_manager.h	/^    int             pop_pos;$/;"	m	struct:_pool
-pop_pos	queue_manager.h	/^    int pop_pos;$/;"	m	struct:_common_queue
 pop_transmission_tcp	packet_generator.c	/^static inline int pop_transmission_tcp(void * tcph,sim_config_t * config)$/;"	f	file:
 pop_transmission_udp	packet_generator.c	/^static inline int pop_transmission_udp(void * udph,sim_config_t * config)$/;"	f	file:
+port	rule_defs.h	/^	uint32_t	port;		\/* ∑¢ÀÕlog±®Œƒµƒ∂Àø⁄∫≈*\/$/;"	m	struct:log_para_s
+port	rule_defs.h	/^	uint32_t	port;$/;"	m	struct:block_para_s
+port	rule_defs.h	/^    uint32_t port;     \/\/∂Àø⁄±‡∫≈$/;"	m	struct:__anon7
+port	rule_defs.h	/^    uint32_t port;     \/\/∂Àø⁄±‡∫≈$/;"	m	struct:__anon9
 pqueue_length	simulation_test.py	/^pqueue_length = [500000,800000]$/;"	v
 prev	list.h	/^	struct list_head* prev;$/;"	m	struct:list_head	typeref:struct:list_head::list_head
 print_config_file	config.c	/^void print_config_file(sim_config_t * config)$/;"	f
 print_lock	parse.c	/^pthread_mutex_t print_lock = PTHREAD_MUTEX_INITIALIZER;$/;"	v
 print_packet	parse.c	/^void print_packet(unsigned char * packet,int size)    $/;"	f
-print_pool_type	pool_manager.c	/^static inline void print_pool_type(pool_t * pool)$/;"	f	file:
 printf_mac_info	parse.c	/^static void printf_mac_info(struct ethhdr * ether_header)$/;"	f	file:
+priority	rule_defs.h	/^	int16_t		priority;$/;"	m	struct:rule_class_para_s
 process_all_session	packet_manager.c	/^static void * process_all_session(void * arg)$/;"	f	file:
 process_ipc_request	lossratio.c	/^void * process_ipc_request(void * arg)$/;"	f
 process_session	packet_manager.c	/^void * process_session(void * arg)$/;"	f
 protocol	config.h	/^    int protocol;$/;"	m	struct:__config
 protocol	includes.h	/^    uint8_t  protocol;$/;"	m	struct:_session_item
 protocol	includes.h	/^    uint8_t  protocol;$/;"	m	struct:flow_item
-push_common_buf	queue_manager.c	/^bool push_common_buf(common_queue_t * common_queue,int flag,void * data)$/;"	f
-push_pos	pool_manager.h	/^    int             push_pos;$/;"	m	struct:_pool
-push_pos	queue_manager.h	/^    int push_pos;$/;"	m	struct:_common_queue
-queue	packet_manager.h	/^    swsr_pool_t       * queue;$/;"	m	struct:_session_manager
+protocol	rule_defs.h	/^	uint8_t  	protocol;$/;"	m	struct:l4_rule_s
+queue	packet_manager.h	/^    mwsr_queue_t      * queue;$/;"	m	struct:_session_manager
 queue	packet_parser.h	/^    swsr_queue_t * queue;$/;"	m	struct:_parser
+rand_key	rule_defs.h	/^	uint32_t	rand_key;$/;"	m	struct:block_para_s
+rand_max	rule_defs.h	/^	uint32_t	rand_max;$/;"	m	struct:block_para_s
 rank	packet_generator.h	/^    int rank;$/;"	m	struct:generator
 read_config_file	config.c	/^int read_config_file(const char * file_name,sim_config_t * config)$/;"	f
 read_config_simple	config.c	/^int read_config_simple(const char * file_name,sim_config_t * config)$/;"	f
+reserved_0	rule_stat.h	/^	int32_t		reserved_0;$/;"	m	struct:rule_stat_s
+reserved_1	rule_defs.h	/^	uint8_t		reserved_1;$/;"	m	struct:l4_rule_s
+reserved_2	rule_defs.h	/^	uint32_t	reserved_2[3];\/*  host∂À–Ë“™∞¥’’16◊÷Ω⁄∂‘∆Î *\/$/;"	m	struct:l4_rule_s
+result	rule_defs.h	/^    vm_l2rule_result_t result;$/;"	m	struct:__anon10
 result1024	simulation_test.py	/^result1024 = open('.result1024', 'a') $/;"	v
 result128	simulation_test.py	/^result128  = open('.result128',  'a') $/;"	v
 result1280	simulation_test.py	/^result1280 = open('.result1280', 'a') $/;"	v
@@ -420,14 +631,54 @@ result256	simulation_test.py	/^result256  = open('.result256',  'a') $/;"	v
 result512	simulation_test.py	/^result512  = open('.result512',  'a') $/;"	v
 result64	simulation_test.py	/^result64   = open('.result64',   'a') $/;"	v
 ring	mpipe.h	/^    unsigned int            ring;$/;"	m	struct:__mpipe_t
+rule_action_e	rule_defs.h	/^typedef enum rule_action_e$/;"	g
+rule_action_t	rule_defs.h	/^} rule_action_t;$/;"	t	typeref:enum:rule_action_e
+rule_block_action_e	rule_defs.h	/^typedef enum rule_block_action_e$/;"	g
+rule_block_action_t	rule_defs.h	/^} rule_block_action_t;$/;"	t	typeref:enum:rule_block_action_e
+rule_class	rule_defs.h	/^	uint8_t  	rule_class;$/;"	m	struct:l4_rule_s
+rule_class_para_hton	rule_defs.h	/^static inline void rule_class_para_hton(rule_class_para_t *para)$/;"	f
+rule_class_para_ntoh	rule_defs.h	/^static inline void rule_class_para_ntoh(rule_class_para_t *para)$/;"	f
+rule_class_para_s	rule_defs.h	/^typedef struct rule_class_para_s$/;"	s
+rule_class_para_t	rule_defs.h	/^} rule_class_para_t;$/;"	t	typeref:struct:rule_class_para_s
+rule_error_e	rule_defs.h	/^typedef enum rule_error_e$/;"	g
+rule_error_t	rule_defs.h	/^} rule_error_t;$/;"	t	typeref:enum:rule_error_e
+rule_id	rule_defs.h	/^	uint32_t	rule_id;$/;"	m	struct:l4_rule_s
+rule_id	rule_defs.h	/^    uint32_t rule_id;    \/\/πÊ‘Ú∫≈_◊‘∂Ø∑÷≈‰$/;"	m	struct:__anon9
+rule_log_acion_e	rule_defs.h	/^typedef enum rule_log_acion_e$/;"	g
+rule_log_action_t	rule_defs.h	/^} rule_log_action_t;$/;"	t	typeref:enum:rule_log_acion_e
+rule_stat_ntoh	rule_stat.h	/^static inline void rule_stat_ntoh(rule_stat_t *stats)$/;"	f
+rule_stat_s	rule_stat.h	/^typedef struct rule_stat_s$/;"	s
+rule_stat_t	rule_stat.h	/^} rule_stat_t;$/;"	t	typeref:struct:rule_stat_s
+rule_type_s	rule_defs.h	/^typedef enum rule_type_s$/;"	g
+rule_type_t	rule_defs.h	/^} rule_type_t;$/;"	t	typeref:enum:rule_type_s
+rule_version	rule_defs.h	/^	uint8_t		rule_version;  \/\/ipv4 or ipv6$/;"	m	struct:l4_rule_s
+rule_version_s	rule_defs.h	/^typedef enum rule_version_s$/;"	g
+rule_version_t	rule_defs.h	/^}rule_version_t;$/;"	t	typeref:enum:rule_version_s
+rx_card_bytes	if_stat.h	/^	uint64_t	rx_card_bytes; $/;"	m	struct:if_stats_s
+rx_card_dropped	if_stat.h	/^	uint64_t	rx_card_dropped; $/;"	m	struct:if_stats_s
+rx_card_dropped_bytes	if_stat.h	/^	uint64_t	rx_card_dropped_bytes;	$/;"	m	struct:if_stats_s
+rx_card_error_bytes	if_stat.h	/^	uint64_t	rx_card_error_bytes;$/;"	m	struct:if_stats_s
+rx_card_errors	if_stat.h	/^	uint64_t	rx_card_errors;  $/;"	m	struct:if_stats_s
+rx_card_mac_bytes	if_stat.h	/^	uint64_t	rx_card_mac_bytes; $/;"	m	struct:if_stats_s
+rx_card_mac_packets	if_stat.h	/^	uint64_t	rx_card_mac_packets; $/;"	m	struct:if_stats_s
+rx_card_packets	if_stat.h	/^	uint64_t	rx_card_packets; $/;"	m	struct:if_stats_s
+rx_hits	if_stat.h	/^	uint64_t 	rx_hits;$/;"	m	struct:if_stats_s
+rx_mpipe_dropped	if_stat.h	/^	uint64_t	rx_mpipe_dropped; $/;"	m	struct:if_stats_s
+rx_multicast	if_stat.h	/^	uint64_t	rx_multicast;		\/* multicast packets received	*\/$/;"	m	struct:if_stats_s
+rx_other_error_bytes	if_stat.h	/^	uint64_t	rx_other_error_bytes;$/;"	m	struct:if_stats_s
+rx_other_errors	if_stat.h	/^	uint64_t	rx_other_errors; \/*huge frame and not ip packet*\/$/;"	m	struct:if_stats_s
 saddr_cur	config.h	/^    uint32_t saddr_cur;$/;"	m	struct:__config
 saddr_max	config.h	/^    uint32_t saddr_max;$/;"	m	struct:__config
 saddr_min	config.h	/^    uint32_t saddr_min;$/;"	m	struct:__config
 screen_display	config.h	/^	int screen_display;$/;"	m	struct:__config
-screen_init	display.c	/^static void screen_init()$/;"	f	file:
-send_total	lossratio.h	/^    uint64_t send_total;$/;"	m	struct:__anon2
+send_total	lossratio.h	/^    uint64_t send_total;$/;"	m	struct:__anon1
+server	rule_defs.h	/^    uint32_t server;   \/\/∑˛ŒÒ∆˜±‡∫≈$/;"	m	struct:__anon7
+server	rule_defs.h	/^    uint32_t server;   \/\/∑˛ŒÒ∆˜±‡∫≈$/;"	m	struct:__anon9
+server_count	rule_defs.h	/^	uint32_t	server_count;	\/* Ω” ’log±®Œƒµƒ∑˛ŒÒ∆˜ ˝¡ø*\/$/;"	m	struct:log_para_s
+server_ip	rule_defs.h	/^	uint32_t	server_ip[MAX_LOG_SERVER];		\/* Ω” ’log±®Œƒµƒ∑˛ŒÒ∆˜IP *\/$/;"	m	struct:log_para_s
 session_item_t	includes.h	/^}session_item_t;$/;"	t	typeref:struct:_session_item
-session_pool	packet_manager.h	/^    mwsr_queue_t      * session_pool;$/;"	m	struct:_session_manager
+session_pool	packet_manager.h	/^    mwsr_mpool_t       * session_pool;$/;"	m	struct:_session_manager
+set_para_ip_version	rule_defs.h	39;"	d
 short_options	simulation.c	/^char * const short_options = "g:p:m:";$/;"	v
 sim_config_t	config.h	/^}sim_config_t;$/;"	t	typeref:struct:__config
 skip_opeartor	config.c	/^static inline char * skip_opeartor(const char * p)$/;"	f	file:
@@ -437,26 +688,52 @@ speed_mode	config.h	/^	int speed_mode;$/;"	m	struct:__config
 sport_cur	config.h	/^    uint32_t sport_cur;$/;"	m	struct:__config
 sport_max	config.h	/^    uint32_t sport_max;$/;"	m	struct:__config
 sport_min	config.h	/^    uint32_t sport_min;$/;"	m	struct:__config
+src_addr	rule_defs.h	/^	gen_ip_addr_t 	src_addr;$/;"	m	struct:l4_rule_s
+src_ip	rule_defs.h	/^	uint32_t	src_ip;			\/* ∑¢ÀÕlog±®Œƒµƒ‘¥IPµÿ÷∑*\/$/;"	m	struct:log_para_s
+src_mac	rule_defs.h	/^	uint8_t		src_mac[8];		\/* ∑¢ÀÕlog±®Œƒµƒ‘¥MACµÿ÷∑*\/$/;"	m	struct:log_para_s
+src_mac	rule_defs.h	/^	uint8_t		src_mac[8];$/;"	m	struct:block_para_s
+src_port	rule_defs.h	/^	uint16_t 	src_port;$/;"	m	struct:l4_rule_s
 srcmac	config.h	/^    unsigned char srcmac[6];$/;"	m	struct:__config
 stack_idx	mpipe.h	/^    int stack_idx;$/;"	m	struct:__mpipe_t
 start_ipc_client	lossratio.c	/^void * start_ipc_client(void * arg)$/;"	f
 start_ipc_server	lossratio.c	/^void * start_ipc_server(void * arg)$/;"	f
-startx	display.c	/^    int startx;$/;"	m	struct:__anon1	file:
-starty	display.c	/^    int starty;$/;"	m	struct:__anon1	file:
+stream	rule_defs.h	/^    uint32_t stream;   \/\/∞Û∂®µƒ¡˜ID$/;"	m	struct:__anon7
+stream	rule_defs.h	/^    uint32_t stream;   \/\/∞Û∂®µƒ¡˜ID$/;"	m	struct:__anon9
+stream_num	rule_defs.h	/^	uint32_t stream_num;   \/\/∞Û∂®µƒ¡˜ ˝¡ø$/;"	m	struct:__anon7
+stream_num	rule_defs.h	/^	uint32_t stream_num;   \/\/∞Û∂®µƒ¡˜ ˝¡ø$/;"	m	struct:__anon9
+stream_stat_ntoh	stream_stat.h	/^static inline void stream_stat_ntoh(stream_stat_t *stats)$/;"	f
+stream_stat_s	stream_stat.h	/^typedef struct stream_stat_s$/;"	s
+stream_stat_t	stream_stat.h	/^} stream_stat_t;$/;"	t	typeref:struct:stream_stat_s
 strupr	config.c	/^static inline char * strupr(char * p)$/;"	f	file:
+syn_drop	if_stat.h	/^	uint64_t	syn_drop;$/;"	m	struct:anti_attack_stat_s
 sys_display	display.c	/^void sys_display(generator_group_t * generator_group,$/;"	f
-tilera_packet_collector	packet_generator.c	/^static void tilera_packet_collector(generator_t * generator)$/;"	f	file:
+tilera_packet_collector	packet_generator.c	/^void tilera_packet_collector(generator_t * generator)$/;"	f
 total	packet_parser.h	/^    uint64_t total;$/;"	m	struct:_parser
-total	pool_manager.h	/^    unsigned int    total;$/;"	m	struct:_pool
-total	queue_manager.h	/^    unsigned int total;$/;"	m	struct:_common_queue
 total_send_byte	packet_generator.h	/^    uint64_t    total_send_byte;$/;"	m	struct:generator
-true	includes.h	55;"	d
+true	includes.h	56;"	d
+ttl	rule_defs.h	/^	int32_t		ttl;$/;"	m	struct:rule_class_para_s
+tx_bytes	if_stat.h	/^	uint64_t	tx_bytes;		\/* total bytes transmitted	*\/$/;"	m	struct:if_stats_s
+tx_card_bytes	if_stat.h	/^	uint64_t	tx_card_bytes; $/;"	m	struct:if_stats_s
+tx_card_errors	if_stat.h	/^	uint64_t	tx_card_errors;  $/;"	m	struct:if_stats_s
+tx_card_packets	if_stat.h	/^	uint64_t	tx_card_packets; $/;"	m	struct:if_stats_s
+tx_dropped	if_stat.h	/^	uint64_t	tx_dropped;		\/* no space available in linux	*\/$/;"	m	struct:if_stats_s
+tx_errors	if_stat.h	/^	uint64_t	tx_errors;		\/* packet transmit problems	*\/$/;"	m	struct:if_stats_s
+tx_packets	if_stat.h	/^	uint64_t	tx_packets;		\/* total packets transmitted	*\/$/;"	m	struct:if_stats_s
+type	rule_defs.h	/^	uint8_t  	type;$/;"	m	struct:l4_rule_s
+udp_dport	rule_defs.h	/^	uint16_t	udp_dport;		\/* ∑¢ÀÕlog±®Œƒµƒƒøµƒudp ∂Àø⁄∫≈*\/$/;"	m	struct:log_para_s
+udp_sport	rule_defs.h	/^	uint16_t	udp_sport;		\/* ∑¢ÀÕlog ±®Œƒµƒ‘¥udp∂Àø⁄∫≈*\/$/;"	m	struct:log_para_s
 unlikely	includes.h	95;"	d
 upper_ip	includes.h	/^    uint32_t upper_ip;$/;"	m	struct:_session_item
 upper_ip	includes.h	/^    uint32_t upper_ip;$/;"	m	struct:flow_item
 upper_port	includes.h	/^    uint32_t upper_port;$/;"	m	struct:_session_item
 upper_port	includes.h	/^    uint32_t upper_port;$/;"	m	struct:flow_item
-width	display.c	/^    int width;$/;"	m	struct:__anon1	file:
-win	display.c	/^    WINDOW * win;$/;"	m	struct:__anon1	file:
-window	display.c	/^static window_t window[WORKER_SET_SIZE];$/;"	v	file:
-window_t	display.c	/^}window_t;$/;"	t	typeref:struct:__anon1	file:
+used_next	rule_defs.h	/^    uint32_t used_next;$/;"	m	struct:__anon9
+used_prev	rule_defs.h	/^    uint32_t used_prev;$/;"	m	struct:__anon9
+vm	rule_defs.h	/^    uint32_t vm;       \/\/–Èƒ‚ª˙±‡∫≈£¨∑«–Èƒ‚ªØ»°0xff$/;"	m	struct:__anon7
+vm	rule_defs.h	/^    uint32_t vm;       \/\/–Èƒ‚ª˙±‡∫≈£¨∑«–Èƒ‚ªØ»°0xff$/;"	m	struct:__anon9
+vm_l2_rule_t	rule_defs.h	/^}vm_l2_rule_t;$/;"	t	typeref:struct:__anon7
+vm_l2rule_entry_t	rule_defs.h	/^}vm_l2rule_entry_t;$/;"	t	typeref:struct:__anon10
+vm_l2rule_key_t	rule_defs.h	/^}vm_l2rule_key_t;$/;"	t	typeref:struct:__anon8
+vm_l2rule_result_t	rule_defs.h	/^}vm_l2rule_result_t;$/;"	t	typeref:struct:__anon9
+vml2_rule_hton	rule_defs.h	389;"	d
+vml2_rule_ntoh	rule_defs.h	399;"	d
