@@ -216,7 +216,7 @@ NAME##_dequeue_multiple(NAME##_t *queue, 									  \
   	unsigned int dequeue_count = queue->dequeue_count;						  \
 	while(__builtin_expect(dequeue_num-- != 0, 1))							  \
 	{																		  \
-    	unsigned int i = queue->dequeue_count & ((1 << LOG2_ENTRIES) - 1);    \
+    	unsigned int i = dequeue_count & ((1 << LOG2_ENTRIES) - 1);    \
 		*(output++) = queue->array[i];										  \
 																			  \
       	/* Prefetch more enqueue data in advance. */                          \

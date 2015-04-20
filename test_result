@@ -4,11 +4,10 @@
 import commands 
 import os
 
-#pktlen = [64,128,256,512,1024,1280,1518]
-pktlen = [256]
+pktlen = [64,128,256,512,1024,1280,1518]
 
-generator = [1,2,3,4,5,6,7,8,9,10] 
-manager = [3,5,7,9,11]
+generator = [2,3,5,10] 
+manager = [3,5,7,11]
 
 gpool_size = [500000,800000] 
 pqueue_length = [500000,800000]
@@ -68,18 +67,20 @@ for p in pktlen:
 for p in pktlen:
     for g in generator:
             for m in manager:
+                for gp in gpool_size:
+                    for pq in pqueue_length:
                         counter += 1
                         #if(counter <= 64):
                             #continue
                         print [counter]
-                        exe = '%s --pktlen %d -g %d -p %d -m %d' % (exename,(p),(g),(g),(m))
+                        exe = '%s --pktlen %d -g %d -p %d -m %d --gpool_size %d --pqueue_length %d' % (exename,(p),(g),(g),(m),(gp),(pq))
                         status,result = commands.getstatusoutput(exe)
                         print "status %d " % status
                         if status == 0:
                             listn = result.split("\n")
                             print listn
                             max = averages(listn)
-                            maxargs = [p,g,g,m]
+                            maxargs = [p,g,g,m,gp,pq]
                         
                             dicta[p][0].append([max,maxargs])
                             dicta[p][1].write(str(max)+ ' ' + str(maxargs) + '\n')

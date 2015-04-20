@@ -27,6 +27,7 @@ static void display_gen(generator_group_t * generator_group)
 		printf("SPEED: %lu :Mbit/s,DROP: %d \n",(new-old)/(1024*128),drop_flag);
     else
 		printf("SPEED: %lu :Mbit/s,DROP: %d \n",(new-old)/(1024*128),drop_flag);
+    fflush(stdout);
         
     old = new;
     new = 0;
@@ -113,7 +114,8 @@ void sys_display(generator_group_t * generator_group,
 	{
 		maximum = manager_group->numbers;
 	}
-	while(1)
+    int count=100;
+	while(count--)
 	{
 		switch(state)
 		{
@@ -154,6 +156,7 @@ void sys_display(generator_group_t * generator_group,
 		read_config_simple(CONFIG_FILE,global_config);	
         usleep(1000 * 1000);
 	}
+    exit(0);
 }
 
 void flow_display(flow_item_t * flow)

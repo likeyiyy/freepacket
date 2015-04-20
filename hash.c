@@ -108,6 +108,7 @@ int  hash_add_item(hash_table ** htp, uint32_t key, void * value )
     hash_table * ht = *htp;
     flow_item_t * flow = (flow_item_t *)value;
     manager_t * manager = list_entry(htp,manager_t,ht);
+
     /*
      * 
      * */
@@ -123,19 +124,7 @@ int  hash_add_item(hash_table ** htp, uint32_t key, void * value )
      * */
     if(!blist)
     {
-#if 0
-        if(get_buf(manager->session_pool,WAIT_MODE,(void **)&new_blist) < 0)
-        {
-            /* 插入失败,session_pool is empty */
-            manager->drop_cause_pool_empty += flow->packet->length;
-            global_loss->drop_cause_manager_pool_empty += flow->packet->length;
-            /* 释放掉flow */
-            free_flow(flow);
-            pthread_mutex_unlock(&bucket->lock);
-            return -1;
-        }
-#endif
-        while(unlikely(swsr_pool_dequeue(manager->session_pool,(void **)&new_blist) != 0))
+        while(unlikely(mwsr_mpool_dequeue(manager->session_pool,(void **)&new_blist) != 0))
 		{
 			continue;
 		}
@@ -178,6 +167,22 @@ int  hash_add_item(hash_table ** htp, uint32_t key, void * value )
             session->cur_len += flow->payload_len;
             session->last_time = GET_CYCLE_COUNT();
         }
+        else
+        {
+            /*
+             * 计算CRC，并且释放掉条目
+             * */
+
+#if 1
+            crc32_32((uint32_t*)session->buffer,session->cur_len / 4);
+            list_del(&blist->listhead);
+    		while(unlikely(mwsr_mpool_enqueue(blist->item.pool,blist) != 0))
+			{
+				continue;	
+			}
+            --bucket->count;
+#endif
+        }
         {
     		while(unlikely(mwsr_pool_enqueue(flow->packet->pool,flow->packet) != 0))
 			{
@@ -188,7 +193,6 @@ int  hash_add_item(hash_table ** htp, uint32_t key, void * value )
 				continue;	
 			}
         }
-
     }
     pthread_mutex_unlock(&bucket->lock);
     return 0;

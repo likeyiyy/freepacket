@@ -178,6 +178,12 @@ int main(int argc, char ** argv)
     tmc_sync_barrier_init(&gbarrier,global_config->generator_nums);
 #endif
 
+	if(global_config->generator_nums > global_config->parser_nums)
+	{
+		printf("parser nums must bigger than generator nums\n");
+		exit(0);
+	}
+
     init_manager_group(global_config);
 
     init_parser_group(global_config);

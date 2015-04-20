@@ -171,6 +171,10 @@ int read_config_simple(const char * file_name,sim_config_t * config)
         		{
             		config -> speed_mode = atoi(p);
         		}
+       			else if(strcmp(pname,"DESTORY_TIME") == 0)
+        		{
+            		config -> destory_time = atoi(p);
+        		}
 				free(pname);
 			}
 			fclose(fp);
@@ -415,17 +419,21 @@ int read_config_file(const char * file_name,sim_config_t * config)
         }
 #endif 
        	else if(strcmp(pname,"PIPE_DEPTH") == 0)
-        		{
-            		config -> pipe_depth = atoi(p);
-        		}
+        {
+            config -> pipe_depth = atoi(p);
+        }
        	else if(strcmp(pname,"SCREEN_DISPLAY") == 0)
-        		{
-            		config -> screen_display = atoi(p);
-        		}
+     	{
+            config -> screen_display = atoi(p);
+        }
        	else if(strcmp(pname,"SPEED_MODE") == 0)
-        		{
-            		config -> speed_mode = atoi(p);
-        		}
+        {
+            config -> speed_mode = atoi(p);
+        }
+       	else if(strcmp(pname,"DESTORY_TIME") == 0)
+        {
+            config -> destory_time = atoi(p);
+        }
         free(pname);        
     }
 	fclose(fp);
@@ -453,7 +461,7 @@ static uint32_t get_cpu_mhz()
 #define NS 1000000000
 uint32_t calc_period(double length,double rate,uint32_t thread_num)
 {
-     uint32_t mhz = get_cpu_mhz();
+     uint32_t mhz = global_config->mhz;
      //printf("cpu mhz %d\n",mhz);
      double l = 8.0 * NS * length;
      double x = rate * 1024 * 1024.0;
@@ -520,6 +528,8 @@ int init_config_s(sim_config_t * config)
 	config -> screen_display = 1;
 	config -> pipe_depth     = 2;
 	config -> speed_mode     = 0;
+
+    config -> mhz            = get_cpu_mhz();
 
     return 0;
 }
