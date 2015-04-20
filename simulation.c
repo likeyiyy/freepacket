@@ -174,6 +174,8 @@ int main(int argc, char ** argv)
 
     parse_args(argc,argv,global_config);
 
+    printf("cpu mhz : %d \n",global_config->mhz);
+
     global_config->period  = calc_period(global_config->pktlen,
                                          global_config->speed,
                                          global_config->generator_nums);

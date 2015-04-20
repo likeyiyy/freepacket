@@ -112,7 +112,6 @@ void * packet_manager_loop(void * arg)
     manager_t * manager = (manager_t *)arg;
     flow_item_t * flow;
     uint32_t v1,v2,h1,index;
-	//uint64_t interval = global_config->destory_time * 1000UL * global_config->mhz;
 	uint64_t start_cycle = 0;	
 	start_cycle = GET_CYCLE_COUNT();	
     while(1)
